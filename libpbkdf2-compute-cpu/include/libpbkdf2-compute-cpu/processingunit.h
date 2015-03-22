@@ -21,7 +21,9 @@ private:
     std::vector<std::string> passwordBuffer;
     std::unique_ptr<unsigned char[]> dkBuffer;
 
-    std::thread computeThread;
+    std::vector<std::thread> computeThreads;
+
+    size_t parallelCount;
 
 public:
     typedef void PasswordGenerator(const char *&password, size_t &passwordSize);

@@ -6,6 +6,7 @@
 #include "pbkdf2testvector.h"
 
 #include "libpbkdf2-compute-opencl/types.h"
+#include "libpbkdf2-compute-cpu/types.h"
 
 #include <cstring>
 
@@ -70,9 +71,18 @@ static void runOpenCLTests(std::ostream &out)
     runComputeTests<Types>(out, "OpenCL", "sha1", &global, devices[0]);
 }
 
+static void runCPUTests(std::ostream &out)
+{
+    using namespace libpbkdf2::compute::cpu;
+
+    runComputeTests<Types>(out, "CPU", "sha1", nullptr, nullptr);
+}
+
 void Tests::runTests(std::ostream &out)
 {
     runOpenCLTests(out);
+
+    runCPUTests(out);
 }
 
 } // namespace tests

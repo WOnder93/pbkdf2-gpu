@@ -32,7 +32,7 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libhashspec-open
 else:unix: LIBS += -L$$OUT_PWD/../libhashspec-openssl/ -lhashspec-openssl
 
 INCLUDEPATH += $$PWD/../libhashspec-openssl/include
-DEPENDPATH += $$PWD/../libhashspec-openssl
+DEPENDPATH += $$PWD/../libhashspec-openssl/include
 
 win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../libhashspec-openssl/release/libhashspec-openssl.a
 else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../libhashspec-openssl/debug/libhashspec-openssl.a

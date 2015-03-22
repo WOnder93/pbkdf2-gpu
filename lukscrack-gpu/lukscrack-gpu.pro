@@ -3,6 +3,7 @@ CONFIG += console
 CONFIG += c++11
 CONFIG -= app_bundle
 CONFIG -= qt
+CONFIG += link_prl
 
 INCLUDEPATH += src
 
@@ -34,7 +35,7 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libpbkdf2-comput
 else:unix: LIBS += -L$$OUT_PWD/../libpbkdf2-compute-opencl/ -lpbkdf2-compute-opencl
 
 INCLUDEPATH += $$PWD/../libpbkdf2-compute-opencl/include  $$PWD/../libhashspec-hashalgorithm/include
-DEPENDPATH += $$PWD/../libpbkdf2-compute-opencl
+DEPENDPATH += $$PWD/../libpbkdf2-compute-opencl/include  $$PWD/../libhashspec-hashalgorithm/include
 
 win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../libpbkdf2-compute-opencl/release/libpbkdf2-compute-opencl.a
 else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../libpbkdf2-compute-opencl/debug/libpbkdf2-compute-opencl.a

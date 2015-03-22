@@ -1,2 +1,1 @@
-# Help linguist recognize header language:
-*.h     linguist-language=C++
+*.h linguist-language=C++

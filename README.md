@@ -22,7 +22,7 @@ NOTE: When running executables always run them in their containing directory so 
 
 ### Using qmake
 
-The project also ships with qmake project files so you can build it using [qmake](http://doc.qt.io/qt-4.8/qmake-manual.html) or open it in the [QtCreator IDE](http://wiki.qt.io/Category:Tools::QtCreator) (just load the `pbkdf2-gpu.pro` file). Note that when running programs that use the `libpbkdf2-compute-opencl` library from QtCreator, you have to set the current directory to `(project root)/pbkdf2-gpu/libpbkdf2-compute-opencl` so that they can find the OpenCL kernel source files.
+The project also ships with qmake project files so you can build it using [qmake](http://doc.qt.io/qt-4.8/qmake-manual.html) or open it in the [QtCreator IDE](http://wiki.qt.io/Category:Tools::QtCreator) (just load the `pbkdf2-gpu.pro` file). Note that when running programs that use the `libpbkdf2-compute-opencl` library from QtCreator, you must set the current directory to `(project root)/pbkdf2-gpu/libpbkdf2-compute-opencl` so they can find the OpenCL kernel source files.
 
 Building from terminal using qmake:
 
@@ -42,6 +42,6 @@ $ for i in pbkdf2-compute-tests benchmarking-tool lukscrack-gpu; do (cd $i && ln
  * **benchmarking-tool** &ndash; A command-line tool for benchmarking the speed of computation (currently only has basic functionality).
  * **lukscrack-gpu** &ndash; A command-line tool for cracking passwords of LUKS disk partitions (currently a work-in-progress).
 
-## The common interface of libpbkdf2-compute libraries
+## The common interface of libpbkdf2-compute-\* libraries
 
 TODO

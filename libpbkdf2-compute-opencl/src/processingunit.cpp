@@ -84,70 +84,8 @@ void ProcessingUnit::writePasswords(std::function<PasswordGenerator> passwordGen
         dest += 1;
     }
 
-    /*
-    size_t pwCounter = 0;
-    size_t interleavedBlockCount = batchSize / STRIPE_LENGTH;
-    for (size_t interleavedBlockIndex = 0; interleavedBlockIndex < interleavedBlockCount; interleavedBlockIndex++) {
-        cl_uint *column = interleavedBlock;
-        for (size_t col = 0; col < STRIPE_LENGTH; col++) {
-            const char *pw;
-            size_t pwSize;
-
-            if (pwCounter >= batchSize) {
-                pw = NULL;
-                pwSize = 0;
-            } else {
-                passwordGenerator(pw, pwSize);
-            }
-            pwCounter++;
-
-            if (pwSize > ibl) {
-                // pre-hash password according to HMAC spec:
-                hashAlg->computeDigest(pw, pwSize, buffer);
-                std::memset((char *)buffer + obl, 0, ibl - obl);
-            } else {
-                std::memcpy((char *)buffer, pw, pwSize);
-                std::memset((char *)buffer + pwSize, 0, ibl - pwSize);
-            }
-
-            cl_uint *dest = column;
-            for (size_t row = 0; row < inputSize; row++) {
-                *dest = buffer[row];
-                dest += STRIPE_LENGTH;
-            }
-
-            column++;
-        }
-        interleavedBlock += inputSize * STRIPE_LENGTH;
-    }
-    */
     cmdQueue.enqueueUnmapMemObject(inputBuffer, inputHostBuffer);
 }
-/*
-const void *ProcessingUnit::KeyIterator::nextKey()
-{
-    if (index == outputCount) {
-        return nullptr;
-    }
-
-    cl_uint *dst = buffer;
-    for (size_t outputBlock = 0; outputBlock < outputBlockCount; outputBlock++) {
-        const cl_uint *src = data + columnIndex;
-        for (size_t row = 0; row < outputBlockSize; row++) {
-            *dst = *src;
-            src += STRIPE_LENGTH;
-            dst += 1;
-        }
-        columnIndex++;
-        if (columnIndex == STRIPE_LENGTH) {
-            columnIndex = 0;
-            data += outputBlockSize * STRIPE_LENGTH;
-        }
-    }
-    index++;
-    return buffer;
-}
-*/
 
 void ProcessingUnit::readDerivedKeys(std::function<KeyConsumer> keyConsumer)
 {

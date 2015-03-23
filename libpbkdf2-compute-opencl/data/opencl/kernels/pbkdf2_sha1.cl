@@ -29,7 +29,7 @@
 
 #ifdef cl_nv_pragma_unroll
 #define NVIDIA
-#endif
+#endif /* cl_nv_pragma_unroll */
 
 /* TODO: make optional: */
 #define DEBUG_LOG
@@ -125,22 +125,12 @@ inline void dump_uix_a(__private output_stream_t *stream, __private uint *array,
 #endif /* DEBUG_LOG */
 
 /* SHA1 macros: */
-#define INIT_SHA1_A                 0x67452301
-#define INIT_SHA1_B                 0xEFCDAB89
-#define INIT_SHA1_C                 0x98BADCFE
-#define INIT_SHA1_D                 0x10325476
-#define INIT_SHA1_E                 0xC3D2E1F0
+#define SHA1_INIT_A                 0x67452301
+#define SHA1_INIT_B                 0xEFCDAB89
+#define SHA1_INIT_C                 0x98BADCFE
+#define SHA1_INIT_D                 0x10325476
+#define SHA1_INIT_E                 0xC3D2E1F0
 
-#define S1(x) rotate((x), (uint)1)
-#define S5(x) rotate((x), (uint)5)
-#define S30(x) rotate((x), (uint)30)
-
-#define SHA1_STEP(a, b, c, d, e, f, k, x) \
-do { \
-    e += S5(a) + f(b,c,d) + k + x; b = S30(b); \
-} while(0)
-
-/* TODO: figure out how to make use of these: */
 #define SHA1_UNROLL_IBLOCK(block) \
     block[0x0], block[0x1], block[0x2], block[0x3], block[0x4], block[0x5],  block[0x6],  block[0x7],  block[0x8],  block[0x9],  block[0xA],  block[0xB],  block[0xC],  block[0xD],  block[0xE],  block[0xF]
 
@@ -150,6 +140,22 @@ do { \
     block[0x2], \
     block[0x3], \
     block[0x4]
+
+#define SHA1_UNROLL_INITSTATE \
+    SHA1_INIT_A, \
+    SHA1_INIT_B, \
+    SHA1_INIT_C, \
+    SHA1_INIT_D, \
+    SHA1_INIT_E
+
+#define S1(x) rotate((x), (uint)1)
+#define S5(x) rotate((x), (uint)5)
+#define S30(x) rotate((x), (uint)30)
+
+#define SHA1_STEP(a, b, c, d, e, f, k, x) \
+do { \
+    e += S5(a) + f(b,c,d) + k + x; b = S30(b); \
+} while(0)
 
 #define SHA1_NEXT_WORDS(buffer, W0, W1, W2, W3, W4, W5, W6, W7, W8, W9, WA, WB, WC, WD, WE, WF) \
 do { \
@@ -175,7 +181,7 @@ do { \
 #define SHA1_F0(x,y,z) bitselect(z, y, x)
 #else
 #define SHA1_F0(x,y,z) (z ^ (x & (y ^ z)))
-#endif
+#endif /* NVIDIA */
 
 #define SHA1_F1(x,y,z) (x ^ y ^ z)
 
@@ -183,7 +189,7 @@ do { \
 #define SHA1_F2(x,y,z) (bitselect(x, y, z) ^ bitselect(x, (uint)0, y))
 #else
 #define SHA1_F2(x,y,z) ((x & y) | (z & (x | y)))
-#endif
+#endif /* NVIDIA */
 
 #define SHA1_F3(x,y,z) (x ^ y ^ z)
 
@@ -364,9 +370,7 @@ inline void dump_sha1(__private output_stream_t *out, __private uint *hash)
 /* PBKDF2 functions: */
 #ifndef SALT_LENGTH
 #error "SALT_LENGTH not defined!"
-#endif
-
-#define APPENDIX_BLOCKS ((SALT_LENGTH + 4 + 8) / 64 + 1)
+#endif /* SALT_LENGTH */
 
 #define SWITCH_ENDIANNESS(v) (\
     (((uint)(v) & 0xff) << 24) | \
@@ -374,159 +378,143 @@ inline void dump_sha1(__private output_stream_t *out, __private uint *hash)
     (((uint)(v) >>  8) & 0x0000ff00) | \
     (((uint)(v) >> 24) & 0x000000ff))
 
-inline void pbkdf2_make_appendix(
-    __private output_stream_t *dbg,
-    const __constant uint *salt,
-    uint dk_block_index,
-    __private uint *appendix)
-{
-    uint i;
-    for (i = 0; i < LENGTH_UINT(SALT_LENGTH); i++) {
-        appendix[i] = SWITCH_ENDIANNESS(salt[i]);
-    }
-
-    if ((SALT_LENGTH % 4) == 0) {
-        appendix[i] = dk_block_index + 1;
-        i++;
-        appendix[i] = 0x80000000;
-        i++;
-    } else {
-        appendix[i] = SWITCH_ENDIANNESS(salt[i]) | ((dk_block_index + 1) >> ((SALT_LENGTH % 4) << 3));
-        i++;
-        appendix[i] = ((dk_block_index + 1) << (32 - ((SALT_LENGTH % 4) << 3))) | ((uint)0x80000000 >> ((SALT_LENGTH % 4) << 3));
-        i++;
-    }
-    for (; i < APPENDIX_BLOCKS * LENGTH_UINT(INPUT_BLOCK_LENGTH) - 1; i++) {
-        appendix[i] = 0x00000000;
-    }
-
-    // [SHA1] put message length at the end of the last block (wi):
-    appendix[APPENDIX_BLOCKS * LENGTH_UINT(INPUT_BLOCK_LENGTH) - 1] = (INPUT_BLOCK_LENGTH + SALT_LENGTH + 4) * 8;
-
-#ifdef ENABLE_LOGGING
-    dump_l(dbg, "Appendix: ");
-    dump_uix_a(dbg, appendix, APPENDIX_BLOCKS * LENGTH_UINT(INPUT_BLOCK_LENGTH));
-    dump_l(dbg, "\n");
-#endif
-}
-
 inline void pbkdf2_init(
     __private output_stream_t *dbg,
-    const __private uint *istate, const __private uint *ostate,
-    __private uint *appendix, __private uint *out)
+    __constant uint *salt, uint dk_block_index,
+    const __private uint *istate,
+    __private uint *state)
 {
-    uint buffer1[LENGTH_UINT(INPUT_BLOCK_LENGTH)];
+    const __private uint *prev_state = istate;
 
-    __private uint *block = appendix;
-    sha1_update_block(
-        SHA1_UNROLL_OBLOCK(istate),
-        block, buffer1
-    );
-
-    __private uint * const buffer2 = appendix;
-    for (uint i = 0; i < (APPENDIX_BLOCKS - 1) / 2; i++) {
-        block += LENGTH_UINT(INPUT_BLOCK_LENGTH);
-        sha1_update_block(
-            buffer1[0], buffer1[1], buffer1[2], buffer1[3], buffer1[4],
-            block, buffer2
-        );
-
-        block += LENGTH_UINT(INPUT_BLOCK_LENGTH);
-        sha1_update_block(
-            buffer2[0], buffer2[1], buffer2[2], buffer2[3], buffer2[4],
-            block, buffer1
-        );
-    }
-    if ((APPENDIX_BLOCKS - 1) % 2 != 0) {
-        block += LENGTH_UINT(INPUT_BLOCK_LENGTH);
-        sha1_update_block(
-            buffer1[0], buffer1[1], buffer1[2], buffer1[3], buffer1[4],
-            block, buffer2
-        );
-
-#ifdef ENABLE_LOGGING
-        dump_l(dbg, "Round 0 semi-digest: ");
-
-        dump_sha1(dbg, buffer2);
-        dump_l(dbg, "\n");
-#endif
-
-        sha1_digest_digest(
-            ostate[0], ostate[1], ostate[2], ostate[3], ostate[4],
-            buffer2, out
-        );
-    } else {
-#ifdef ENABLE_LOGGING
-        dump_l(dbg, "Round 0 semi-digest: ");
-
-        dump_sha1(dbg, buffer1);
-        dump_l(dbg, "\n");
-#endif
-
-        sha1_digest_digest(
-            ostate[0], ostate[1], ostate[2], ostate[3], ostate[4],
-            buffer1, out
-        );
+    /* Process contigous blocks of salt: */
+    {
+        uint buffer[LENGTH_UINT(INPUT_BLOCK_LENGTH)];
+        for (uint i = 0; i < SALT_LENGTH / INPUT_BLOCK_LENGTH; i++) {
+            for (uint k = 0; k < LENGTH_UINT(INPUT_BLOCK_LENGTH); k++) {
+                buffer[k] = SWITCH_ENDIANNESS(salt[k]);
+            }
+            sha1_update_block(SHA1_UNROLL_OBLOCK(prev_state), buffer, state);
+            salt += LENGTH_UINT(INPUT_BLOCK_LENGTH);
+            prev_state = state;
+        }
     }
 
+    /* Prepare and process the last (possibly partial) block of salt with the padding: */
+    /* (may be one or two blocks) */
+#define TAIL_BLOCKS ((SALT_LENGTH % INPUT_BLOCK_LENGTH) / (INPUT_BLOCK_LENGTH - 4 - 8) + 1)
+    {
+        uint tail[TAIL_BLOCKS * LENGTH_UINT(INPUT_BLOCK_LENGTH)];
+        {
+            uint i = 0;
+            /* Process the rest of the salt: */
+            /* (except the last (SALT_LENGTH % 4) bytes) */
+            for (; i < LENGTH_UINT(SALT_LENGTH % INPUT_BLOCK_LENGTH); i++) {
+                tail[i] = SWITCH_ENDIANNESS(salt[i]);
+            }
+
+            /* Append DK block index: */
+            if ((SALT_LENGTH % 4) == 0) {
+                tail[i] = dk_block_index + 1;
+                i++;
+                tail[i] = 0x80000000;
+                i++;
+            } else {
+                tail[i] = SWITCH_ENDIANNESS(salt[i]) | ((dk_block_index + 1) >> ((SALT_LENGTH % 4) << 3));
+                i++;
+                tail[i] = ((dk_block_index + 1) << (32 - ((SALT_LENGTH % 4) << 3))) | ((uint)0x80000000 >> ((SALT_LENGTH % 4) << 3));
+                i++;
+            }
+
+            /* Pad with zeroes: */
+            for (; i < TAIL_BLOCKS * LENGTH_UINT(INPUT_BLOCK_LENGTH) - 1; i++) {
+                tail[i] = 0x00000000;
+            }
+
+            /* Put SHA1 message length at the end of the last block: */
+            tail[TAIL_BLOCKS * LENGTH_UINT(INPUT_BLOCK_LENGTH) - 1] = (INPUT_BLOCK_LENGTH + SALT_LENGTH + 4) * 8;
+        }
+
 #ifdef ENABLE_LOGGING
-    dump_l(dbg, "Round 0 digest: ");
-    dump_sha1(dbg, out);
+    dump_l(dbg, "Tail: ");
+    dump_uix_a(dbg, tail, TAIL_BLOCKS * LENGTH_UINT(INPUT_BLOCK_LENGTH));
     dump_l(dbg, "\n");
-#endif
+#endif /* ENABLE_LOGGING */
+
+        /* Process the prepared blocks: */
+        __private uint *input = tail;
+        for (uint i = 0; i < TAIL_BLOCKS; i++) {
+            sha1_update_block(SHA1_UNROLL_OBLOCK(prev_state), input, state);
+            input += LENGTH_UINT(INPUT_BLOCK_LENGTH);
+            prev_state = state;
+        }
+        /* From now on 'prev_state' definitely refers to 'state' */
+        /* which contains the half-done HMAC of iteration 0.     */
+    }
+#undef TAIL_BLOCKS
+
+#ifdef ENABLE_LOGGING
+    dump_l(dbg, "Iteration 0 semi-digest: ");
+    dump_sha1(dbg, state);
+    dump_l(dbg, "\n");
+#endif /* ENABLE_LOGGING */
 }
 
 inline void pbkdf2_iter(
     __private output_stream_t *dbg,
-    uint iterations,
     const __private uint *istate, const __private uint *ostate,
-    __private uint *buffer, __private uint *out)
+    uint iterations,
+    __private uint *dk, __private uint *state)
 {
-    uint buffer2[LENGTH_UINT(INPUT_BLOCK_LENGTH)];
+    uint buffer[LENGTH_UINT(INPUT_BLOCK_LENGTH)];
 
-    __private uint * const buffer1 = buffer;
-    for (int i = 1; i < iterations; i++) {
-        sha1_digest_digest(
-            istate[0], istate[1], istate[2], istate[3], istate[4],
-            buffer1, buffer2
-        );
+    /* Complete the HMAC of the first iteration: */
+    sha1_digest_digest(SHA1_UNROLL_OBLOCK(ostate), state, buffer);
 
 #ifdef ENABLE_LOGGING
-        dump_l(dbg, "Round ");
+    dump_l(dbg, "Iteration 0 digest: ");
+    dump_sha1(dbg, buffer);
+    dump_l(dbg, "\n");
+#endif /* ENABLE_LOGGING */
+
+    /* Copy the result of iteration 0 to the final result buffer: */
+    for (uint i = 0; i < LENGTH_UINT(OUTPUT_BLOCK_LENGTH); i++) {
+        dk[i] = buffer[i];
+    }
+
+    /* Perform the remaining iterations: */
+    for (uint i = 1; i < iterations; i++) {
+        sha1_digest_digest(SHA1_UNROLL_OBLOCK(istate), buffer, state);
+
+#ifdef ENABLE_LOGGING
+        dump_l(dbg, "Iteration ");
         dump_ui(dbg, i);
         dump_l(dbg, " semi-digest: ");
-
-        dump_sha1(dbg, buffer2);
+        dump_sha1(dbg, state);
         dump_l(dbg, "\n");
-#endif
+#endif /* ENABLE_LOGGING */
 
-        sha1_digest_digest(
-            ostate[0], ostate[1], ostate[2], ostate[3], ostate[4],
-            buffer2, buffer1
-        );
+        sha1_digest_digest(SHA1_UNROLL_OBLOCK(ostate), state, buffer);
 
 #ifdef ENABLE_LOGGING
-        dump_l(dbg, "Round ");
+        dump_l(dbg, "Iteration ");
         dump_ui(dbg, i);
         dump_l(dbg, " digest: ");
-
-        dump_sha1(dbg, buffer1);
+        dump_sha1(dbg, buffer);
         dump_l(dbg, "\n");
-#endif
+#endif /* ENABLE_LOGGING */
 
-        out[0] ^= buffer1[0];
-        out[1] ^= buffer1[1];
-        out[2] ^= buffer1[2];
-        out[3] ^= buffer1[3];
-        out[4] ^= buffer1[4];
+        /* XOR the result of this iteration into the final result: */
+        for (uint i = 0; i < LENGTH_UINT(OUTPUT_BLOCK_LENGTH); i++) {
+            dk[i] ^= buffer[i];
+        }
 
 #ifdef ENABLE_LOGGING
-        dump_l(dbg, "Round ");
+        dump_l(dbg, "Iteration ");
         dump_ui(dbg, i);
         dump_l(dbg, " digest XOR'd: ");
-        dump_sha1(dbg, out);
+        dump_sha1(dbg, dk);
         dump_l(dbg, "\n");
-#endif
+#endif /* ENABLE_LOGGING */
     }
 }
 
@@ -544,7 +532,7 @@ void pbkdf2_kernel(
 #ifdef DEBUG_LOG
     output_stream_t dbg;
     stream_init(&dbg, debug_buffer);
-#endif
+#endif /* DEBUG_LOG */
 
     uint input_block_index = (uint)get_global_id(0);
     uint input_pos = input_block_index;
@@ -567,45 +555,32 @@ void pbkdf2_kernel(
 #ifdef ENABLE_LOGGING
             dump_uix(&dbg, in);
             dump_l(&dbg, " ");
-#endif
+#endif /* ENABLE_LOGGING */
 
             ipad[row] = in ^ 0x36363636;
             opad[row] = in ^ 0x5C5C5C5C;
         }
 #ifdef ENABLE_LOGGING
         dump_l(&dbg, "\n");
-#endif
+#endif /* ENABLE_LOGGING */
 
-        sha1_update_block(INIT_SHA1_A, INIT_SHA1_B, INIT_SHA1_C, INIT_SHA1_D, INIT_SHA1_E, ipad, ipad_state);
-        sha1_update_block(INIT_SHA1_A, INIT_SHA1_B, INIT_SHA1_C, INIT_SHA1_D, INIT_SHA1_E, opad, opad_state);
+        sha1_update_block(SHA1_UNROLL_INITSTATE, ipad, ipad_state);
+        sha1_update_block(SHA1_UNROLL_INITSTATE, opad, opad_state);
     }
 
-
-    // buffer for the salt + dk_index appendix:
-    uint appendix[APPENDIX_BLOCKS * LENGTH_UINT(INPUT_BLOCK_LENGTH)];
-    pbkdf2_make_appendix(&dbg, salt, dk_block_index, appendix);
+    uint buffer[LENGTH_UINT(INPUT_BLOCK_LENGTH)];
+    pbkdf2_init(&dbg, salt, dk_block_index, ipad_state, buffer);
 
     uint dk[LENGTH_UINT(OUTPUT_BLOCK_LENGTH)];
-    pbkdf2_init(&dbg, ipad_state, opad_state, appendix, dk);
+    pbkdf2_iter(&dbg, ipad_state, opad_state, iterations, dk, buffer);
 
-    // appendix is now reused as a general purpose buffer:
-    appendix[0] = dk[0];
-    appendix[1] = dk[1];
-    appendix[2] = dk[2];
-    appendix[3] = dk[3];
-    appendix[4] = dk[4];
-
-    pbkdf2_iter(&dbg, iterations, ipad_state, opad_state, appendix, dk);
-
-    output[output_pos + 0 * batchSize * dk_blocks] = SWITCH_ENDIANNESS(dk[0]);
-    output[output_pos + 1 * batchSize * dk_blocks] = SWITCH_ENDIANNESS(dk[1]);
-    output[output_pos + 2 * batchSize * dk_blocks] = SWITCH_ENDIANNESS(dk[2]);
-    output[output_pos + 3 * batchSize * dk_blocks] = SWITCH_ENDIANNESS(dk[3]);
-    output[output_pos + 4 * batchSize * dk_blocks] = SWITCH_ENDIANNESS(dk[4]);
+    for (uint i = 0; i < LENGTH_UINT(OUTPUT_BLOCK_LENGTH); i++) {
+        output[output_pos + i * batchSize * dk_blocks] = SWITCH_ENDIANNESS(dk[i]);
+    }
 
 #ifdef DEBUG_LOG
     stream_close(&dbg);
-#endif
+#endif /* DEBUG_LOG */
 }
 
 /* Testing functions & testing kernel: */
@@ -624,7 +599,7 @@ inline void test_sha1(__private output_stream_t *out, __constant char *name,
     __private uint *block, __private uint *hash)
 {
     uint state[LENGTH_UINT(OUTPUT_BLOCK_LENGTH)];
-    sha1_update_block(INIT_SHA1_A, INIT_SHA1_B, INIT_SHA1_C, INIT_SHA1_D, INIT_SHA1_E, block, state);
+    sha1_update_block(SHA1_UNROLL_INITSTATE, block, state);
     if (!sha1_compare(hash, state)) {
         dump_l(out, "SHA1 test '");
         dump_l(out, name);
@@ -675,23 +650,6 @@ void run_tests(__global char *debug_buffer)
         };
         test_sha1(&out, "abc", tv_i, tv_o);
     }
-
-/*
-    {
-#if SALT_LENGTH != 32
-#error "SALT_LENGTH must be 32 for this test!"
-#endif
-        uint appendix[APPENDIX_BLOCKS * LENGTH_UINT(INPUT_BLOCK_LENGTH)];
-        const __constant uint salt[] = {
-            0xba7816bf, 0x8f01cfea, 0x414140de, 0x5dae2223,
-            0xb00361a3, 0x96177a9c, 0xb410ff61, 0xf20015ad
-        };
-        pbkdf2_make_appendix(&out, salt, 523, appendix);
-
-        dump_uix_a(&out, appendix, APPENDIX_BLOCKS * LENGTH_UINT(INPUT_BLOCK_LENGTH));
-        dump_l(&out, "\n");
-    }
-*/
 
     stream_close(&out);
 }

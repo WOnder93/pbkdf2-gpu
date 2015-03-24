@@ -105,8 +105,19 @@ public:
 
     inline double getMeanDeviationPerMean() const { return (double)devMean / mean; }
 
-    inline nanosecs getMeanPerIteration() const { return mean / iter; }
-    inline nanosecs getMeanDeviationPerIteration() const { return devMean / iter; }
+    inline nanosecs getMeanPerIteration() const {
+        return mean / iter;
+    }
+    inline nanosecs getMeanDeviationPerIteration() const {
+        return devMean / iter;
+    }
+
+    inline nanosecs getMeanPer1MIterations() const {
+        return (mean * 1000 * 1000) / iter;
+    }
+    inline nanosecs getMeanDeviationPer1MIterations() const {
+        return (devMean * 1000 * 1000) / iter;
+    }
 
     inline RunTimeStatistics(size_t iterationCount, size_t batchSize)
         : iter(iterationCount * batchSize), samples(), sum(0) { }
@@ -199,11 +210,11 @@ void runBenchmark(
               << " (" << compTimeStats.getMeanDeviationPerMean() * 100.0 << "%)"
               << std::endl;
 
-    std::cout << "Average computation time (per iteration): "
-              << RunTimeStatistics::repr(compTimeStats.getMeanPerIteration())
+    std::cout << "Average computation time (per 1M iterations): "
+              << RunTimeStatistics::repr(compTimeStats.getMeanPer1MIterations())
               << std::endl;
-    std::cout << "Average deviation (per iteration): "
-              << RunTimeStatistics::repr(compTimeStats.getMeanDeviationPerIteration())
+    std::cout << "Average deviation (per 1M iterations): "
+              << RunTimeStatistics::repr(compTimeStats.getMeanDeviationPer1MIterations())
               << std::endl;
 }
 

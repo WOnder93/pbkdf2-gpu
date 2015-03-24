@@ -17,29 +17,30 @@ LIBS += -l:libOpenCL.so.1
 INCLUDEPATH += include/libpbkdf2-compute-opencl src
 
 HEADERS += \
-	include/libpbkdf2-compute-opencl/cl.h \
-	include/libpbkdf2-compute-opencl/hashfunctioncontext.h \
-	include/libpbkdf2-compute-opencl/computecontext.h \
-	include/libpbkdf2-compute-opencl/devicecontext.h \
-	include/libpbkdf2-compute-opencl/processingunit.h \
-	include/libpbkdf2-compute-opencl/globalcontext.h \
-	include/libpbkdf2-compute-opencl/types.h \
-	src/kernelloader.h \
-	src/alignment.h
+    include/libpbkdf2-compute-opencl/cl.hpp \
+    include/libpbkdf2-compute-opencl/opencl.h \
+    include/libpbkdf2-compute-opencl/hashfunctioncontext.h \
+    include/libpbkdf2-compute-opencl/computecontext.h \
+    include/libpbkdf2-compute-opencl/devicecontext.h \
+    include/libpbkdf2-compute-opencl/processingunit.h \
+    include/libpbkdf2-compute-opencl/globalcontext.h \
+    include/libpbkdf2-compute-opencl/types.h \
+    src/kernelloader.h \
+    src/alignment.h
 
 SOURCES += \
-	src/computecontext.cpp \
-	src/kernelloader.cpp \
-	src/devicecontext.cpp \
-	src/hashfunctioncontext.cpp \
-	src/processingunit.cpp
+    src/computecontext.cpp \
+    src/kernelloader.cpp \
+    src/devicecontext.cpp \
+    src/hashfunctioncontext.cpp \
+    src/processingunit.cpp
 
 OTHER_FILES += \
-	data/opencl/kernels/pbkdf2_sha1.cl
+    data/opencl/kernels/pbkdf2_sha1.cl
 
 unix {
-	target.path = /usr/lib
-	INSTALLS += target
+    target.path = /usr/lib
+    INSTALLS += target
 }
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libhashspec-hashalgorithm/release/ -lhashspec-hashalgorithm

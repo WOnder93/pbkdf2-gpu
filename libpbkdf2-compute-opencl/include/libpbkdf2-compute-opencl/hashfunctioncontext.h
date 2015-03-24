@@ -5,7 +5,7 @@
 
 #include "libhashspec-hashalgorithm/hashalgorithm.h"
 
-#include "cl.h"
+#include "opencl.h"
 #include "globalcontext.h"
 
 namespace libpbkdf2 {

@@ -1,7 +1,7 @@
 #ifndef LIBPBKDF2_COMPUTE_OPENCL_KERNELLOADER_H
 #define LIBPBKDF2_COMPUTE_OPENCL_KERNELLOADER_H
 
-#include "cl.h"
+#include "opencl.h"
 
 #include <string>
 

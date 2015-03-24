@@ -1,7 +1,7 @@
 #ifndef LIBPBKDF2_COMPUTE_OPENCL_TYPES_H
 #define LIBPBKDF2_COMPUTE_OPENCL_TYPES_H
 
-#include "cl.h"
+#include "opencl.h"
 
 #include "processingunit.h"
 

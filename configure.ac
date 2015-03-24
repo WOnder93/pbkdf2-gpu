@@ -18,6 +18,13 @@ AC_CONFIG_FILES([
     benchmarking-tool/Makefile
     lukscrack-gpu/Makefile])
 
+AC_ARG_WITH([opencl-lib],
+    AS_HELP_STRING([--with-opencl-lib], [The name of the OpenCL library to link against (default is :libOpenCL.so.1)]),
+    [OPENCL_LIB=$withval],
+    [OPENCL_LIB=':libOpenCL.so.1'])
+
+AC_SUBST([OPENCL_LIB])
+
 dnl 'ln -s' (or equivalent) needed for copying the data folder:
 AC_PROG_LN_S
 

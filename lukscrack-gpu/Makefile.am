@@ -4,7 +4,7 @@ bin_PROGRAMS = lukscrack-gpu
 
 AM_CXXFLAGS += -I$(srcdir)/../libpbkdf2-compute-opencl/include -I$(srcdir)/../libhashspec-hashalgorithm/include
 
-lukscrack_gpu_LDADD = ../libpbkdf2-compute-opencl/libpbkdf2-compute-opencl.la -l:libOpenCL.so.1 -lcrypto
+lukscrack_gpu_LDADD = ../libpbkdf2-compute-opencl/libpbkdf2-compute-opencl.la -l$(OPENCL_LIB) -lcrypto
 lukscrack_gpu_SOURCES = src/main.cpp \
     src/lukscrack.cpp \
     src/passworddata.cpp \

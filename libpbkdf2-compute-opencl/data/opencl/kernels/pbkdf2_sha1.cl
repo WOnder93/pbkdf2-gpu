@@ -524,7 +524,7 @@ void pbkdf2_kernel(
     const __global uint *input,
     __global uint *output,
     __constant uint *salt,
-    uint dk_length,
+    uint dk_blocks,
     uint iterations,
     uint batchSize,
     __global char *debug_buffer)
@@ -536,12 +536,6 @@ void pbkdf2_kernel(
 
     uint input_block_index = (uint)get_global_id(0);
     uint input_pos = input_block_index;
-
-    uint dk_block_index = (uint)get_global_id(1);
-    uint dk_blocks = dk_length / OUTPUT_BLOCK_LENGTH + (dk_length % OUTPUT_BLOCK_LENGTH ? 1 : 0);
-
-    uint output_block_index = input_block_index * dk_blocks + dk_block_index;
-    uint output_pos = output_block_index;
 
     uint ipad_state[LENGTH_UINT(OUTPUT_BLOCK_LENGTH)];
     uint opad_state[LENGTH_UINT(OUTPUT_BLOCK_LENGTH)];
@@ -568,11 +562,16 @@ void pbkdf2_kernel(
         sha1_update_block(SHA1_UNROLL_INITSTATE, opad, opad_state);
     }
 
+    uint dk_block_index = (uint)get_global_id(1);
+
     uint buffer[LENGTH_UINT(INPUT_BLOCK_LENGTH)];
     pbkdf2_init(&dbg, salt, dk_block_index, ipad_state, buffer);
 
     uint dk[LENGTH_UINT(OUTPUT_BLOCK_LENGTH)];
     pbkdf2_iter(&dbg, ipad_state, opad_state, iterations, dk, buffer);
+
+    uint output_block_index = input_block_index * dk_blocks + dk_block_index;
+    uint output_pos = output_block_index;
 
     for (uint i = 0; i < LENGTH_UINT(OUTPUT_BLOCK_LENGTH); i++) {
         output[output_pos + i * batchSize * dk_blocks] = SWITCH_ENDIANNESS(dk[i]);

@@ -40,9 +40,9 @@ ProcessingUnit::ProcessingUnit(const DeviceContext *context, size_t batchSize)
     kernel.setArg<cl::Buffer>(0, inputBuffer);
     kernel.setArg<cl::Buffer>(1, outputBuffer);
     kernel.setArg<cl::Buffer>(2, computeContext->getSaltBuffer());
-    kernel.setArg<cl_uint>(3, computeContext->getDerivedKeyLength());
-    kernel.setArg<cl_uint>(4, computeContext->getIterationCount());
-    kernel.setArg<cl_uint>(5, batchSize);
+    kernel.setArg<cl_uint>   (3, outputBlocks);
+    kernel.setArg<cl_uint>   (4, computeContext->getIterationCount());
+    kernel.setArg<cl_uint>   (5, batchSize);
     kernel.setArg<cl::Buffer>(6, debugBuffer);
 }
 

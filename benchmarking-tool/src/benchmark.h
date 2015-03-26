@@ -119,6 +119,10 @@ public:
         return (devMean * 1000 * 1000) / iter;
     }
 
+    inline uintmax_t getIterationsPerSecond() const {
+        return ((uintmax_t)iter * 1000 * 1000 * 1000) / mean;
+    }
+
     inline RunTimeStatistics(size_t iterationCount, size_t batchSize)
         : iter(iterationCount * batchSize), samples(), sum(0) { }
 
@@ -215,6 +219,10 @@ void runBenchmark(
               << std::endl;
     std::cout << "Average deviation (per 1M iterations): "
               << RunTimeStatistics::repr(compTimeStats.getMeanDeviationPer1MIterations())
+              << std::endl;
+
+    std::cout << "Average iterations per second: "
+              << compTimeStats.getIterationsPerSecond()
               << std::endl;
 }
 

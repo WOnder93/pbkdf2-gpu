@@ -17,23 +17,19 @@ LIBS += -lcrypto
 INCLUDEPATH += include/libpbkdf2-compute-cpu src
 
 SOURCES += \
-	src/hashfunctioncontext.cpp \
-    src/processingunit.cpp \
-	src/pkcs_pbkdf2.cpp \
-    src/sha1.cpp
+    src/hashfunctioncontext.cpp \
+    src/processingunit.cpp
 
 HEADERS += \
-	include/libpbkdf2-compute-cpu/hashfunctioncontext.h \
+    include/libpbkdf2-compute-cpu/hashfunctioncontext.h \
     include/libpbkdf2-compute-cpu/computecontext.h \
     include/libpbkdf2-compute-cpu/devicecontext.h \
     include/libpbkdf2-compute-cpu/processingunit.h \
-    include/libpbkdf2-compute-cpu/types.h \
-    src/sha1.h \
-    src/pkcs_pbkdf2.h
+    include/libpbkdf2-compute-cpu/types.h
 
 unix {
-	target.path = /usr/lib
-	INSTALLS += target
+    target.path = /usr/lib
+    INSTALLS += target
 }
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libhashspec-openssl/release/ -lhashspec-openssl

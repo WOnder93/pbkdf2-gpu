@@ -7,13 +7,11 @@
 
 #include <iostream>
 
-using namespace std;
 using namespace libpbkdf2::compute;
 using namespace libcommandline;
 
-typedef unsigned long long u_type;
-
 struct Arguments {
+    std::string mode = "opencl";
     std::string hashSpec = "sha1";
     std::string salt = "saltSALTsaltSALTsaltSALTsaltSALTsalt";
     size_t iterations = 4096;
@@ -24,14 +22,19 @@ struct Arguments {
     bool showHelp = false;
 };
 
+typedef unsigned long long u_type;
+
 static CommandLineParser<Arguments> buildCmdLineParser() {
     return CommandLineParser<Arguments>(
         "A tool for benchmarking the libpbkdf2-compute-* libraries.",
         PositionalArgumentHandler<Arguments>("", "", [] (Arguments &, const std::string &) {}),
         {
             new ArgumentOption<Arguments>(
+                "mode", 'm', "the mode in which to run ('opencl' for OpenCL, 'cpu' for CPU)", "opencl",
+                [] (Arguments &state, const std::string &salt) { state.mode = salt; }),
+            new ArgumentOption<Arguments>(
                 "hash-spec", 'h', "the hash spec to use", "sha1",
-                [] (Arguments &state, const std::string &salt) { state.salt = salt; }),
+                [] (Arguments &state, const std::string &salt) { state.hashSpec = salt; }),
             new ArgumentOption<Arguments>(
                 "salt", '\0', "the salt", "saltSALTsaltSALTsaltSALTsaltSALTsalt",
                 [] (Arguments &state, const std::string &salt) { state.salt = salt; }),
@@ -67,28 +70,39 @@ int main(int, const char * const *argv)
         return 0;
     }
 
-    cl::Platform platform = cl::Platform::getDefault();
+    if (args.mode == "opencl") {
+        std::vector<cl::Platform> platforms;
+        cl::Platform::get(&platforms);
 
-    std::vector<cl::Device> devices;
-    platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
+        if (platforms.size() == 0) {
+            std::cerr << argv[0] << ": no OpenCL platforms found" << std::endl;
+            return 1;
+        }
 
-    if (devices.size() == 0) {
-        cerr << "No devices!" << endl;
-        return 1;
+        cl::Platform platform = platforms[0];
+
+        std::vector<cl::Device> devices;
+        platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
+
+        if (devices.size() == 0) {
+            std::cerr << argv[0] << ": no OpenCL devices found" << std::endl;
+            return 1;
+        }
+
+        std::cout << "Benchmarking OpenCL..." << std::endl;
+
+        opencl::GlobalContext global("data");
+        runBenchmark<opencl::Types>(&global, devices[0], args.hashSpec,
+                args.salt.data(), args.salt.size(), args.iterations,
+                args.dkLength, args.batchSize, args.sampleCount);
+    } else if (args.mode == "cpu") {
+        std::cout << "Benchmarking CPU..." << std::endl;
+
+        runBenchmark<cpu::Types>(nullptr, nullptr, args.hashSpec,
+                 args.salt.data(), args.salt.size(), args.iterations,
+                 args.dkLength, args.batchSize, args.sampleCount);
+    } else {
+        std::cerr << argv[0] << ": invalid mode: " << args.mode << std::endl;
     }
-
-    std::cout << "Benchmarking OpenCL..." << std::endl;
-
-    opencl::GlobalContext global("data");
-    runBenchmark<opencl::Types>(&global, devices[0], args.hashSpec,
-            args.salt.data(), args.salt.size(), args.iterations,
-            args.dkLength, args.batchSize, args.sampleCount);
-
-
-    std::cout << "Benchmarking CPU..." << std::endl;
-
-    runBenchmark<cpu::Types>(nullptr, nullptr, args.hashSpec,
-             args.salt.data(), args.salt.size(), args.iterations,
-             args.dkLength, args.batchSize, args.sampleCount);
     return 0;
 }

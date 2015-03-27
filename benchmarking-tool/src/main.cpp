@@ -2,14 +2,71 @@
 
 #include "libpbkdf2-compute-opencl/types.h"
 #include "libpbkdf2-compute-cpu/types.h"
+#include "libcommandline/commandlineparser.h"
+#include "libcommandline/argumenthandlers.h"
 
 #include <iostream>
 
 using namespace std;
 using namespace libpbkdf2::compute;
+using namespace libcommandline;
 
-int main()
+typedef unsigned long long u_type;
+
+struct Arguments {
+    std::string hashSpec = "sha1";
+    std::string salt = "saltSALTsaltSALTsaltSALTsaltSALTsalt";
+    size_t iterations = 4096;
+    size_t dkLength = 20;
+    size_t batchSize = 2048;
+    size_t sampleCount = 10;
+
+    bool showHelp = false;
+};
+
+static CommandLineParser<Arguments> buildCmdLineParser() {
+    return CommandLineParser<Arguments>(
+        "A tool for benchmarking the libpbkdf2-compute-* libraries.",
+        PositionalArgumentHandler<Arguments>("", "", [] (Arguments &, const std::string &) {}),
+        {
+            new ArgumentOption<Arguments>(
+                "hash-spec", 'h', "the hash spec to use", "sha1",
+                [] (Arguments &state, const std::string &salt) { state.salt = salt; }),
+            new ArgumentOption<Arguments>(
+                "salt", '\0', "the salt", "saltSALTsaltSALTsaltSALTsaltSALTsalt",
+                [] (Arguments &state, const std::string &salt) { state.salt = salt; }),
+            new ArgumentOption<Arguments>(
+                "iterations", 'i', "the number of PBKDF2 iterations", "4096",
+                makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) { state.iterations = (size_t)num; })),
+            new ArgumentOption<Arguments>(
+                "dk-length", 'd', "the length of the derived key", "20",
+                makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) { state.dkLength = (size_t)num; })),
+            new ArgumentOption<Arguments>(
+                "batch-size", 'b', "the number of tasks per batch", "2048",
+                makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) { state.batchSize = (size_t)num; })),
+            new ArgumentOption<Arguments>(
+                "samples", 's', "the number of batches to run and measure", "10",
+                makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) { state.sampleCount = (size_t)num; })),
+            new FlagOption<Arguments>(
+                "help", 'h', "show this help and exit",
+                [] (Arguments &state) { state.showHelp = true; }),
+        });
+}
+
+int main(int, const char * const *argv)
 {
+    CommandLineParser<Arguments> parser = buildCmdLineParser();
+
+    Arguments args;
+    int ret = parser.parseArguments(args, argv);
+    if (ret != 0) {
+        return ret;
+    }
+    if (args.showHelp) {
+        parser.printHelp(argv);
+        return 0;
+    }
+
     cl::Platform platform = cl::Platform::getDefault();
 
     std::vector<cl::Device> devices;
@@ -23,13 +80,15 @@ int main()
     std::cout << "Benchmarking OpenCL..." << std::endl;
 
     opencl::GlobalContext global("data");
-    runBenchmark<opencl::Types>(&global, devices[0], "sha1", "saltySalt", 9,
-            2 * 1024 /*iter*/, 20 /*dkLen*/, 4 * 1024 /*batchSize*/, 10 /*sampleCount*/);
+    runBenchmark<opencl::Types>(&global, devices[0], args.hashSpec,
+            args.salt.data(), args.salt.size(), args.iterations,
+            args.dkLength, args.batchSize, args.sampleCount);
 
 
     std::cout << "Benchmarking CPU..." << std::endl;
 
-    runBenchmark<cpu::Types>(nullptr, nullptr, "sha1", "saltySalt", 9,
-            2 * 1024 /*iter*/, 20 /*dkLen*/, 4 * 1024 /*batchSize*/, 10 /*sampleCount*/);
+    runBenchmark<cpu::Types>(nullptr, nullptr, args.hashSpec,
+             args.salt.data(), args.salt.size(), args.iterations,
+             args.dkLength, args.batchSize, args.sampleCount);
     return 0;
 }

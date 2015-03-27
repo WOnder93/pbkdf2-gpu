@@ -14,6 +14,8 @@ AC_CONFIG_FILES([
     libpbkdf2-compute-cpu/include/Makefile
     libpbkdf2-compute-opencl/Makefile
     libpbkdf2-compute-opencl/include/Makefile
+    libcommandline/Makefile
+    libcommandline/include/Makefile
     pbkdf2-compute-tests/Makefile
     benchmarking-tool/Makefile
     lukscrack-gpu/Makefile])

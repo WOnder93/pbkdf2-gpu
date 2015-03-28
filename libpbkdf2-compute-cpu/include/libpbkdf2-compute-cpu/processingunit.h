@@ -35,7 +35,7 @@ public:
 
     public:
         inline KeyIterator(const char *first, size_t dataSize, size_t count)
-            : data(first), dataSize(dataSize), count(count) { }
+            : data(first), dataSize(dataSize), index(0), count(count) { }
 
         inline const void *nextKey()
         {

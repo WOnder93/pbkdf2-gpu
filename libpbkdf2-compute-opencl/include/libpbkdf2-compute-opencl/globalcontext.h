@@ -17,7 +17,7 @@ private:
     std::vector<Device> devices;
 
 public:
-    inline const std::vector<Device> &getAvailableDevices() const { return devices; }
+    inline const std::vector<Device> &getAllDevices() const { return devices; }
 
     inline const std::string &getDataDirectory() const { return dataDirectory; }
 

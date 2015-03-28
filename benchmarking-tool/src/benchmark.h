@@ -143,7 +143,7 @@ public:
     }
 };
 
-template<typename Types>
+template<class Types>
 void runBenchmark(
         const typename Types::TGlobalContext *globalCtx,
         const typename Types::TDevice &dev,

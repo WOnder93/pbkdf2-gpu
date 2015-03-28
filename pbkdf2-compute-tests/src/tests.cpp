@@ -14,12 +14,12 @@ namespace libpbkdf2 {
 namespace compute {
 namespace tests {
 
-template<typename Types>
+template<class Types>
 void runComputeTests(
         std::ostream &out, const std::string &platformName, const std::string &hashSpec,
         const typename Types::TGlobalContext *globalCtx)
 {
-    auto &devices = globalCtx->getAvailableDevices();
+    auto &devices = globalCtx->getAllDevices();
     if (devices.size() == 0) {
         out << "No devices found, tests cannot be run!" << std::endl;
         return;

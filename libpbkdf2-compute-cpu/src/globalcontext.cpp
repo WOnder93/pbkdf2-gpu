@@ -9,6 +9,7 @@ GlobalContext::CoreContext::CoreContext()
 {
     thread = std::thread(&CoreContext::processTasks, this);
 }
+
 GlobalContext::CoreContext::~CoreContext()
 {
     mutex.lock();

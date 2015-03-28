@@ -1220,7 +1220,9 @@ inline cl_int getInfoHelper(Func f, cl_uint name, STRING_CLASS* param, long)
         return err;
     }
     if (param) {
-        param->assign(value.begin(), value.end());
+        // subtract one from the end iterator to strip
+        // the null character
+        param->assign(value.begin(), value.end() - 1);
     }
     return CL_SUCCESS;
 }

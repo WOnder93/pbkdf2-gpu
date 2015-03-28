@@ -106,39 +106,26 @@ public:
         std::cerr << std::endl;
 
         size_t longest = 0;
+        std::vector<std::string> names {};
         for (auto &opt : options) {
             auto ptr = opt.get();
-            size_t length = ptr->getLongName().size();
-            if (ptr->takesArgument()) {
-                length += 4; /* std::string("=ARG").size(); */
+
+            std::string name = ptr->formatOptionName();
+            if (name.size() > longest) {
+                longest = name.size();
             }
-            if (length > longest) {
-                longest = length;
-            }
+            names.push_back(std::move(name));
         }
         std::cerr << "Options:" << std::endl;
-        for (auto &opt : options) {
-            auto ptr = opt.get();
 
-            std::cerr << "  ";
-            char shortName = ptr->getShortName();
-            if (shortName != '\0') {
-                std::cerr << "-" << shortName << ", ";
-            } else {
-                std::cerr << "    ";
-            }
+        for (size_t i = 0; i < options.size(); i++) {
+            auto ptr = options[i].get();
+            auto &name = names[i];
 
-            size_t padding = longest;
-            std::cerr << "--" << ptr->getLongName();
-            padding -= ptr->getLongName().size();
-            if (ptr->takesArgument()) {
-                std::cerr << "=ARG";
-                padding -= 4;
-            }
-            std::cerr << std::string(padding + 2, ' ');
-            std::cerr << ptr->getHelpText();
-            ptr->printExtraHelpText(std::cerr);
-            std::cerr << std::endl;
+            size_t padding = longest - name.size();
+            std::cerr << "  " << name
+                      << std::string(padding + 2, ' ')
+                      << ptr->getHelpText() << std::endl;
         }
         if (!posArgHandler.getHelpText().empty()) {
             std::cerr << std::endl;
@@ -184,7 +171,7 @@ public:
                         return 1;
                     }
                     auto opt = entry->second;
-                    if (opt->takesArgument()) {
+                    if (opt->doesTakeArgument()) {
                         /* if the option takes an argument, then
                          * the rest of this cmdline arg is passed
                          * to the handler as that argument */
@@ -237,7 +224,7 @@ public:
                     return 1;
                 }
                 auto opt = entry->second;
-                if (opt->takesArgument()) {
+                if (opt->doesTakeArgument()) {
                     std::string argument;
                     if (eqSignPos != std::string::npos) {
                         /* take whatever is after the equal

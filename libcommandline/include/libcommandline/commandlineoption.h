@@ -3,6 +3,7 @@
 
 #include <string>
 #include <ostream>
+#include <sstream>
 #include <functional>
 #include <exception>
 #include <stdexcept>
@@ -35,28 +36,40 @@ private:
     std::string longName;
     char shortName;
     std::string helpText;
+    bool takesArgument;
+    std::string metavar;
 
 public:
     inline const std::string &getLongName() const { return longName; }
     inline char getShortName() const { return shortName; }
     inline const std::string &getHelpText() const { return helpText; }
+    inline bool doesTakeArgument() const { return takesArgument; }
 
     inline CommandLineOption(
             const std::string &longName, char shortName = '\0',
-            const std::string &helpText = std::string())
-        : longName(longName), shortName(shortName), helpText(helpText)
+            const std::string &helpText = std::string(),
+            bool takesArgument = false, const std::string &metavar = std::string())
+        : longName(longName), shortName(shortName), helpText(helpText),
+          takesArgument(takesArgument), metavar(metavar)
     {
     }
     virtual ~CommandLineOption() { }
 
-    virtual bool takesArgument() const = 0;
-    virtual void printExtraHelpText(std::ostream &) const { }
     virtual void processOption(TState &state, const std::string &argument) const = 0;
 
-    void printHelpText(std::ostream &out) const
+    std::string formatOptionName() const
     {
-        out << helpText;
-        printExtraHelpText(out);
+        std::ostringstream res {};
+        if (shortName == '\0') {
+            res << "    ";
+        } else {
+            res << "-" << shortName << ", ";
+        }
+        res << "--" << longName;
+        if (takesArgument && !metavar.empty()) {
+            res << "=" << metavar;
+        }
+        return res.str();
     }
 };
 
@@ -71,14 +84,14 @@ private:
 
 public:
     inline FlagOption(
-            const std::string &longName, char shortName,
-            const std::string &helpText, std::function<Callback> callback)
+            std::function<Callback> callback,
+            const std::string &longName, char shortName = '\0',
+            const std::string &helpText = std::string())
         : CommandLineOption<TState>(longName, shortName, helpText),
           callback(callback)
     {
     }
 
-    bool takesArgument() const override { return false; }
     void processOption(TState &state, const std::string &) const override
     {
         callback(state);
@@ -92,26 +105,33 @@ public:
     typedef void Callback(TState &state, const std::string &argument);
 
 private:
-    std::string defaultValue;
     std::function<Callback> callback;
+
+    static std::string formatHelpText(std::string helpText, std::string defaultValue)
+    {
+        if (helpText.empty()) {
+            return std::string();
+        }
+        if (defaultValue.empty()) {
+            return helpText;
+        }
+        return helpText + " [default: " + defaultValue + "]";
+    }
 
 public:
     inline ArgumentOption(
-            const std::string &longName, char shortName,
-            const std::string &helpText, const std::string &defaultValue,
-            std::function<Callback> callback)
-        : CommandLineOption<TState>(longName, shortName, helpText),
-          defaultValue(defaultValue), callback(callback)
+            std::function<Callback> callback,
+            const std::string &longName, char shortName = '\0',
+            const std::string &helpText = std::string(),
+            const std::string &defaultValue = std::string(),
+            const std::string &metavar = "ARG")
+        : CommandLineOption<TState>(
+              longName, shortName, formatHelpText(helpText, defaultValue),
+              true, metavar),
+          callback(callback)
     {
     }
 
-    bool takesArgument() const override { return true; }
-    void printExtraHelpText(std::ostream &out) const override
-    {
-        if (!defaultValue.empty()) {
-            out << " [default: " << defaultValue << "]";
-        }
-    }
     void processOption(TState &state, const std::string &argument) const override
     {
         callback(state, argument);
@@ -134,8 +154,9 @@ public:
     inline const std::string &getHelpText() const { return helpText; }
 
     inline PositionalArgumentHandler(
-            const std::string &name, const std::string &helpText,
-            std::function<Callback> callback)
+            std::function<Callback> callback,
+            const std::string &name = std::string(),
+            const std::string &helpText = std::string())
         : name(name), helpText(), callback(callback)
     {
         if (!helpText.empty()) {

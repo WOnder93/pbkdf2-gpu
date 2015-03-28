@@ -31,57 +31,52 @@ struct Arguments {
 typedef unsigned long long u_type;
 
 static CommandLineParser<Arguments> buildCmdLineParser() {
-    static const auto positional = PositionalArgumentHandler<Arguments>("", "", [] (Arguments &, const std::string &) {});
+    static const auto positional = PositionalArgumentHandler<Arguments>([] (Arguments &, const std::string &) {});
 
     std::vector<const CommandLineOption<Arguments>*> options = {
         new FlagOption<Arguments>(
-            "list-devices", 'l', "list all available devices and exit",
-            [] (Arguments &state) { state.listDevices = true; }),
+            [] (Arguments &state) { state.listDevices = true; },
+            "list-devices", 'l', "list all available devices and exit"),
 
         new ArgumentOption<Arguments>(
-            "mode", 'm', "the mode in which to run ('opencl' for OpenCL, 'cpu' for CPU)", "opencl",
-            [] (Arguments &state, const std::string &mode) { state.mode = mode; }),
+            [] (Arguments &state, const std::string &mode) { state.mode = mode; },
+            "mode", 'm', "the mode in which to run ('opencl' for OpenCL, 'cpu' for CPU)", "opencl", "MODE"),
 
         new ArgumentOption<Arguments>(
-            "device", 'd', "use device with index ARG", "0",
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type index) {
                 state.deviceIndex = (size_t)index;
-            })),
+            }), "device", 'd', "use device with index INDEX", "0", "INDEX"),
 
         new ArgumentOption<Arguments>(
-            "hash-spec", 'h', "the hash spec to use", "sha1",
-            [] (Arguments &state, const std::string &hashSpec) { state.hashSpec = hashSpec; }),
+            [] (Arguments &state, const std::string &hashSpec) { state.hashSpec = hashSpec; },
+            "hash-spec", 'h', "the hash spec to use", "sha1", "SPEC"),
         new ArgumentOption<Arguments>(
-            "salt", '\0', "the salt", "saltSALTsaltSALTsaltSALTsaltSALTsalt",
-            [] (Arguments &state, const std::string &salt) { state.salt = salt; }),
+            [] (Arguments &state, const std::string &salt) { state.salt = salt; },
+            "salt", '\0', "the salt", "saltSALTsaltSALTsaltSALTsaltSALTsalt", "SALT"),
         new ArgumentOption<Arguments>(
-            "iterations", 'i', "the number of PBKDF2 iterations", "4096",
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
                 state.iterations = (size_t)num;
-            })),
+            }), "iterations", 'i', "the number of PBKDF2 iterations", "4096", "N"),
         new ArgumentOption<Arguments>(
-            "dk-length", 'k', "the length of the derived key", "20",
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
                 state.dkLength = (size_t)num;
-            })),
+            }), "dk-length", 'k', "the length of the derived key", "20", "BYTES"),
         new ArgumentOption<Arguments>(
-            "batch-size", 'b', "the number of tasks per batch", "2048",
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
                 state.batchSize = (size_t)num;
-            })),
+            }), "batch-size", 'b', "the number of tasks per batch", "2048", "N"),
         new ArgumentOption<Arguments>(
-            "samples", 's', "the number of batches to run and measure", "10",
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
                 state.sampleCount = (size_t)num;
-            })),
+            }), "samples", 's', "the number of batches to run and measure", "10", "N"),
 
         new ArgumentOption<Arguments>(
-            "opencl-data-dir", '\0', "the data directory for the 'opencl' mode", "data",
-            [] (Arguments &state, const std::string &folder) { state.openclDataDir = folder; }),
+            [] (Arguments &state, const std::string &folder) { state.openclDataDir = folder; },
+            "opencl-data-dir", '\0', "the data directory for the 'opencl' mode", "data", "DIR"),
 
         new FlagOption<Arguments>(
-            "help", 'h', "show this help and exit",
-            [] (Arguments &state) { state.showHelp = true; }),
+            [] (Arguments &state) { state.showHelp = true; },
+            "help", 'h', "show this help and exit")
     };
 
     return CommandLineParser<Arguments>(

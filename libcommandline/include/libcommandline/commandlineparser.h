@@ -191,14 +191,14 @@ public:
                         } else {
                             argument = arg.substr(optIndex);
                         }
-                        int ret = tryProcessOption(progname, "-" + name, opt, state, argument);
+                        int ret = tryProcessOption(progname, { '-', name }, opt, state, argument);
                         if (ret != 0) return ret;
                         break;
                     }
                     /* if the option doesn't take an argument,
                      * then process the rest of this arg as
                      * another short option(s) */
-                    int ret = tryProcessOption(progname, "-" + name, opt, state);
+                    int ret = tryProcessOption(progname, { '-', name }, opt, state);
                     if (ret != 0) return ret;
                 } while (optIndex < arg.size());
             } else if (arg.size() == 2) {

@@ -9,7 +9,9 @@ LIBS += -l:libOpenCL.so.1
 
 INCLUDEPATH += src
 
-HEADERS += src/benchmark.h
+HEADERS += \
+    src/runtimestatistics.h \
+    src/benchmark.h
 
 SOURCES += src/main.cpp
 

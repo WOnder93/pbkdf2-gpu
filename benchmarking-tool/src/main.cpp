@@ -18,6 +18,9 @@ struct Arguments {
 
     size_t deviceIndex = 0;
 
+    std::string outputType = "iters-per-sec";
+    std::string outputMode = "verbose";
+
     std::string hashSpec = "sha1";
     std::string salt = "saltSALTsaltSALTsaltSALTsaltSALTsalt";
     size_t iterations = 4096;
@@ -48,6 +51,13 @@ static CommandLineParser<Arguments> buildCmdLineParser() {
             }), "device", 'd', "use device with index INDEX", "0", "INDEX"),
 
         new ArgumentOption<Arguments>(
+            [] (Arguments &state, const std::string &type) { state.outputType = type; },
+            "output-type", 'o', "what to output (iters-per-sec|ns|ns-per-1M-iters)", "iters-per-sec", "TYPE"),
+        new ArgumentOption<Arguments>(
+            [] (Arguments &state, const std::string &mode) { state.outputMode = mode; },
+            "output-mode", '\0', "output mode (verbose|raw|mean|mean-and-mdev)", "verbose", "MODE"),
+
+        new ArgumentOption<Arguments>(
             [] (Arguments &state, const std::string &hashSpec) { state.hashSpec = hashSpec; },
             "hash-spec", 'h', "the hash spec to use", "sha1", "SPEC"),
         new ArgumentOption<Arguments>(
@@ -76,7 +86,7 @@ static CommandLineParser<Arguments> buildCmdLineParser() {
 
         new FlagOption<Arguments>(
             [] (Arguments &state) { state.showHelp = true; },
-            "help", 'h', "show this help and exit")
+            "help", '?', "show this help and exit")
     };
 
     return CommandLineParser<Arguments>(
@@ -89,6 +99,11 @@ int doStuff(std::string progname,
             const typename Mode::TGlobalContext *globalCtx,
             const Arguments &args)
 {
+    if (args.outputMode == "verbose") {
+        std::cout << "Running benchmark in '" << args.mode
+                  << "' mode..." << std::endl;
+    }
+
     if (args.listDevices) {
         size_t i = 0;
         for (auto &device : globalCtx->getAllDevices()) {
@@ -106,13 +121,65 @@ int doStuff(std::string progname,
     }
 
     auto &device = devices[args.deviceIndex];
-    std::cout << "Using device #" << args.deviceIndex << ": "
-              << device.getInfo() << std::endl;
+    if (args.outputMode == "verbose") {
+        std::cout << "Using device #" << args.deviceIndex << ": "
+                  << device.getInfo() << std::endl;
+    }
 
-    runBenchmark<Mode>(
-                globalCtx, device, args.hashSpec,
+    auto stats = runBenchmark<Mode>(
+                globalCtx, device, args.outputMode == "verbose", args.hashSpec,
                 args.salt.data(), args.salt.size(), args.iterations,
                 args.dkLength, args.batchSize, args.sampleCount);
+
+    if (args.outputMode == "verbose") {
+        std::cout << "Mean computation time: "
+                  << RunTimeStatistics::repr((nanosecs)stats.getNanoseconds().getMean())
+                  << std::endl;
+        std::cout << "Mean deviation: "
+                  << RunTimeStatistics::repr((nanosecs)stats.getNanoseconds().getMeanDeviation())
+                  << " (" << stats.getNanoseconds().getMeanDeviationPerMean() * 100.0 << "%)"
+                  << std::endl;
+
+        std::cout << "Mean computation time (per 1M iterations): "
+                  << RunTimeStatistics::repr((nanosecs)stats.getNsPer1MIterations().getMean())
+                  << std::endl;
+        std::cout << "Mean deviation (per 1M iterations): "
+                  << RunTimeStatistics::repr((nanosecs)stats.getNsPer1MIterations().getMeanDeviation())
+                  << std::endl;
+
+        std::cout << "Mean iterations per second: "
+                  << stats.getIterationsPerSecond().getMean()
+                  << std::endl;
+        return 0;
+    }
+
+    const DataSet *dataSet;
+    if (args.outputType == "iters-per-sec") {
+        dataSet = &stats.getIterationsPerSecond();
+    } else if (args.outputType == "ns") {
+        dataSet = &stats.getNanoseconds();
+    } else if (args.outputType == "ns-per-1M-iters") {
+        dataSet = &stats.getNsPer1MIterations();
+    } else {
+        std::cerr << progname << ": invalid output type: '"
+                  << args.outputType << "'" << std::endl;
+        return 1;
+    }
+
+    if (args.outputMode == "raw") {
+        for (auto sample : dataSet->getSamples()) {
+            std::cout << sample << std::endl;
+        }
+    } else if (args.outputMode == "mean") {
+        std::cout << dataSet->getMean() << std::endl;
+    } else if (args.outputMode == "mean-and-mdev") {
+        std::cout << dataSet->getMean() << std::endl;
+        std::cout << dataSet->getMeanDeviation() << std::endl;
+    } else {
+        std::cerr << progname << ": invalid output mode: '"
+                  << args.outputMode << "'" << std::endl;
+        return 1;
+    }
     return 0;
 }
 
@@ -131,19 +198,16 @@ int main(int, const char * const *argv)
     }
 
     if (args.mode == "opencl") {
-        std::cout << "Running benchmark in OpenCL mode..." << std::endl;
-
         opencl::GlobalContext global(args.openclDataDir);
 
-        doStuff<opencl::Types>(argv[0], &global, args);
+        return doStuff<opencl::Types>(argv[0], &global, args);
     } else if (args.mode == "cpu") {
-        std::cout << "Running benchmark in CPU mode..." << std::endl;
-
         cpu::GlobalContext global(nullptr);
 
-        doStuff<cpu::Types>(argv[0], &global, args);
+        return doStuff<cpu::Types>(argv[0], &global, args);
     } else {
         std::cerr << argv[0] << ": invalid mode: " << args.mode << std::endl;
+        return 1;
     }
     return 0;
 }

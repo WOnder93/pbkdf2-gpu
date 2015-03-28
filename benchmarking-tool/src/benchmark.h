@@ -1,16 +1,15 @@
 #ifndef BENCHMARK_H
 #define BENCHMARK_H
 
+#include "runtimestatistics.h"
+
 #include <string>
 #include <vector>
 #include <chrono>
 #include <random>
-#include <numeric>
 #include <iostream>
-#include <cstdint>
 
 #define PASSWORD_LENGTH 64
-#define NS_PER_SECOND 1000000000
 
 /**
  * @brief A dummy password generator.
@@ -37,116 +36,11 @@ public:
     }
 };
 
-/**
- * @brief A class for storing and computing run time statistics.
- *
- * Nanoseconds are used as a universal unit so that it is easy
- * to convert time from other units.
- */
-class RunTimeStatistics
-{
-public:
-    typedef uintmax_t nanosecs;
-
-    template<class duration>
-    static nanosecs toNanoseconds(const duration &d) {
-        return d.count() * (NS_PER_SECOND * duration::period::num / duration::period::den);
-    }
-
-    static double toMinutes(nanosecs ns)
-    {
-        return (double)ns / ((nanosecs)60 * 1000 * 1000 * 1000);
-    }
-
-    static double toSeconds(nanosecs ns)
-    {
-        return (double)ns / ((nanosecs)1000 * 1000 * 1000);
-    }
-
-    static double toMilliSeconds(nanosecs ns)
-    {
-        return (double)ns / ((nanosecs)1000 * 1000);
-    }
-
-    static double toMicroSeconds(nanosecs ns)
-    {
-        return (double)ns / (nanosecs)1000;
-    }
-
-    static std::string repr(nanosecs ns)
-    {
-        if (ns < (nanosecs)1000) {
-            return std::to_string(ns) + " ns";
-        }
-        if (ns < (nanosecs)1000 * 1000) {
-            return std::to_string(toMicroSeconds(ns)) + " us";
-        }
-        if (ns < (nanosecs)1000 * 1000 * 1000) {
-            return std::to_string(toMilliSeconds(ns)) + " ms";
-        }
-        if (ns < (nanosecs)60 * 1000 * 1000 * 1000) {
-            return std::to_string(toSeconds(ns)) + " s";
-        }
-        return std::to_string(toMinutes(ns)) + " min";
-    }
-
-private:
-    nanosecs iter;
-
-    std::vector<nanosecs> samples;
-    nanosecs sum;
-    nanosecs mean;
-    nanosecs devSum;
-    nanosecs devMean;
-
-public:
-    inline nanosecs getMean() const { return mean; }
-    inline nanosecs getMeanDeviation() const { return devMean; }
-
-    inline double getMeanDeviationPerMean() const { return (double)devMean / mean; }
-
-    inline nanosecs getMeanPerIteration() const {
-        return mean / iter;
-    }
-    inline nanosecs getMeanDeviationPerIteration() const {
-        return devMean / iter;
-    }
-
-    inline nanosecs getMeanPer1MIterations() const {
-        return (mean * 1000 * 1000) / iter;
-    }
-    inline nanosecs getMeanDeviationPer1MIterations() const {
-        return (devMean * 1000 * 1000) / iter;
-    }
-
-    inline uintmax_t getIterationsPerSecond() const {
-        return ((uintmax_t)iter * 1000 * 1000 * 1000) / mean;
-    }
-
-    inline RunTimeStatistics(size_t iterationCount, size_t batchSize)
-        : iter(iterationCount * batchSize), samples(), sum(0) { }
-
-    void addSample(nanosecs sample)
-    {
-        sum += sample;
-        samples.push_back(sample);
-    }
-
-    void close()
-    {
-        mean = sum / samples.size();
-
-        devSum = std::accumulate(
-            samples.begin(), samples.end(), (nanosecs)0,
-            [=](nanosecs s, nanosecs x) { return s + abs(x - mean); });
-        devMean = devSum / samples.size();
-    }
-};
-
 template<class Types>
-void runBenchmark(
+RunTimeStatistics runBenchmark(
         const typename Types::TGlobalContext *globalCtx,
         const typename Types::TDevice &dev,
+        bool beVerbose,
         const std::string &hashSpec,
         const void *salt, size_t saltLength,
         size_t iterationCount, size_t dkLength,
@@ -161,14 +55,16 @@ void runBenchmark(
 
     typedef std::chrono::steady_clock clock_type;
 
-    std::cout << "Starting computation..." << std::endl;
+    if (beVerbose) {
+        std::cout << "Starting computation..." << std::endl;
+    }
 
     DummyPasswordGenerator pwgen;
-    RunTimeStatistics wrTimeStats(1, batchSize);
     RunTimeStatistics compTimeStats(iterationCount, batchSize);
-    RunTimeStatistics rdTimeStats(1, batchSize);
     for (size_t i = 0; i < sampleCount; i++) {
-        std::cout << "  Sample " << i << "..." << std::endl;
+        if (beVerbose) {
+            std::cout << "  Sample " << i << "..." << std::endl;
+        }
 
         clock_type::time_point checkpt0 = clock_type::now();
 
@@ -189,41 +85,28 @@ void runBenchmark(
 
         clock_type::time_point checkpt3 = clock_type::now();
 
-        clock_type::duration wrTime = checkpt1 - checkpt0;
-        auto wrTimeNs = RunTimeStatistics::toNanoseconds(wrTime);
-        std::cout << "    Writing took     " << RunTimeStatistics::repr(wrTimeNs) << std::endl;
-        wrTimeStats.addSample(wrTimeNs);
+        if (beVerbose) {
+            clock_type::duration wrTime = checkpt1 - checkpt0;
+            auto wrTimeNs = toNanoseconds(wrTime);
+            std::cout << "    Writing took     " << RunTimeStatistics::repr(wrTimeNs) << std::endl;
+        }
 
         clock_type::duration compTime = checkpt2 - checkpt1;
-        auto compTimeNs = RunTimeStatistics::toNanoseconds(compTime);
-        std::cout << "    Computation took " << RunTimeStatistics::repr(compTimeNs) << std::endl;
+        auto compTimeNs = toNanoseconds(compTime);
+        if (beVerbose) {
+            std::cout << "    Computation took " << RunTimeStatistics::repr(compTimeNs) << std::endl;
+        }
         compTimeStats.addSample(compTimeNs);
 
-        clock_type::duration rdTime = checkpt3 - checkpt2;
-        auto rdTimeNs = RunTimeStatistics::toNanoseconds(rdTime);
-        std::cout << "    Reading took     " << RunTimeStatistics::repr(rdTimeNs) << std::endl;
-        rdTimeStats.addSample(wrTimeNs);
+        if (beVerbose) {
+            clock_type::duration rdTime = checkpt3 - checkpt2;
+            auto rdTimeNs = toNanoseconds(rdTime);
+            std::cout << "    Reading took     " << RunTimeStatistics::repr(rdTimeNs) << std::endl;
+        }
     }
     compTimeStats.close();
 
-    std::cout << "Average computation time: "
-              << RunTimeStatistics::repr(compTimeStats.getMean())
-              << std::endl;
-    std::cout << "Average deviation: "
-              << RunTimeStatistics::repr(compTimeStats.getMeanDeviation())
-              << " (" << compTimeStats.getMeanDeviationPerMean() * 100.0 << "%)"
-              << std::endl;
-
-    std::cout << "Average computation time (per 1M iterations): "
-              << RunTimeStatistics::repr(compTimeStats.getMeanPer1MIterations())
-              << std::endl;
-    std::cout << "Average deviation (per 1M iterations): "
-              << RunTimeStatistics::repr(compTimeStats.getMeanDeviationPer1MIterations())
-              << std::endl;
-
-    std::cout << "Average iterations per second: "
-              << compTimeStats.getIterationsPerSecond()
-              << std::endl;
+    return compTimeStats;
 }
 
 #endif // BENCHMARK_H

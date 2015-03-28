@@ -9,6 +9,7 @@ This project is part of my bachelor's thesis on the [Faculty of Informatics, Mas
 
  * The [OpenSSL](https://www.openssl.org/)/[LibreSSL](http://www.libressl.org/) `crypto` library.
  * An [OpenCL](https://www.khronos.org/opencl/) implementation (you should have libOpenCL.so.1 somewhere in your library search path).
+ * If you are building using GCC, make sure use at least version 4.8.1 because 4.7.2 gives a weird error when compiling `libpbkdf2-compute-opencl/src/device.cpp` (other versions between 4.7.2 and 4.8.1 might also work).
 
 ### Using GNU autotools
 

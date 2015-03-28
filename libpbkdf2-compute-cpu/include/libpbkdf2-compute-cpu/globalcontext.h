@@ -24,12 +24,14 @@ public:
         std::mutex mutex;
         std::condition_variable cv;
         std::queue<std::packaged_task<void()>> taskQueue;
+        bool finish = false;
 
         void processTasks();
         std::packaged_task<void()> dequeueTask();
 
     public:
         CoreContext();
+        ~CoreContext();
 
         CoreContext(const CoreContext &) = delete;
         CoreContext &operator=(const CoreContext &) = delete;

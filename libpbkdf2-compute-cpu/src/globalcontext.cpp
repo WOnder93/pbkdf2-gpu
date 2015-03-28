@@ -7,14 +7,31 @@ namespace cpu {
 GlobalContext::CoreContext::CoreContext()
     : mutex(), cv(), taskQueue()
 {
-    thread = std::thread(&GlobalContext::CoreContext::processTasks, this);
+    thread = std::thread(&CoreContext::processTasks, this);
 }
+GlobalContext::CoreContext::~CoreContext()
+{
+    mutex.lock();
+
+    finish = true;
+    cv.notify_one();
+
+    mutex.unlock();
+
+    thread.join();
+}
+
+class FinishException : public std::exception { };
 
 void GlobalContext::CoreContext::processTasks()
 {
-    while (true) {
-        auto task = dequeueTask();
-        task();
+    try {
+        while (true) {
+            auto task = dequeueTask();
+            task();
+        }
+    } catch(const FinishException &) {
+        return;
     }
 }
 
@@ -36,8 +53,14 @@ std::future<void> GlobalContext::CoreContext::enqueueTask(std::function<void ()>
 std::packaged_task<void()> GlobalContext::CoreContext::dequeueTask()
 {
     std::unique_lock<std::mutex> lock(mutex);
+    if (finish) {
+        throw FinishException();
+    }
     if (taskQueue.empty()) {
         cv.wait(lock);
+        if (finish) {
+            throw FinishException();
+        }
     }
     auto task = std::move(taskQueue.front());
     taskQueue.pop();

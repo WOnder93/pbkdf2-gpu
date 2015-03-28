@@ -1,6 +1,8 @@
 #ifndef LIBPBKDF2_COMPUTE_CPU_HASHFUNCTIONCONTEXT_H
 #define LIBPBKDF2_COMPUTE_CPU_HASHFUNCTIONCONTEXT_H
 
+#include "globalcontext.h"
+
 #include <openssl/evp.h>
 
 #include <vector>
@@ -13,9 +15,11 @@ namespace cpu {
 class HashFunctionContext
 {
 private:
+    const GlobalContext *globalContext;
     const ::EVP_MD *digest;
 
 public:
+    inline const GlobalContext *getGlobalContext() const { return globalContext; }
     inline const ::EVP_MD *getDigest() const { return digest; }
 
     /**
@@ -32,8 +36,8 @@ public:
     HashFunctionContext &operator=(HashFunctionContext &&) = default;
 
     HashFunctionContext(
-            const void *globalContext,
-            const std::vector<std::nullptr_t> &devices,
+            const GlobalContext *globalContext,
+            const std::vector<Device> &devices,
             const std::string &hashSpec);
 };
 

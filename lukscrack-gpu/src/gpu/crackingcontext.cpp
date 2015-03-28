@@ -3,7 +3,7 @@
 namespace lukscrack {
 namespace gpu {
 
-CrackingContext::CrackingContext(const GlobalContext *global, const std::vector<cl::Device> &devices, const PasswordData *passwordData)
+CrackingContext::CrackingContext(const GlobalContext *global, const std::vector<Device> &devices, const PasswordData *passwordData)
     : passwordData(passwordData)
 {
     hfContext = HashFunctionContext(global, devices, passwordData->getHashSpec());

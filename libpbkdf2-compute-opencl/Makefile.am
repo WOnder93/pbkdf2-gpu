@@ -6,10 +6,12 @@ AM_CXXFLAGS += -I$(srcdir)/../libhashspec-hashalgorithm/include
 
 libpbkdf2_compute_opencl_la_LIBADD = ../libhashspec-hashalgorithm/libhashspec-hashalgorithm.la -l$(OPENCL_LIB)
 libpbkdf2_compute_opencl_la_SOURCES = \
-    src/computecontext.cpp \
+    src/device.cpp \
+    src/globalcontext.cpp \
     src/kernelloader.cpp \
-    src/devicecontext.cpp \
     src/hashfunctioncontext.cpp \
+    src/computecontext.cpp \
+    src/devicecontext.cpp \
     src/processingunit.cpp \
     src/kernelloader.h \
     src/alignment.h

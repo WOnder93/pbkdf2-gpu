@@ -26,14 +26,17 @@ HEADERS += \
     include/libpbkdf2-compute-opencl/globalcontext.h \
     include/libpbkdf2-compute-opencl/types.h \
     src/kernelloader.h \
-    src/alignment.h
+    src/alignment.h \
+    include/libpbkdf2-compute-opencl/device.h
 
 SOURCES += \
     src/computecontext.cpp \
     src/kernelloader.cpp \
     src/devicecontext.cpp \
     src/hashfunctioncontext.cpp \
-    src/processingunit.cpp
+    src/processingunit.cpp \
+    src/device.cpp \
+    src/globalcontext.cpp
 
 OTHER_FILES += \
     data/opencl/kernels/pbkdf2_sha1.cl

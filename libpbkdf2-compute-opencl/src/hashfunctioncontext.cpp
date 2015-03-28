@@ -6,12 +6,15 @@ namespace opencl {
 
 HashFunctionContext::HashFunctionContext(
         const GlobalContext *globalContext,
-        const std::vector<cl::Device> &devices,
+        const std::vector<Device> &devices,
         const std::string &hashSpec)
-    : globalContext(globalContext),
-      devices(devices), context(devices),
+    : globalContext(globalContext), devices(),
       hashSpec(hashSpec), hashAlg(&HashAlgorithm::getAlgorithm(hashSpec))
 {
+    for (const Device &device : devices) {
+        this->devices.push_back(device.getCLDevice());
+    }
+    context = cl::Context(this->devices);
 }
 
 } // namespace opencl

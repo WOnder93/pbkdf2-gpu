@@ -8,11 +8,10 @@ namespace cpu {
 
 using namespace libhashspec::openssl;
 
-HashFunctionContext::HashFunctionContext(
-        const void *,
-        const std::vector<std::nullptr_t> &,
+HashFunctionContext::HashFunctionContext(const GlobalContext *globalContext,
+        const std::vector<Device> &,
         const std::string &hashSpec)
-    : digest(DigestLookup::getDigest(hashSpec))
+    : globalContext(globalContext), digest(DigestLookup::getDigest(hashSpec))
 {
 }
 

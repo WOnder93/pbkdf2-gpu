@@ -11,9 +11,15 @@ class DeviceContext
 {
 private:
     const ComputeContext *parentContext;
+    Device device;
 
 public:
     inline const ComputeContext *getParentContext() const { return parentContext; }
+    inline GlobalContext::CoreContext &getCoreContext() const
+    {
+        return parentContext->getParentContext()->
+                getGlobalContext()->getCoreContext(device);
+    }
 
     /**
      * @brief Empty constructor.
@@ -28,8 +34,8 @@ public:
     DeviceContext(DeviceContext &&) = default;
     DeviceContext &operator=(DeviceContext &&) = default;
 
-    inline DeviceContext(const ComputeContext *parentContext, size_t)
-        : parentContext(parentContext) { }
+    inline DeviceContext(const ComputeContext *parentContext, const Device &device)
+        : parentContext(parentContext), device(device) { }
 };
 
 } // namespace cpu

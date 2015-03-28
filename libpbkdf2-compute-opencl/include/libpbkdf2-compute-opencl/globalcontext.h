@@ -1,7 +1,10 @@
 #ifndef LIBPBKDF2_COMPUTE_OPENCL_GLOBALCONTEXT_H
 #define LIBPBKDF2_COMPUTE_OPENCL_GLOBALCONTEXT_H
 
+#include "device.h"
+
 #include <string>
+#include <vector>
 
 namespace libpbkdf2 {
 namespace compute {
@@ -11,12 +14,14 @@ class GlobalContext
 {
 private:
     std::string dataDirectory;
+    std::vector<Device> devices;
 
 public:
+    inline const std::vector<Device> &getAvailableDevices() const { return devices; }
+
     inline const std::string &getDataDirectory() const { return dataDirectory; }
 
-    inline GlobalContext(const std::string &dataDirectory)
-        : dataDirectory(dataDirectory) { }
+    GlobalContext(const std::string &dataDirectory);
 };
 
 } // namespace opencl

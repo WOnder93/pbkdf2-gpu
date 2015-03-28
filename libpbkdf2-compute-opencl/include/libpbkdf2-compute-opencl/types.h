@@ -12,7 +12,7 @@ namespace opencl {
 class Types
 {
 public:
-    typedef cl::Device          TDevice;
+    typedef Device              TDevice;
     typedef GlobalContext       TGlobalContext;
     typedef HashFunctionContext THashFunctionContext;
     typedef ComputeContext      TComputeContext;

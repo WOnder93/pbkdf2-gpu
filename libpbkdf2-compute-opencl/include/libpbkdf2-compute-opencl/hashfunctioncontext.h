@@ -49,7 +49,7 @@ public:
 
     HashFunctionContext(
             const GlobalContext *globalContext,
-            const std::vector<cl::Device> &devices,
+            const std::vector<Device> &devices,
             const std::string &hashSpec);
 };
 

@@ -17,13 +17,18 @@ namespace tests {
 template<typename Types>
 void runComputeTests(
         std::ostream &out, const std::string &platformName, const std::string &hashSpec,
-        const typename Types::TGlobalContext *globalCtx, const typename Types::TDevice &dev)
+        const typename Types::TGlobalContext *globalCtx)
 {
+    auto &devices = globalCtx->getAvailableDevices();
+    if (devices.size() == 0) {
+        out << "No devices found, tests cannot be run!" << std::endl;
+        return;
+    }
+
     std::vector<Test> tests;
     auto &testVectors = PBKDF2TestVector::getStandardVectors(hashSpec);
 
-    std::vector<typename Types::TDevice> devices(&dev, &dev + 1);
-    typename Types::THashFunctionContext hfContext(globalCtx, devices, hashSpec);
+    typename Types::THashFunctionContext hfContext(globalCtx, { devices[0] }, hashSpec);
     for (const PBKDF2TestVector &tv : testVectors) {
         tests.push_back(Test("Test vector '" + tv.getName() + "'", [&] {
             typename Types::TComputeContext computeContext(
@@ -56,26 +61,18 @@ static void runOpenCLTests(std::ostream &out)
 {
     using namespace libpbkdf2::compute::opencl;
 
-    cl::Platform platform = cl::Platform::getDefault();
-
-    std::vector<cl::Device> devices;
-    platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
-
-    if (devices.size() == 0) {
-        out << "No devices found, tests cannot be run!" << std::endl;
-        return;
-    }
-
     GlobalContext global("data");
 
-    runComputeTests<Types>(out, "OpenCL", "sha1", &global, devices[0]);
+    runComputeTests<Types>(out, "OpenCL", "sha1", &global);
 }
 
 static void runCPUTests(std::ostream &out)
 {
     using namespace libpbkdf2::compute::cpu;
 
-    runComputeTests<Types>(out, "CPU", "sha1", nullptr, nullptr);
+    GlobalContext global(nullptr);
+
+    runComputeTests<Types>(out, "CPU", "sha1", &global);
 }
 
 void Tests::runTests(std::ostream &out)

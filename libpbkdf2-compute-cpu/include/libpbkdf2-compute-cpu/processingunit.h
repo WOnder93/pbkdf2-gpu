@@ -6,7 +6,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
-#include <thread>
+#include <future>
 
 namespace libpbkdf2 {
 namespace compute {
@@ -21,9 +21,7 @@ private:
     std::vector<std::string> passwordBuffer;
     std::unique_ptr<unsigned char[]> dkBuffer;
 
-    std::vector<std::thread> computeThreads;
-
-    size_t parallelCount;
+    std::future<void> taskFuture;
 
 public:
     typedef void PasswordGenerator(const char *&password, size_t &passwordSize);

@@ -71,34 +71,37 @@ int main(int, const char * const *argv)
     }
 
     if (args.mode == "opencl") {
-        std::vector<cl::Platform> platforms;
-        cl::Platform::get(&platforms);
-
-        if (platforms.size() == 0) {
-            std::cerr << argv[0] << ": no OpenCL platforms found" << std::endl;
-            return 1;
-        }
-
-        cl::Platform platform = platforms[0];
-
-        std::vector<cl::Device> devices;
-        platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
-
-        if (devices.size() == 0) {
-            std::cerr << argv[0] << ": no OpenCL devices found" << std::endl;
-            return 1;
-        }
-
         std::cout << "Benchmarking OpenCL..." << std::endl;
 
         opencl::GlobalContext global("data");
-        runBenchmark<opencl::Types>(&global, devices[0], args.hashSpec,
+
+        auto &devices = global.getAvailableDevices();
+        if (devices.size() == 0) {
+            std::cerr << argv[0] << ": no devices found" << std::endl;
+            return 1;
+        }
+        auto &device = devices[0];
+        std::cout << "Using device #0:" << std::endl;
+        std::cout << device.getInfo() << std::endl;
+
+        runBenchmark<opencl::Types>(&global, device, args.hashSpec,
                 args.salt.data(), args.salt.size(), args.iterations,
                 args.dkLength, args.batchSize, args.sampleCount);
     } else if (args.mode == "cpu") {
         std::cout << "Benchmarking CPU..." << std::endl;
 
-        runBenchmark<cpu::Types>(nullptr, nullptr, args.hashSpec,
+        cpu::GlobalContext global(nullptr);
+
+        auto &devices = global.getAvailableDevices();
+        if (devices.size() == 0) {
+            std::cerr << argv[0] << ": no devices found" << std::endl;
+            return 1;
+        }
+        auto &device = devices[0];
+        std::cout << "Using device #0:" << std::endl;
+        std::cout << device.getInfo() << std::endl;
+
+        runBenchmark<cpu::Types>(&global, device, args.hashSpec,
                  args.salt.data(), args.salt.size(), args.iterations,
                  args.dkLength, args.batchSize, args.sampleCount);
     } else {

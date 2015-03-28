@@ -10,8 +10,8 @@ namespace cpu {
 class Types
 {
 public:
-    typedef std::nullptr_t      TDevice;
-    typedef void                TGlobalContext;
+    typedef Device              TDevice;
+    typedef GlobalContext       TGlobalContext;
     typedef HashFunctionContext THashFunctionContext;
     typedef ComputeContext      TComputeContext;
     typedef DeviceContext       TDeviceContext;

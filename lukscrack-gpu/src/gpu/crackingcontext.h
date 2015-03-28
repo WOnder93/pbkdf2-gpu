@@ -29,7 +29,7 @@ public:
 
     CrackingContext(
             const GlobalContext *global,
-            const std::vector<cl::Device> &devices,
+            const std::vector<Device> &devices,
             const PasswordData *passwordData);
 };
 

@@ -18,14 +18,17 @@ INCLUDEPATH += include/libpbkdf2-compute-cpu src
 
 SOURCES += \
     src/hashfunctioncontext.cpp \
-    src/processingunit.cpp
+    src/processingunit.cpp \
+    src/globalcontext.cpp
 
 HEADERS += \
     include/libpbkdf2-compute-cpu/hashfunctioncontext.h \
     include/libpbkdf2-compute-cpu/computecontext.h \
     include/libpbkdf2-compute-cpu/devicecontext.h \
     include/libpbkdf2-compute-cpu/processingunit.h \
-    include/libpbkdf2-compute-cpu/types.h
+    include/libpbkdf2-compute-cpu/types.h \
+    include/libpbkdf2-compute-cpu/device.h \
+    include/libpbkdf2-compute-cpu/globalcontext.h
 
 unix {
     target.path = /usr/lib

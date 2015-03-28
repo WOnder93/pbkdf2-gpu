@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <unordered_map>
+#include <stdexcept>
 
 namespace libpbkdf2 {
 namespace compute {

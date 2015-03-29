@@ -38,8 +38,9 @@ $ for i in pbkdf2-compute-tests benchmarking-tool lukscrack-gpu; do (cd $i && ln
  * **libhashspec-hashalgorithm** &ndash; A utility library to lookup a hash algorithm implementation from a LUKS hashspec (see above).
  * **libpbkdf2-compute-cpu** &ndash; A reference implementation of the libpbkdf2-compute interface (see below) performing computation on the CPU.
  * **libpbkdf2-compute-opencl** &ndash; An implementation of the libpbkdf2-compute interface (see below) performing computation on one or more OpenCL devices.
- * **pbkdf2-compute-tests** &ndash; A utility that runs tests (currently only checks computation of RFC test vectors) on libpbkdf2-compute-\* libraries.
- * **benchmarking-tool** &ndash; A command-line tool for benchmarking the speed of computation (currently only has basic functionality).
+ * **libcommandline** &ndash; A simple command-line argument parser.
+ * **pbkdf2-compute-tests** &ndash; A utility that runs tests (currently only checks computation of RFC test vectors) on the libpbkdf2-compute-\* libraries.
+ * **benchmarking-tool** &ndash; A command-line tool for benchmarking the performance of the libpbkdf2-compute-\* libraries.
  * **lukscrack-gpu** &ndash; A command-line tool for cracking passwords of LUKS disk partitions (currently a work-in-progress).
 
 ## The common interface of libpbkdf2-compute-\* libraries

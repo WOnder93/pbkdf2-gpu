@@ -33,7 +33,7 @@ public:
     DeviceContext(DeviceContext &&) = default;
     DeviceContext &operator=(DeviceContext &&) = default;
 
-    DeviceContext(const ComputeContext *parentContext, size_t deviceIndex);
+    DeviceContext(const ComputeContext *parentContext, const Device &device);
 };
 
 } // namespace opencl

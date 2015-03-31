@@ -50,7 +50,7 @@ RunTimeStatistics runBenchmark(
 
     typename Types::THashFunctionContext hfContext(globalCtx, devices, hashSpec);
     typename Types::TComputeContext computeContext(&hfContext, salt, saltLength, dkLength, iterationCount);
-    typename Types::TDeviceContext deviceContext(&computeContext, 0);
+    typename Types::TDeviceContext deviceContext(&computeContext, dev);
     typename Types::TProcessingUnit unit(&deviceContext, batchSize);
 
     typedef std::chrono::steady_clock clock_type;

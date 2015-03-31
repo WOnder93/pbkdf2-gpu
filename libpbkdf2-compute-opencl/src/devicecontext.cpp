@@ -6,12 +6,11 @@ namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
 
-DeviceContext::DeviceContext(const ComputeContext *parentContext, size_t deviceIndex)
+DeviceContext::DeviceContext(const ComputeContext *parentContext, const Device &device)
     : parentContext(parentContext)
 {
     auto hfContext = parentContext->getParentContext();
-    device = hfContext->getDevices().at(deviceIndex);
-    queue = cl::CommandQueue(hfContext->getContext(), device);
+    queue = cl::CommandQueue(hfContext->getContext(), device.getCLDevice());
 
     void *hostSaltBuffer = queue.enqueueMapBuffer(
                 parentContext->getSaltBuffer(), true, CL_MAP_WRITE,

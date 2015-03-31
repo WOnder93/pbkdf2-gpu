@@ -35,7 +35,7 @@ void runComputeTests(
                         &hfContext,
                         tv.getSaltData(), tv.getSaltLength(),
                         tv.getDerivedKeyLength(), tv.getIterationCount());
-            typename Types::TDeviceContext deviceContext(&computeContext, 0 /* use the first (and only) device */);
+            typename Types::TDeviceContext deviceContext(&computeContext, devices[0]);
             typename Types::TProcessingUnit unit(&deviceContext, 1);
 
             unit.writePasswords([&tv](const char *&password, size_t &passwordSize) {

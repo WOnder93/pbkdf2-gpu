@@ -25,7 +25,7 @@ void ProcessingUnit::writePasswords(std::function<PasswordGenerator> passwordGen
         size_t pwSize;
         passwordGenerator(pw, pwSize);
 
-        passwordBuffer[i] = std::string(pw, pw + pwSize);
+        passwordBuffer[i].assign(pw, pw + pwSize);
     }
 }
 

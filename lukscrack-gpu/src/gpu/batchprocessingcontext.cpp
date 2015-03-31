@@ -8,8 +8,11 @@
 namespace lukscrack {
 namespace gpu {
 
-BatchProcessingContext::BatchProcessingContext(const CrackingContext *parentContext, size_t deviceIndex, size_t batchSize)
-    : parentContext(parentContext), batchSize(batchSize)
+BatchProcessingContext::BatchProcessingContext(
+        const CrackingContext *parentContext,
+        const Device &deviceIndex, size_t batchSize)
+    : parentContext(parentContext), batchSize(batchSize),
+      passwords(batchSize)
 {
     const PasswordData *passwordData = parentContext->getPasswordData();
     cipherAlg = CipherAlgorithm::get(passwordData->getCipherName(), passwordData->getCipherMode(),
@@ -21,32 +24,32 @@ BatchProcessingContext::BatchProcessingContext(const CrackingContext *parentCont
     keyslotUnit = ProcessingUnit(&keyslotContext, batchSize);
     mkDigestUnit = ProcessingUnit(&mkDigestContext, batchSize);
 
-    passwords.resize(batchSize);
+    size_t keySize = passwordData->getKeySize();
+    size_t afStripes = passwordData->getKeyslotStripes();
+    size_t keyMaterialSize = afStripes * keySize;
+    keyMaterialDecryptedBuffer = std::vector<char>(keyMaterialSize);
+    masterKeyBuffer = std::vector<char>(keySize);
 }
 
 void BatchProcessingContext::initializePasswords(lukscrack::PasswordGenerator &generator)
 {
     size_t i = 0;
-    keyslotUnit.writePasswords([&] (const char *&password, size_t &passwordSize) {
-        if (!generator.nextPassword()) {
-            passwords[i] = std::string();
-            password = nullptr;
-            passwordSize = 0;
-        } else {
-            auto &pw = generator.getCurrentPassword();
-            passwords[i] = pw;
-            password = pw.data();
-            passwordSize = pw.size();
+    keyslotUnit.writePasswords([&] (const char *&outPwData, size_t &outPwLength) {
+        const char *pwData;
+        size_t pwLength;
+        if (!generator.nextPassword(pwData, pwLength)) {
+            pwData = nullptr;
+            pwLength = 0;
         }
+        passwords[i].assign(pwData, pwData + pwLength);
+        outPwData = pwData;
+        outPwLength = pwLength;
         ++i;
     });
-    keyslotUnit.beginProcessing();
 }
 
 void BatchProcessingContext::decryptMasterKey()
 {
-    keyslotUnit.endProcessing();
-
     auto passwordData = parentContext->getPasswordData();
 
     const char *keyMaterial = passwordData->getKeyMaterial();
@@ -54,24 +57,12 @@ void BatchProcessingContext::decryptMasterKey()
     size_t afStripes = passwordData->getKeyslotStripes();
     size_t keyMaterialSize = afStripes * keySize;
 
-    /* buffers for decrypted material: */
-    char *keyMaterialDecrypted = new char[keyMaterialSize];
-    if (keyMaterialDecrypted == nullptr) {
-        throw std::bad_alloc();
-    }
-    /* to ensure memory will be freed if an exception gets thrown: */
-    std::unique_ptr<char[]> keyMaterialDecryptedOwner(keyMaterialDecrypted);
-
-    char *masterKey = new char[keySize];
-    if (masterKey == nullptr) {
-        throw std::bad_alloc();
-    }
-    std::unique_ptr<char[]> masterKeyOwner(masterKey);
-
-    keyslotUnit.readDerivedKeys(
-                [=](ProcessingUnit::KeyIterator &iter) {
-        mkDigestUnit.writePasswords(
-                    [=, &iter](const char *&password, size_t &passwordSize) {
+    char *keyMaterialDecrypted = keyMaterialDecryptedBuffer.data();
+    char *masterKey = masterKeyBuffer.data();
+    keyslotUnit.readDerivedKeys([=](ProcessingUnit::KeyIterator &iter)
+    {
+        mkDigestUnit.writePasswords([=, &iter](const char *&password, size_t &passwordSize)
+        {
             const void *key = iter.nextKey();
             cipherAlg->decrypt(key, keyMaterial, keyMaterialSize, keyMaterialDecrypted);
             crypto::AF_merge(keyMaterialDecrypted, masterKey, keySize,
@@ -81,19 +72,16 @@ void BatchProcessingContext::decryptMasterKey()
             passwordSize = keySize;
         });
     });
-    mkDigestUnit.beginProcessing();
 }
 
 ssize_t BatchProcessingContext::processResults()
 {
-    mkDigestUnit.endProcessing();
-
     auto passwordData = parentContext->getPasswordData();
     const char *mkDigest = passwordData->getMasterKeyDigest();
 
     ssize_t match = -1;
-    mkDigestUnit.readDerivedKeys(
-                [=, &match](ProcessingUnit::KeyIterator &iter) {
+    mkDigestUnit.readDerivedKeys([=, &match](ProcessingUnit::KeyIterator &iter)
+    {
         for (size_t i = 0; i < batchSize; i++) {
             auto key = iter.nextKey();
             if (std::memcmp(key, mkDigest, PasswordData::MASTER_KEY_DIGEST_SIZE) == 0) {

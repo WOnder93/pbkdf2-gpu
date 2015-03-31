@@ -10,8 +10,7 @@ class PasswordGenerator
 public:
     virtual ~PasswordGenerator() { }
 
-    virtual const std::string &getCurrentPassword() const;
-    virtual bool nextPassword();
+    virtual bool nextPassword(const char *&pwData, size_t &pwLength);
 };
 
 } // namespace lukscrack

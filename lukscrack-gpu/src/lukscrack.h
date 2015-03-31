@@ -1,14 +1,42 @@
 #ifndef LUKSCRACK_LUKSCRACK_H
 #define LUKSCRACK_LUKSCRACK_H
 
-namespace lukscrack {
-    class LuksCrack
-    {
-    public:
-        LuksCrack(); // TODO: supply PasswordGeneratorFactory, ...
+#include "passworddistributor.h"
+#include "gpu/devicecrackingcontext.h"
 
-        void runCracking();
-    };
-}
+#include <thread>
+#include <mutex>
+
+namespace lukscrack {
+
+using namespace libpbkdf2::compute::opencl;
+
+class LuksCrack
+{
+private:
+    const GlobalContext *globalContext;
+    PasswordDistributor pwDistributor;
+
+    gpu::CrackingContext context;
+    std::vector<std::unique_ptr<gpu::DeviceCrackingContext>> devContexts;
+    std::vector<std::thread> threads;
+
+    std::mutex passwordMutex;
+    std::string password;
+    bool passwordFound;
+
+    void setFoundPassword(const std::string &found);
+
+public:
+    LuksCrack(const GlobalContext *globalContext,
+              const std::vector<Device> &devices,
+              const PasswordData *passwordData,
+              PasswordGenerator *pwGen, size_t batchSize);
+
+    void runCracking();
+    void requestStopCracking();
+};
+
+} // namespace lukscrack
 
 #endif // LUKSCRACK_LUKSCRACK_H

@@ -32,4 +32,5 @@ public:
 
 } // namespace hashalgorithm
 } // namespace libhashspec
+
 #endif // LIBHASHSPEC_HASHALGORITHM_HASHALGORITHM_H

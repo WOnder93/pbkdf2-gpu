@@ -26,7 +26,7 @@ public:
 
     void computeDigest(const void *data, size_t size, void *dest) const;
 
-    static const HashAlgorithm &getAlgorithm(std::string hashSpec);
+    static const HashAlgorithm &getAlgorithm(const std::string &hashSpec);
 };
 
 

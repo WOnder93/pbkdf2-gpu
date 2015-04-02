@@ -18,13 +18,13 @@ void HashAlgorithm::computeDigest(const void *data, size_t size, void *dest) con
     EVP_DigestFinal(&ctx, (unsigned char *)dest, NULL);
 }
 
-const HashAlgorithm &HashAlgorithm::getAlgorithm(std::string hashSpec)
+const HashAlgorithm &HashAlgorithm::getAlgorithm(const std::string &hashSpec)
 {
     static const std::unordered_map<std::string, HashAlgorithm> algorithms = {
-        { "ripemd160",  HashAlgorithm(DigestLookup::getDigest("ripemd160"),  64, 20) },
-        { "sha1",       HashAlgorithm(DigestLookup::getDigest("sha1"),       64, 20) },
-        { "sha256",     HashAlgorithm(DigestLookup::getDigest("sha256"),     64, 32) },
-        { "sha512",     HashAlgorithm(DigestLookup::getDigest("sha512"),    128, 64) },
+        { "ripemd160", HashAlgorithm(DigestLookup::getDigest("ripemd160"),  64, 20) },
+        { "sha1",      HashAlgorithm(DigestLookup::getDigest("sha1"),       64, 20) },
+        { "sha256",    HashAlgorithm(DigestLookup::getDigest("sha256"),     64, 32) },
+        { "sha512",    HashAlgorithm(DigestLookup::getDigest("sha512"),    128, 64) },
     };
 
     return algorithms.at(hashSpec);

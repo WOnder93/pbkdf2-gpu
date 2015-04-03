@@ -175,7 +175,7 @@ int main(int, const char * const *argv)
         }
         devices.push_back(allDevices[i]);
     }
-    LuksCrack crack(&global, global.getAllDevices(), &pwData, pwGen.get(), args.batchSize);
+    LuksCrack crack(&global, devices, &pwData, pwGen.get(), args.batchSize);
     if (args.action == "crack") {
         crack.runCracking();
 

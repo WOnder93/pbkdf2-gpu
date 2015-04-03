@@ -77,7 +77,7 @@ class PasswordData
 {
 public:
     enum {
-        MASTER_KEY_DIGEST_LENGTH = 20, /* LUKS DIGESTSIZE */
+        MASTER_KEY_DIGEST_LENGTH = 20, /* LUKS_DIGESTSIZE */
         SALT_LENGTH = 32, /* LUKS_SALSIZE */
         SECTOR_SIZE = 512,
     };

@@ -62,8 +62,7 @@ void PasswordData::readFromLuksHeader(std::istream &stream, size_t keyslot)
     }
     cursor += 32;
 
-    /* payloadOffset */
-    cursor += 4;
+    cursor += 4; /* skip payloadOffset */
 
     std::uint_least32_t keySize = UINT32_BE(cursor);
     cursor += 4;

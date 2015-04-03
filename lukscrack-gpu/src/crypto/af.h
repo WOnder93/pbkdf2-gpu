@@ -26,12 +26,13 @@
 #ifndef LUKSCRACK_CRYPTO_AF_H
 #define LUKSCRACK_CRYPTO_AF_H
 
-#include <stdlib.h>
+#include <cstdlib>
+#include <string>
 
 namespace lukscrack {
 namespace crypto {
 
-int AF_merge(char *src, char *dst, size_t blocksize, unsigned int blocknumbers, const char *hash);
+int AF_merge(char *src, char *dst, size_t blocksize, size_t blocknumbers, const std::string &hashSpec);
 
 } // namespace crypto
 } // namespace lukscrack

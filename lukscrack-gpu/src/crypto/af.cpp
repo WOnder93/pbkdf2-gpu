@@ -25,106 +25,98 @@
 
 #include "af.h"
 
-#include "errno.h"
-#include "crypto_backend.h"
+#include "libhashspec-hashalgorithm/hashalgorithm.h"
 
+#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <cstdint>
 
-using namespace std;
-
 namespace lukscrack {
 namespace crypto {
 
-static void XORblock(const char *src1, const char *src2, char *dst, size_t n)
-{
-        size_t j;
+using namespace libhashspec::hashalgorithm;
 
-        for(j = 0; j < n; ++j)
-                dst[j] = src1[j] ^ src2[j];
+// TODO: refactor this Frankenstein...
+
+static inline void XORblock(const char *src1, const char *src2, char *dst, size_t n)
+{
+    for(size_t j = 0; j < n; ++j)
+        dst[j] = src1[j] ^ src2[j];
 }
 
 static int hash_buf(const char *src, char *dst, uint32_t iv,
-                    size_t len, const char *hash_name)
+                    size_t len, const HashAlgorithm &hashAlg)
 {
-        struct crypt_hash *hd = NULL;
-        char iv_char[4];
-        int r;
+    char iv_char[4];
+    iv_char[3] = iv & 0xFF; iv >>= 8;
+    iv_char[2] = iv & 0xFF; iv >>= 8;
+    iv_char[1] = iv & 0xFF; iv >>= 8;
+    iv_char[0] = iv & 0xFF;
 
-        iv_char[3] = iv & 0xFF; iv >>= 8;
-        iv_char[2] = iv & 0xFF; iv >>= 8;
-        iv_char[1] = iv & 0xFF; iv >>= 8;
-        iv_char[0] = iv & 0xFF;
-
-        if (crypt_hash_init(&hd, hash_name))
-                return -EINVAL;
-
-        if ((r = crypt_hash_write(hd, iv_char, sizeof(uint32_t))))
-                goto out;
-
-        if ((r = crypt_hash_write(hd, src, len)))
-                goto out;
-
-        r = crypt_hash_final(hd, dst, len);
-out:
-        crypt_hash_destroy(hd);
-        return r;
+    try {
+        HashAlgorithm::Context ctx(hashAlg);
+        ctx.update(iv_char, 4);
+        ctx.update(src, len);
+        ctx.digest(dst);
+    } catch(const HashException &) {
+        return -EINVAL;
+    }
+    return 0;
 }
 
 /* diffuse: Information spreading over the whole dataset with
  * the help of hash function.
  */
 
-static int diffuse(char *src, char *dst, size_t size, const char *hash_name)
+static int diffuse(char *src, char *dst, size_t size, const HashAlgorithm &hashAlg)
 {
-        int hash_size = crypt_hash_size(hash_name);
-        unsigned int digest_size;
-        unsigned int i, blocks, padding;
+    size_t digest_size;
+    size_t i, blocks, padding;
 
-        if (hash_size <= 0)
-                return 1;
-        digest_size = hash_size;
+    digest_size = hashAlg.getOutputBlockLength();
 
-        blocks = size / digest_size;
-        padding = size % digest_size;
+    blocks = size / digest_size;
+    padding = size % digest_size;
 
-        for (i = 0; i < blocks; i++)
-                if(hash_buf(src + digest_size * i,
-                            dst + digest_size * i,
-                            i, (size_t)digest_size, hash_name))
-                        return 1;
+    for (i = 0; i < blocks; i++)
+        if (hash_buf(src + digest_size * i,
+                     dst + digest_size * i,
+                     i, digest_size, hashAlg))
+            return 1;
 
-        if(padding)
-                if(hash_buf(src + digest_size * i,
-                            dst + digest_size * i,
-                            i, (size_t)padding, hash_name))
-                        return 1;
+    if (padding)
+        if (hash_buf(src + digest_size * i,
+                     dst + digest_size * i,
+                     i, padding, hashAlg))
+            return 1;
 
-        return 0;
+    return 0;
 }
 
 int AF_merge(char *src, char *dst, size_t blocksize,
-                 unsigned int blocknumbers, const char *hash)
+             size_t blocknumbers, const std::string &hashSpec)
 {
-        unsigned int i;
-        char *bufblock;
-        int r = -EINVAL;
+    size_t i;
+    char *bufblock;
+    int r = -EINVAL;
 
-        if((bufblock = (char *)calloc(blocksize, 1)) == NULL)
-                return -ENOMEM;
+    auto &hashAlg = HashAlgorithm::getAlgorithm(hashSpec);
 
-        memset(bufblock,0,blocksize);
-        for(i=0; i<blocknumbers-1; i++) {
-                XORblock(src+(blocksize*i),bufblock,bufblock,blocksize);
-                if(diffuse(bufblock, bufblock, blocksize, hash))
-                        goto out;
-        }
-        XORblock(src + blocksize * i, bufblock, dst, blocksize);
-        r = 0;
+    if ((bufblock = (char *)std::calloc(blocksize, 1)) == NULL)
+        return -ENOMEM;
+
+    std::memset(bufblock, 0, blocksize);
+    for(i = 0; i < blocknumbers - 1; i++) {
+        XORblock(src + blocksize * i, bufblock, bufblock, blocksize);
+        if (diffuse(bufblock, bufblock, blocksize, hashAlg))
+            goto out;
+    }
+    XORblock(src + blocksize * i, bufblock, dst, blocksize);
+    r = 0;
 out:
-        free(bufblock);
-        return r;
+    free(bufblock);
+    return r;
 }
 
 } // namespace crypto

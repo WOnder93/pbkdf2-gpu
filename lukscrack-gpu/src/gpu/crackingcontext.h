@@ -5,6 +5,7 @@
 #include "libpbkdf2-compute-opencl/computecontext.h"
 
 #include "passworddata.h"
+#include "sectordecryptor.h"
 
 namespace lukscrack {
 namespace gpu {
@@ -21,11 +22,15 @@ private:
     ComputeContext keyslotContext;
     ComputeContext mkDigestContext;
 
+    SectorDecryptor decryptor;
+
 public:
     inline const PasswordData *getPasswordData() const { return passwordData; }
 
     inline const ComputeContext &getKeyslotContext() const { return keyslotContext; }
     inline const ComputeContext &getMKDigestContext() const { return mkDigestContext; }
+
+    inline const SectorDecryptor &getSectorDecryptor() const { return decryptor; }
 
     CrackingContext(
             const GlobalContext *global,

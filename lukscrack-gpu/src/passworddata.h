@@ -5,15 +5,81 @@
 
 #include <istream>
 #include <string>
+#include <memory>
+#include <stdexcept>
 
 namespace lukscrack {
+
+class InvalidLuksHeaderException : public std::runtime_error
+{
+public:
+    inline InvalidLuksHeaderException(const std::string &message)
+        : std::runtime_error("Invalid LUKS header: " + message)
+    {
+    }
+};
+
+class InvalidLuksMagicException : public InvalidLuksHeaderException
+{
+public:
+    inline InvalidLuksMagicException()
+        : InvalidLuksHeaderException("Invalid magic!")
+    {
+    }
+};
+
+class IncompatibleLuksVersionException : public InvalidLuksHeaderException
+{
+public:
+    inline IncompatibleLuksVersionException(std::uint_least16_t version)
+        : InvalidLuksHeaderException("Incompatible version: " + std::to_string(version) + "!")
+    {
+    }
+};
+
+class StringNotTerminatedException : public InvalidLuksHeaderException
+{
+public:
+    inline StringNotTerminatedException(const std::string &field)
+        : InvalidLuksHeaderException(field + ": String not terminated!")
+    {
+    }
+};
+
+class KeyslotDisabledException : public InvalidLuksHeaderException
+{
+public:
+    inline KeyslotDisabledException(int keyslot_num)
+        : InvalidLuksHeaderException("Keyslot #" + std::to_string(keyslot_num) + " is disabled!")
+    {
+    }
+};
+
+class KeyslotCorruptedException : public InvalidLuksHeaderException
+{
+public:
+    inline KeyslotCorruptedException(int keyslot_num)
+        : InvalidLuksHeaderException("Keyslot #" + std::to_string(keyslot_num) + " is corrupted!")
+    {
+    }
+};
+
+class NoActiveKeyslotException : public InvalidLuksHeaderException
+{
+public:
+    inline NoActiveKeyslotException()
+        : InvalidLuksHeaderException("No active keyslot found!")
+    {
+    }
+};
 
 class PasswordData
 {
 public:
     enum {
-        MASTER_KEY_DIGEST_SIZE = 20, /* LUKS DIGESTSIZE */
-        SALT_SIZE = 32, /* LUKS_SALSIZE */
+        MASTER_KEY_DIGEST_LENGTH = 20, /* LUKS DIGESTSIZE */
+        SALT_LENGTH = 32, /* LUKS_SALSIZE */
+        SECTOR_SIZE = 512,
     };
 
 private:
@@ -21,44 +87,40 @@ private:
     std::string cipherMode;
     std::string hashSpec;
 
-    uint_least32_t keySize;
+    size_t keySize;
 
-    char masterKeyDigest[MASTER_KEY_DIGEST_SIZE];
-    char masterKeyDigestSalt[SALT_SIZE];
-    uint_least32_t masterKeyDigestIter;
+    unsigned char masterKeyDigest[MASTER_KEY_DIGEST_LENGTH];
+    unsigned char masterKeyDigestSalt[SALT_LENGTH];
+    size_t masterKeyDigestIter;
 
-    char keyslotSalt[SALT_SIZE];
-    uint_least32_t keyslotIter;
-    uint_least32_t keyslotStripes;
+    unsigned char keyslotSalt[SALT_LENGTH];
+    size_t keyslotIter;
+    size_t keyslotStripes;
 
-    char *keyMaterial;
+    size_t keyMaterialSectors;
+    std::unique_ptr<unsigned char[]> keyMaterial;
 
 public:
     inline const std::string &getCipherName() const { return cipherName; }
     inline const std::string &getCipherMode() const { return cipherMode; }
     inline const std::string &getHashSpec() const { return hashSpec; }
 
-    inline uint_least32_t getKeySize() const { return keySize; }
+    inline size_t getKeySize() const { return keySize; }
 
-    inline const char *getMasterKeyDigest() const { return masterKeyDigest; }
-    inline const char *getMasterKeyDigestSalt() const { return masterKeyDigestSalt; }
-    inline uint_least32_t getMasterKeyDigestIter() const { return masterKeyDigestIter; }
+    inline const unsigned char *getMasterKeyDigest() const { return masterKeyDigest; }
+    inline const unsigned char *getMasterKeyDigestSalt() const { return masterKeyDigestSalt; }
+    inline size_t getMasterKeyDigestIter() const { return masterKeyDigestIter; }
 
-    inline const char *getKeyslotSalt() const { return keyslotSalt; }
-    inline uint_least32_t getKeyslotIter() const { return keyslotIter; }
-    inline uint_least32_t getKeyslotStripes() const { return keyslotStripes; }
+    inline const unsigned char *getKeyslotSalt() const { return keyslotSalt; }
+    inline size_t getKeyslotIter() const { return keyslotIter; }
+    inline size_t getKeyslotStripes() const { return keyslotStripes; }
 
-    inline const char *getKeyMaterial() const { return keyMaterial; }
+    inline size_t getKeyMaterialSectors() const { return keyMaterialSectors; }
+    inline const unsigned char *getKeyMaterial() const { return keyMaterial.get(); }
 
-    PasswordData() : keyMaterial(nullptr) { }
-    PasswordData(const PasswordData &other) = delete;
-    PasswordData &operator=(const PasswordData &other) = delete;
+    inline PasswordData() : keyMaterial() { }
 
-    ~PasswordData() {
-        delete[] keyMaterial;
-    }
-
-    void readFromLuksHeader(std::istream &stream, int keyslot);
+    void readFromLuksHeader(std::istream &stream, size_t keyslot);
 };
 
 } // namespace lukscrack

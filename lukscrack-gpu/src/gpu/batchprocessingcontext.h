@@ -3,7 +3,6 @@
 
 #include "libpbkdf2-compute-opencl/processingunit.h"
 
-#include "cipheralgorithm.h"
 #include "passwordgenerator.h"
 
 #include "crackingcontext.h"
@@ -28,11 +27,9 @@ private:
     ProcessingUnit keyslotUnit;
     ProcessingUnit mkDigestUnit;
 
-    std::shared_ptr<const CipherAlgorithm> cipherAlg;
-
     std::vector<std::string> passwords;
-    std::vector<char> keyMaterialDecryptedBuffer;
-    std::vector<char> masterKeyBuffer;
+    std::vector<unsigned char> keyMaterialDecryptedBuffer;
+    std::vector<unsigned char> masterKeyBuffer;
 
 public:
     inline const std::vector<std::string> &getCurrentPasswords() const { return passwords; }
@@ -43,7 +40,7 @@ public:
             const CrackingContext *parentContext,
             const Device &device, size_t batchSize);
 
-    void initializePasswords(lukscrack::PasswordGenerator &generator);
+    bool initializePasswords(lukscrack::PasswordGenerator &generator);
 
     inline void beginKeyslotUnit() { keyslotUnit.beginProcessing(); }
     inline void endKeyslotUnit() { keyslotUnit.endProcessing(); }

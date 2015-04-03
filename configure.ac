@@ -18,6 +18,10 @@ AC_CONFIG_FILES([
     libcommandline/include/Makefile
     pbkdf2-compute-tests/Makefile
     benchmarking-tool/Makefile
+    libcipherspec-cipheralgorithm/Makefile
+    libcipherspec-cipheralgorithm/include/Makefile
+    libivmode/Makefile
+    libivmode/include/Makefile
     lukscrack-gpu/Makefile])
 
 AC_ARG_WITH([opencl-lib],

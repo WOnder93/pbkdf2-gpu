@@ -8,9 +8,9 @@ namespace lukscrack {
 class PasswordGenerator
 {
 public:
-    virtual ~PasswordGenerator() { }
+    virtual ~PasswordGenerator();
 
-    virtual bool nextPassword(const char *&pwData, size_t &pwLength);
+    virtual bool nextPassword(const char *&pwData, size_t &pwLength) = 0;
 };
 
 } // namespace lukscrack

@@ -2,27 +2,36 @@ AM_CXXFLAGS = -I$(srcdir)/src
 
 bin_PROGRAMS = lukscrack-gpu
 
-AM_CXXFLAGS += -I$(srcdir)/../libpbkdf2-compute-opencl/include -I$(srcdir)/../libhashspec-hashalgorithm/include
+AM_CXXFLAGS += -I$(srcdir)/../libhashspec-hashalgorithm/include
+AM_CXXFLAGS += -I$(srcdir)/../libcipherspec-cipheralgorithm/include
+AM_CXXFLAGS += -I$(srcdir)/../libivmode/include
+AM_CXXFLAGS += -I$(srcdir)/../libcommandline/include
+AM_CXXFLAGS += -I$(srcdir)/../libpbkdf2-compute-opencl/include
 
-lukscrack_gpu_LDADD = ../libpbkdf2-compute-opencl/libpbkdf2-compute-opencl.la -l$(OPENCL_LIB) -lpthread -lcrypto
+lukscrack_gpu_LDADD = -l$(OPENCL_LIB) -lpthread \
+    ../libhashspec-hashalgorithm/libhashspec-hashalgorithm.la \
+    ../libcipherspec-cipheralgorithm/libcipherspec-cipheralgorithm.la \
+    ../libivmode/libivmode.la \
+    ../libcommandline/libcommandline.la \
+    ../libpbkdf2-compute-opencl/libpbkdf2-compute-opencl.la
+
 lukscrack_gpu_SOURCES = src/main.cpp \
     src/lukscrack.cpp \
     src/passworddata.cpp \
-    src/cipheralgorithm.cpp \
+    src/listpasswordgenerator.cpp \
+    src/sectordecryptor.cpp \
     src/crypto/af.cpp \
-    src/crypto/crypto_backend_openssl.cpp \
-    src/crypto/crypto_backend_linux.cpp \
     src/gpu/batchprocessingcontext.cpp \
     src/gpu/crackingcontext.cpp \
     src/gpu/devicecrackingcontext.cpp \
+    src/passwordgenerator.cpp \
     src/lukscrack.h \
-    src/passwordgenerator.h \
     src/passworddata.h \
+    src/passwordgenerator.h \
+    src/listpasswordgenerator.h \
     src/passworddistributor.h \
-    src/cipheralgorithm.h \
+    src/sectordecryptor.h \
     src/crypto/af.h \
-    src/crypto/crypto_backend.h \
-    src/crypto/errno.h \
     src/gpu/batchprocessingcontext.h \
     src/gpu/crackingcontext.h \
     src/gpu/devicecrackingcontext.h

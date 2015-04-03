@@ -18,7 +18,7 @@ $ mkdir build && cd build
 $ ../configure --disable-shared && make
 ```
 
-NOTE: When running executables always run them in their containing directory so they can find the OpenCL kernel source files!
+NOTE: When running the executables always run them in their containing directory so they can find the OpenCL kernel source files (in case of benchmarking-tool and lukscrack-gpu you can also specify the --opencl-data-dir command-line option).
 
 ### Using qmake
 
@@ -34,14 +34,16 @@ $ for i in pbkdf2-compute-tests benchmarking-tool lukscrack-gpu; do (cd $i && ln
 ```
 
 ## Subprojects
- * **libhashspec-openssl** &ndash; A utility library to lookup OpenSSL hash algorithm (a pointer to `EVP_MD` structure) from a LUKS hashspec (see the [LUKS On-Disk Format Specification](https://gitlab.com/cryptsetup/cryptsetup/wikis/LUKS-standard/on-disk-format.pdf) for more information).
- * **libhashspec-hashalgorithm** &ndash; A utility library to lookup a hash algorithm implementation from a LUKS hashspec (see above).
+ * **libhashspec-openssl** &ndash; A utility library to lookup an OpenSSL hash algorithm (a pointer to `EVP_MD` structure) from a LUKS hashspec string (see the [LUKS On-Disk Format Specification](https://gitlab.com/cryptsetup/cryptsetup/wikis/LUKS-standard/on-disk-format.pdf) for more information).
+ * **libhashspec-hashalgorithm** &ndash; A utility library to lookup a hash algorithm implementation based on a LUKS hashspec string (see above).
+ * **libcipherspec-cipheralgorithm** &ndash; A utility library to lookup a cipher algorithm implementation based on LUKS cipherspec and ciphermode strings (see above).
+ * **libivmode** &ndash; A utility library to lookup an IV generator implementation based on a LUKS ivmode string (see above).
  * **libpbkdf2-compute-cpu** &ndash; A reference implementation of the libpbkdf2-compute interface (see below) performing computation on the CPU.
  * **libpbkdf2-compute-opencl** &ndash; An implementation of the libpbkdf2-compute interface (see below) performing computation on one or more OpenCL devices.
  * **libcommandline** &ndash; A simple command-line argument parser.
  * **pbkdf2-compute-tests** &ndash; A utility that runs tests (currently only checks computation of RFC test vectors) on the libpbkdf2-compute-\* libraries.
  * **benchmarking-tool** &ndash; A command-line tool for benchmarking the performance of the libpbkdf2-compute-\* libraries.
- * **lukscrack-gpu** &ndash; A command-line tool for cracking passwords of LUKS disk partitions (currently a work-in-progress).
+ * **lukscrack-gpu** &ndash; A command-line tool for cracking passwords of LUKS disk partitions.
 
 ## The common interface of libpbkdf2-compute-\* libraries
 

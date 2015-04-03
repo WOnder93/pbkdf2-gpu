@@ -15,8 +15,6 @@ BatchProcessingContext::BatchProcessingContext(
       passwords(batchSize)
 {
     const PasswordData *passwordData = parentContext->getPasswordData();
-    cipherAlg = CipherAlgorithm::get(passwordData->getCipherName(), passwordData->getCipherMode(),
-                                     passwordData->getKeySize()); // TODO handle missing
 
     keyslotContext = DeviceContext(&parentContext->getKeyslotContext(), deviceIndex);
     mkDigestContext = DeviceContext(&parentContext->getMKDigestContext(), deviceIndex);
@@ -25,50 +23,61 @@ BatchProcessingContext::BatchProcessingContext(
     mkDigestUnit = ProcessingUnit(&mkDigestContext, batchSize);
 
     size_t keySize = passwordData->getKeySize();
-    size_t afStripes = passwordData->getKeyslotStripes();
-    size_t keyMaterialSize = afStripes * keySize;
-    keyMaterialDecryptedBuffer = std::vector<char>(keyMaterialSize);
-    masterKeyBuffer = std::vector<char>(keySize);
+    size_t keyMaterialSectors = passwordData->getKeyMaterialSectors();
+    size_t keyMaterialSize = keyMaterialSectors * PasswordData::SECTOR_SIZE;
+    keyMaterialDecryptedBuffer = std::vector<unsigned char>(keyMaterialSize);
+    masterKeyBuffer = std::vector<unsigned char>(keySize);
 }
 
-void BatchProcessingContext::initializePasswords(lukscrack::PasswordGenerator &generator)
+bool BatchProcessingContext::initializePasswords(lukscrack::PasswordGenerator &generator)
 {
     size_t i = 0;
+    bool passwordsLeft = true;
     keyslotUnit.writePasswords([&] (const char *&outPwData, size_t &outPwLength) {
         const char *pwData;
         size_t pwLength;
         if (!generator.nextPassword(pwData, pwLength)) {
             pwData = nullptr;
             pwLength = 0;
+            passwordsLeft = false;
         }
         passwords[i].assign(pwData, pwData + pwLength);
         outPwData = pwData;
         outPwLength = pwLength;
         ++i;
     });
+    return passwordsLeft;
 }
 
 void BatchProcessingContext::decryptMasterKey()
 {
     auto passwordData = parentContext->getPasswordData();
 
-    const char *keyMaterial = passwordData->getKeyMaterial();
+    const unsigned char *keyMaterial = passwordData->getKeyMaterial();
+
     size_t keySize = passwordData->getKeySize();
     size_t afStripes = passwordData->getKeyslotStripes();
-    size_t keyMaterialSize = afStripes * keySize;
 
-    char *keyMaterialDecrypted = keyMaterialDecryptedBuffer.data();
-    char *masterKey = masterKeyBuffer.data();
+    size_t keyMaterialSectors = passwordData->getKeyMaterialSectors();
+
+    unsigned char *keyMaterialDecrypted = keyMaterialDecryptedBuffer.data();
+    unsigned char *masterKey = masterKeyBuffer.data();
+
+    auto decryptor = &parentContext->getSectorDecryptor();
     keyslotUnit.readDerivedKeys([=](ProcessingUnit::KeyIterator &iter)
     {
         mkDigestUnit.writePasswords([=, &iter](const char *&password, size_t &passwordSize)
         {
             const void *key = iter.nextKey();
-            cipherAlg->decrypt(key, keyMaterial, keyMaterialSize, keyMaterialDecrypted);
-            crypto::AF_merge(keyMaterialDecrypted, masterKey, keySize,
+
+            decryptor->decryptSectors(
+                        key, keyMaterial, keyMaterialDecrypted,
+                        0, keyMaterialSectors);
+
+            crypto::AF_merge((char *)keyMaterialDecrypted, (char *)masterKey, keySize,
                              afStripes, passwordData->getHashSpec().c_str());
 
-            password = masterKey;
+            password = (char *)masterKey;
             passwordSize = keySize;
         });
     });
@@ -77,14 +86,14 @@ void BatchProcessingContext::decryptMasterKey()
 ssize_t BatchProcessingContext::processResults()
 {
     auto passwordData = parentContext->getPasswordData();
-    const char *mkDigest = passwordData->getMasterKeyDigest();
+    const unsigned char *mkDigest = passwordData->getMasterKeyDigest();
 
     ssize_t match = -1;
     mkDigestUnit.readDerivedKeys([=, &match](ProcessingUnit::KeyIterator &iter)
     {
         for (size_t i = 0; i < batchSize; i++) {
             auto key = iter.nextKey();
-            if (std::memcmp(key, mkDigest, PasswordData::MASTER_KEY_DIGEST_SIZE) == 0) {
+            if (std::memcmp(key, mkDigest, PasswordData::MASTER_KEY_DIGEST_LENGTH) == 0) {
                 match = i;
                 break;
             }

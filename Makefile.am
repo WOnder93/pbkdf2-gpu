@@ -8,4 +8,6 @@ SUBDIRS = \
     libcommandline \
     pbkdf2-compute-tests \
     benchmarking-tool \
+    libcipherspec-cipheralgorithm \
+    libivmode \
     lukscrack-gpu

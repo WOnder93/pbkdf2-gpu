@@ -34,7 +34,9 @@ void DeviceCrackingContext::runCracking()
         }
         if (!lastLoop) {
             std::lock_guard<std::mutex> guard(pwMutex);
-            pc1.initializePasswords(pwGen);
+            if (!pc1.initializePasswords(pwGen)) {
+                stop = true;
+            }
         }
 
         if (!firstLoop) {
@@ -47,18 +49,20 @@ void DeviceCrackingContext::runCracking()
         if (!firstLoop) {
             ssize_t res = pc2.processResults();
             if (res >= 0) {
-                callback(pc1.getCurrentPasswords()[res]);
+                callback(pc2.getCurrentPasswords()[res]);
                 stop = true;
             }
         }
         if (!lastLoop) {
             std::lock_guard<std::mutex> guard(pwMutex);
-            pc2.initializePasswords(pwGen);
+            if (!pc2.initializePasswords(pwGen)) {
+                stop = true;
+            }
         } else {
             break;
         }
 
-        firstLoop = true;
+        firstLoop = false;
 
         if (stop) {
             stop = false;

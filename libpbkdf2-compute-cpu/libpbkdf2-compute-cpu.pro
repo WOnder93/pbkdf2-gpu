@@ -35,6 +35,7 @@ unix {
     INSTALLS += target
 }
 
+# libhashspec-openssl:
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libhashspec-openssl/release/ -lhashspec-openssl
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libhashspec-openssl/debug/ -lhashspec-openssl
 else:unix: LIBS += -L$$OUT_PWD/../libhashspec-openssl/ -lhashspec-openssl

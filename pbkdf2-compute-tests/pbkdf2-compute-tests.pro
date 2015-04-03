@@ -8,18 +8,19 @@ CONFIG += link_prl
 LIBS += -l:libOpenCL.so.1
 
 HEADERS += \
-	src/testexception.h \
-	src/test.h \
-	src/pbkdf2testvector.h \
-	src/utils.h \
-	src/testsuite.h \
-	src/tests.h
+    src/testexception.h \
+    src/test.h \
+    src/pbkdf2testvector.h \
+    src/utils.h \
+    src/testsuite.h \
+    src/tests.h
 
 SOURCES += src/main.cpp \
-	src/pbkdf2testvector.cpp \
-	src/testsuite.cpp \
-	src/tests.cpp
+    src/pbkdf2testvector.cpp \
+    src/testsuite.cpp \
+    src/tests.cpp
 
+# libpbkdf2-compute-opencl:
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libpbkdf2-compute-opencl/release/ -lpbkdf2-compute-opencl
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libpbkdf2-compute-opencl/debug/ -lpbkdf2-compute-opencl
 else:unix: LIBS += -L$$OUT_PWD/../libpbkdf2-compute-opencl/ -lpbkdf2-compute-opencl
@@ -33,6 +34,7 @@ else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PW
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../libpbkdf2-compute-opencl/debug/pbkdf2-compute-opencl.lib
 else:unix: PRE_TARGETDEPS += $$OUT_PWD/../libpbkdf2-compute-opencl/libpbkdf2-compute-opencl.a
 
+# libpbkdf2-compute-cpu:
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libpbkdf2-compute-cpu/release/ -lpbkdf2-compute-cpu
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libpbkdf2-compute-cpu/debug/ -lpbkdf2-compute-cpu
 else:unix: LIBS += -L$$OUT_PWD/../libpbkdf2-compute-cpu/ -lpbkdf2-compute-cpu

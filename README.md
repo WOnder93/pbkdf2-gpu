@@ -8,7 +8,7 @@ This project is part of my bachelor's thesis on the [Faculty of Informatics, Mas
 ### Prerequisites
 
  * The [OpenSSL](https://www.openssl.org/)/[LibreSSL](http://www.libressl.org/) `crypto` library.
- * An [OpenCL](https://www.khronos.org/opencl/) implementation (you should have libOpenCL.so.1 somewhere in your library search path).
+ * An [OpenCL](https://www.khronos.org/opencl/) implementation (you should have `libOpenCL.so.1` somewhere in your library search path).
 
 ### Using GNU autotools
 

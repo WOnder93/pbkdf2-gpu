@@ -12,13 +12,13 @@ LIBS += -l:libOpenCL.so.1
 SOURCES += src/main.cpp \
     src/lukscrack.cpp \
     src/passworddata.cpp \
+    src/passwordgenerator.cpp \
     src/listpasswordgenerator.cpp \
     src/sectordecryptor.cpp \
     src/crypto/af.cpp \
     src/gpu/batchprocessingcontext.cpp \
     src/gpu/crackingcontext.cpp \
-    src/gpu/devicecrackingcontext.cpp \
-    src/passwordgenerator.cpp
+    src/gpu/devicecrackingcontext.cpp
 
 HEADERS += \
     src/lukscrack.h \

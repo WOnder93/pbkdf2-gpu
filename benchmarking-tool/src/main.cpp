@@ -10,7 +10,8 @@
 using namespace libpbkdf2::compute;
 using namespace libcommandline;
 
-struct Arguments {
+struct Arguments
+{
     bool showHelp = false;
     bool listDevices = false;
 
@@ -33,10 +34,11 @@ struct Arguments {
 
 typedef unsigned long long u_type;
 
-static CommandLineParser<Arguments> buildCmdLineParser() {
+static CommandLineParser<Arguments> buildCmdLineParser()
+{
     static const auto positional = PositionalArgumentHandler<Arguments>([] (Arguments &, const std::string &) {});
 
-    std::vector<const CommandLineOption<Arguments>*> options = {
+    std::vector<const CommandLineOption<Arguments>*> options {
         new FlagOption<Arguments>(
             [] (Arguments &state) { state.listDevices = true; },
             "list-devices", 'l', "list all available devices and exit"),

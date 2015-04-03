@@ -9,22 +9,45 @@ namespace hashalgorithm {
 
 using namespace libhashspec::openssl;
 
-void HashAlgorithm::computeDigest(const void *data, size_t size, void *dest) const
+HashAlgorithm::Context::Context(const HashAlgorithm &hashAlg)
 {
-    EVP_MD_CTX ctx;
-    EVP_DigestInit(&ctx, digest);
+    EVP_MD_CTX_init(&ctx);
+    EVP_DigestInit(&ctx, hashAlg.digest);
+}
+
+HashAlgorithm::Context::~Context()
+{
+    EVP_MD_CTX_cleanup(&ctx);
+}
+
+void HashAlgorithm::Context::update(const void *data, size_t size)
+{
     EVP_DigestUpdate(&ctx, data, size);
-    /* the digest size will be guarenteed to match the output bock length: */
+}
+
+void HashAlgorithm::Context::digest(void *dest)
+{
+    /* the digest size will be guarenteed to match the output block length: */
     EVP_DigestFinal(&ctx, (unsigned char *)dest, NULL);
+}
+
+size_t HashAlgorithm::getInputBlockLength() const
+{
+    return (size_t)EVP_MD_block_size(digest);
+}
+
+size_t HashAlgorithm::getOutputBlockLength() const
+{
+    return (size_t)EVP_MD_size(digest);
 }
 
 const HashAlgorithm &HashAlgorithm::getAlgorithm(const std::string &hashSpec)
 {
     static const std::unordered_map<std::string, HashAlgorithm> algorithms = {
-        { "ripemd160", HashAlgorithm(DigestLookup::getDigest("ripemd160"),  64, 20) },
-        { "sha1",      HashAlgorithm(DigestLookup::getDigest("sha1"),       64, 20) },
-        { "sha256",    HashAlgorithm(DigestLookup::getDigest("sha256"),     64, 32) },
-        { "sha512",    HashAlgorithm(DigestLookup::getDigest("sha512"),    128, 64) },
+        { "ripemd160", HashAlgorithm(DigestLookup::getDigest("ripemd160")) },
+        { "sha1",      HashAlgorithm(DigestLookup::getDigest("sha1")) },
+        { "sha256",    HashAlgorithm(DigestLookup::getDigest("sha256")) },
+        { "sha512",    HashAlgorithm(DigestLookup::getDigest("sha512")) },
     };
 
     return algorithms.at(hashSpec);

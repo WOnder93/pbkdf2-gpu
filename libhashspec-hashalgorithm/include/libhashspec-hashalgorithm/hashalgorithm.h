@@ -4,27 +4,53 @@
 #include <openssl/evp.h>
 
 #include <string>
+#include <stdexcept>
 
 namespace libhashspec {
 namespace hashalgorithm {
+
+class HashException : std::runtime_error
+{
+public:
+    HashException(const std::string &message)
+        : std::runtime_error(message)
+    {
+    }
+};
 
 class HashAlgorithm
 {
 private:
     const ::EVP_MD *digest;
-    size_t inputBlockLength;
-    size_t outputBlockLength;
 
-    inline HashAlgorithm(const ::EVP_MD *digest, size_t inputBlockLength, size_t outputBlockLength)
-        : digest(digest), inputBlockLength(inputBlockLength), outputBlockLength(outputBlockLength)
+    inline HashAlgorithm(const ::EVP_MD *digest)
+        : digest(digest)
     {
     }
 
 public:
-    inline size_t getInputBlockLength() const { return inputBlockLength; }
-    inline size_t getOutputBlockLength() const { return outputBlockLength; }
+    class Context
+    {
+    private:
+        ::EVP_MD_CTX ctx;
 
-    void computeDigest(const void *data, size_t size, void *dest) const;
+    public:
+        Context(const HashAlgorithm &hashAlg);
+        ~Context();
+
+        void update(const void *data, size_t size);
+        void digest(void *dest);
+    };
+
+    size_t getInputBlockLength() const;
+    size_t getOutputBlockLength() const;
+
+    inline void computeDigest(const void *data, size_t size, void *dest) const
+    {
+        Context ctx(*this);
+        ctx.update(data, size);
+        ctx.digest(dest);
+    }
 
     static const HashAlgorithm &getAlgorithm(const std::string &hashSpec);
 };

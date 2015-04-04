@@ -20,8 +20,7 @@ private:
     PasswordDistributor *pwDistributor;
     std::function<PasswordFoundCallback> callback;
 
-    BatchProcessingContext pc1;
-    BatchProcessingContext pc2;
+    BatchProcessingContext pc1, pc2, pc3;
 
     std::atomic_bool stop;
 

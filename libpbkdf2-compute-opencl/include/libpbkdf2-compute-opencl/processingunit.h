@@ -17,6 +17,8 @@ private:
     const DeviceContext *context;
     size_t batchSize;
 
+    cl::CommandQueue cmdQueue;
+
     cl::Buffer inputBuffer;
     cl::Buffer outputBuffer;
     cl::Buffer debugBuffer;

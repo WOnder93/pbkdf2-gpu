@@ -32,6 +32,8 @@ ProcessingUnit::ProcessingUnit(const DeviceContext *context, size_t batchSize)
     outputBlocks = outputLength / obl;
 
     auto &clContext = hfContext->getContext();
+    cmdQueue = cl::CommandQueue(clContext, context->getDevice());
+
     inputBuffer = cl::Buffer(clContext, CL_MEM_READ_ONLY, inputLength * batchSize);
     outputBuffer = cl::Buffer(clContext, CL_MEM_WRITE_ONLY, outputLength * batchSize);
     debugBuffer = cl::Buffer(clContext, CL_MEM_WRITE_ONLY, DEBUG_BUFFER_SIZE);
@@ -48,7 +50,6 @@ ProcessingUnit::ProcessingUnit(const DeviceContext *context, size_t batchSize)
 
 void ProcessingUnit::writePasswords(std::function<PasswordGenerator> passwordGenerator)
 {
-    auto &cmdQueue = context->getCommandQueue();
     auto computeContext = context->getParentContext();
     auto hfContext = computeContext->getParentContext();
     auto hashAlg = hfContext->getHashAlgorithm();
@@ -89,8 +90,6 @@ void ProcessingUnit::writePasswords(std::function<PasswordGenerator> passwordGen
 
 void ProcessingUnit::readDerivedKeys(std::function<KeyConsumer> keyConsumer)
 {
-    auto &cmdQueue = context->getCommandQueue();
-
     size_t outputBufferSize = outputSize * batchSize * sizeof(cl_uint);
     void *outputHostBuffer = cmdQueue.enqueueMapBuffer(outputBuffer, true, CL_MAP_READ, 0, outputBufferSize);
 
@@ -101,7 +100,6 @@ void ProcessingUnit::readDerivedKeys(std::function<KeyConsumer> keyConsumer)
 
 void ProcessingUnit::beginProcessing()
 {
-    auto &cmdQueue = context->getCommandQueue();
     cmdQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(batchSize, outputBlocks), cl::NullRange, nullptr, &event);
 }
 

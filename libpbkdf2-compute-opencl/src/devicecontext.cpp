@@ -7,10 +7,11 @@ namespace compute {
 namespace opencl {
 
 DeviceContext::DeviceContext(const ComputeContext *parentContext, const Device &device)
-    : parentContext(parentContext)
+    : parentContext(parentContext), device(device.getCLDevice())
 {
     auto hfContext = parentContext->getParentContext();
-    queue = cl::CommandQueue(hfContext->getContext(), device.getCLDevice());
+    auto queue = cl::CommandQueue(
+                hfContext->getContext(), device.getCLDevice());
 
     void *hostSaltBuffer = queue.enqueueMapBuffer(
                 parentContext->getSaltBuffer(), true, CL_MAP_WRITE,

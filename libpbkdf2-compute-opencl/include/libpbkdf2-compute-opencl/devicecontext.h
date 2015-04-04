@@ -13,12 +13,10 @@ private:
     const ComputeContext *parentContext;
 
     cl::Device device;
-    cl::CommandQueue queue;
 
 public:
     inline const ComputeContext *getParentContext() const { return parentContext; }
     inline const cl::Device &getDevice() const { return device; }
-    inline const cl::CommandQueue &getCommandQueue() const { return queue; }
 
     /**
      * @brief Empty constructor.

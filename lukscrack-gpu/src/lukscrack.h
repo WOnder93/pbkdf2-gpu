@@ -19,7 +19,6 @@ private:
 
     gpu::CrackingContext context;
     std::vector<std::unique_ptr<gpu::DeviceCrackingContext>> devContexts;
-    std::vector<std::thread> threads;
 
     std::mutex passwordMutex;
     std::string password;

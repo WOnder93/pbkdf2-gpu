@@ -7,8 +7,7 @@ LuksCrack::LuksCrack(
         const PasswordData *passwordData,
         PasswordGenerator *pwGen, size_t batchSize)
     : globalContext(globalContext), pwDistributor(pwGen),
-      context(globalContext, devices, passwordData),
-      devContexts(), threads(devices.size()),
+      context(globalContext, devices, passwordData), devContexts(),
       passwordMutex(), password(), passwordFound(false)
 {
     devContexts.reserve(devices.size());
@@ -30,6 +29,7 @@ void LuksCrack::setFoundPassword(const std::string &found)
 
 void LuksCrack::runCracking()
 {
+    std::vector<std::thread> threads(devContexts.size());
     for (size_t i = 0; i < devContexts.size(); i++) {
         threads[i] = std::thread(
                     &gpu::DeviceCrackingContext::runCracking,

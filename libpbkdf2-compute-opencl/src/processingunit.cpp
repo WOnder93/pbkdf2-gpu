@@ -48,54 +48,118 @@ ProcessingUnit::ProcessingUnit(const DeviceContext *context, size_t batchSize)
     kernel.setArg<cl::Buffer>(6, debugBuffer);
 }
 
-void ProcessingUnit::writePasswords(std::function<PasswordGenerator> passwordGenerator)
+ProcessingUnit::Passwords::Passwords(const ProcessingUnit *parent)
+    : parent(parent)
 {
-    auto computeContext = context->getParentContext();
-    auto hfContext = computeContext->getParentContext();
-    auto hashAlg = hfContext->getHashAlgorithm();
+    size_t inputBufferSize = parent->inputSize * parent->batchSize * sizeof(cl_uint);
+    hostBuffer = parent->cmdQueue.enqueueMapBuffer(
+                parent->inputBuffer, true, CL_MAP_WRITE,
+                0, inputBufferSize);
+}
+ProcessingUnit::Passwords::~Passwords()
+{
+    parent->cmdQueue.enqueueUnmapMemObject(
+                parent->inputBuffer, hostBuffer);
+}
 
+ProcessingUnit::Passwords::Writer::Writer(
+        const Passwords &parent, size_t index)
+{
+    dest = (cl_uint *)parent.hostBuffer + index;
+
+    auto unit = parent.parent;
+    count = unit->batchSize;
+    inputSize = unit->inputSize;
+
+    auto computeContext = unit->context->getParentContext();
+    auto hfContext = computeContext->getParentContext();
+    hashAlg = hfContext->getHashAlgorithm();
+
+    buffer = std::unique_ptr<cl_uint[]>(new cl_uint[inputSize * count]);
+}
+
+void ProcessingUnit::Passwords::Writer::moveForward(size_t offset)
+{
+    dest += offset;
+}
+
+void ProcessingUnit::Passwords::Writer::moveBackwards(size_t offset)
+{
+    dest -= offset;
+}
+
+void ProcessingUnit::Passwords::Writer::setPassword(
+        const void *pw, size_t pwSize) const
+{
     size_t ibl = hashAlg->getInputBlockLength();
     size_t obl = hashAlg->getOutputBlockLength();
 
-    size_t inputBufferSize = inputSize * batchSize * sizeof(cl_uint);
-    void *inputHostBuffer = cmdQueue.enqueueMapBuffer(inputBuffer, true, CL_MAP_WRITE, 0, inputBufferSize);
-
-    cl_uint *dest = (cl_uint *)inputHostBuffer;
-    cl_uint *buffer = inputDataBuffer.get();
-    for (size_t col = 0; col < batchSize; col++) {
-        const char *pw;
-        size_t pwSize;
-        passwordGenerator(pw, pwSize);
-
-        if (pwSize > ibl) {
-            /* pre-hash password according to HMAC spec: */
-            hashAlg->computeDigest(pw, pwSize, buffer);
-            std::memset((char *)buffer + obl, 0, ibl - obl);
-        } else {
-            std::memcpy((char *)buffer, pw, pwSize);
-            std::memset((char *)buffer + pwSize, 0, ibl - pwSize);
-        }
-
-        cl_uint *dest2 = dest;
-        for (size_t row = 0; row < inputSize; row++) {
-            *dest2 = buffer[row];
-            dest2 += batchSize;
-        }
-
-        dest += 1;
+    cl_uint *buffer = this->buffer.get();
+    if (pwSize > ibl) {
+        /* pre-hash password according to HMAC spec: */
+        hashAlg->computeDigest(pw, pwSize, buffer);
+        std::memset((char *)buffer + obl, 0, ibl - obl);
+    } else {
+        std::memcpy((char *)buffer, pw, pwSize);
+        std::memset((char *)buffer + pwSize, 0, ibl - pwSize);
     }
 
-    cmdQueue.enqueueUnmapMemObject(inputBuffer, inputHostBuffer);
+    cl_uint *dest2 = dest;
+    for (size_t row = 0; row < inputSize; row++) {
+        *dest2 = buffer[row];
+        dest2 += count;
+    }
 }
 
-void ProcessingUnit::readDerivedKeys(std::function<KeyConsumer> keyConsumer)
+ProcessingUnit::DerivedKeys::DerivedKeys(const ProcessingUnit *parent)
+    : parent(parent)
 {
-    size_t outputBufferSize = outputSize * batchSize * sizeof(cl_uint);
-    void *outputHostBuffer = cmdQueue.enqueueMapBuffer(outputBuffer, true, CL_MAP_READ, 0, outputBufferSize);
+    size_t outputBufferSize = parent->outputSize * parent->batchSize * sizeof(cl_uint);
+    hostBuffer = parent->cmdQueue.enqueueMapBuffer(
+                parent->outputBuffer, true, CL_MAP_READ,
+                0, outputBufferSize);
+}
+ProcessingUnit::DerivedKeys::~DerivedKeys()
+{
+    parent->cmdQueue.enqueueUnmapMemObject(
+                parent->outputBuffer, hostBuffer);
+}
 
-    KeyIterator keyIter((cl_uint *)outputHostBuffer, outputDataBuffer.get(), outputSize / outputBlocks, outputBlocks, batchSize);
-    keyConsumer(keyIter);
-    cmdQueue.enqueueUnmapMemObject(outputBuffer, outputHostBuffer);
+ProcessingUnit::DerivedKeys::Reader::Reader(
+        const DerivedKeys &parent, size_t index)
+{
+    auto unit = parent.parent;
+    count = unit->batchSize;
+    outputSize = unit->outputSize;
+    outputBlockCount = unit->outputBlocks;
+    outputBlockSize = outputSize / outputBlockCount;
+
+    buffer = std::unique_ptr<cl_uint[]>(new cl_uint[outputSize * count]);
+    src = (cl_uint *)parent.hostBuffer + index * outputBlockCount;
+}
+
+void ProcessingUnit::DerivedKeys::Reader::moveForward(size_t offset)
+{
+    src += offset * outputBlockCount;
+}
+
+void ProcessingUnit::DerivedKeys::Reader::moveBackwards(size_t offset)
+{
+    src -= offset * outputBlockCount;
+}
+
+const void *ProcessingUnit::DerivedKeys::Reader::getDerivedKey() const
+{
+    auto dst = buffer.get();
+    for (size_t outputBlock = 0; outputBlock < outputBlockCount; outputBlock++) {
+        auto src = this->src + outputBlock;
+        for (size_t row = 0; row < outputBlockSize; row++) {
+            *dst = *src;
+            src += count * outputBlockCount;
+            dst += 1;
+        }
+    }
+    return buffer.get();
 }
 
 void ProcessingUnit::beginProcessing()

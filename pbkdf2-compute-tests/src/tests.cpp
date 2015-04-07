@@ -38,17 +38,25 @@ void runComputeTests(
             typename Types::TDeviceContext deviceContext(&computeContext, devices[0]);
             typename Types::TProcessingUnit unit(&deviceContext, 1);
 
-            unit.writePasswords([&tv](const char *&password, size_t &passwordSize) {
-                password = (const char *)tv.getPasswordData();
-                passwordSize = tv.getPasswordLength();
-            });
+            {
+                auto passwords = unit.openPasswords();
+                typename Types::TProcessingUnit::Passwords::Writer writer(passwords);
+                writer.setPassword(
+                            (const char *)tv.getPasswordData(),
+                            tv.getPasswordLength());
+            }
+
             unit.beginProcessing();
             unit.endProcessing();
 
             bool match = false;
-            unit.readDerivedKeys([&match, &tv](typename Types::TProcessingUnit::KeyIterator &keyIter) {
-                match = memcmp(tv.getDerivedKeyData(), keyIter.nextKey(), tv.getDerivedKeyLength()) == 0;
-            });
+            {
+                auto keys = unit.openDerivedKeys();
+                typename Types::TProcessingUnit::DerivedKeys::Reader reader(keys);
+                match = memcmp(tv.getDerivedKeyData(),
+                               reader.getDerivedKey(),
+                               tv.getDerivedKeyLength()) == 0;
+            }
             Utils::assert("Output should be equal to the expected output", match);
         }));
     }

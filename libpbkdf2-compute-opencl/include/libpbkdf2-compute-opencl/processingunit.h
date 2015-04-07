@@ -36,48 +36,66 @@ private:
     cl::Event event;
 
 public:
-    typedef void PasswordGenerator(const char *&password, size_t &passwordSize);
-    class KeyIterator
+    class Passwords
     {
     private:
-        const cl_uint *data;
-        cl_uint *buffer;
-        size_t outputBlockSize;
-        size_t outputBlockCount;
-        size_t count;
-        size_t index;
+        const ProcessingUnit *parent;
+        void *hostBuffer;
 
     public:
-        inline KeyIterator(const cl_uint *data, cl_uint *buffer,
-                           size_t outputBlockSize, size_t outputBlockCount,
-                           size_t count)
-            : data(data), buffer(buffer),
-              outputBlockSize(outputBlockSize), outputBlockCount(outputBlockCount),
-              count(count), index(0)
+        class Writer
         {
-        }
+        private:
+            cl_uint *dest;
 
-        const void *nextKey()
-        {
-            if (index == count) {
-                return nullptr;
-            }
+            size_t count;
+            size_t inputSize;
+            const HashAlgorithm *hashAlg;
+            std::unique_ptr<cl_uint[]> buffer;
 
-            cl_uint *dst = buffer;
-            for (size_t outputBlock = 0; outputBlock < outputBlockCount; outputBlock++) {
-                const cl_uint *src = data + outputBlock;
-                for (size_t row = 0; row < outputBlockSize; row++) {
-                    *dst = *src;
-                    src += count * outputBlockCount;
-                    dst += 1;
-                }
-            }
-            data += outputBlockCount;
-            index++;
-            return buffer;
-        }
+        public:
+            Writer(const Passwords &parent, size_t index = 0);
+
+            void moveForward(size_t offset);
+            void moveBackwards(size_t offset);
+
+            void setPassword(const void *pw, size_t pwSize) const;
+        };
+
+        Passwords(const ProcessingUnit *parent);
+        ~Passwords();
     };
-    typedef void KeyConsumer(KeyIterator &iter);
+
+    class DerivedKeys
+    {
+    private:
+        const ProcessingUnit *parent;
+        void *hostBuffer;
+
+    public:
+        class Reader
+        {
+        private:
+            const cl_uint *src;
+
+            size_t count;
+            size_t outputSize;
+            size_t outputBlockCount;
+            size_t outputBlockSize;
+            std::unique_ptr<cl_uint[]> buffer;
+
+        public:
+            Reader(const DerivedKeys &parent, size_t index = 0);
+
+            void moveForward(size_t offset);
+            void moveBackwards(size_t offset);
+
+            const void *getDerivedKey() const;
+        };
+
+        DerivedKeys(const ProcessingUnit *parent);
+        ~DerivedKeys();
+    };
 
     inline size_t getBatchSize() const { return batchSize; }
 
@@ -96,8 +114,8 @@ public:
 
     ProcessingUnit(const DeviceContext *context, size_t batchSize);
 
-    void writePasswords(std::function<PasswordGenerator> passwordGenerator);
-    void readDerivedKeys(std::function<KeyConsumer> keyConsumer);
+    inline Passwords openPasswords() { return Passwords(this); }
+    inline DerivedKeys openDerivedKeys() { return DerivedKeys(this); }
 
     void beginProcessing();
     void endProcessing();

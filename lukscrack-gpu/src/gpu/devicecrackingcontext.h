@@ -2,6 +2,7 @@
 #define LUKSCRACK_GPU_DEVICECRACKINGCONTEXT_H
 
 #include "passworddistributor.h"
+#include "threadpool.h"
 #include "batchprocessingcontext.h"
 
 #include <thread>
@@ -29,6 +30,7 @@ public:
 
     DeviceCrackingContext(const CrackingContext *crackingContext,
                           PasswordDistributor *pwDistributor,
+                          ThreadPool *threadPool,
                           std::function<PasswordFoundCallback> callback,
                           const Device &device, size_t batchSize);
 

@@ -67,22 +67,31 @@ RunTimeStatistics runBenchmark(
         }
 
         clock_type::time_point checkpt0 = clock_type::now();
+        {
+            auto passwords = unit.openPasswords();
+            typename Types::TProcessingUnit::Passwords::Writer writer(passwords);
+            for (size_t i = 0; i < batchSize; i++) {
+                const char *pw;
+                size_t pwLength;
+                pwgen(pw, pwLength);
+                writer.setPassword(pw, pwLength);
 
-        unit.writePasswords(pwgen);
-
+                writer.moveForward(1);
+            }
+        }
         clock_type::time_point checkpt1 = clock_type::now();
 
         unit.beginProcessing();
         unit.endProcessing();
 
         clock_type::time_point checkpt2 = clock_type::now();
-
-        unit.readDerivedKeys([batchSize] (typename Types::TProcessingUnit::KeyIterator &it) {
+        {
+            auto keys = unit.openDerivedKeys();
+            typename Types::TProcessingUnit::DerivedKeys::Reader reader(keys);
             for (size_t i = 0; i < batchSize; i++) {
-                it.nextKey();
+                reader.moveForward(1);
             }
-        });
-
+        }
         clock_type::time_point checkpt3 = clock_type::now();
 
         if (beVerbose) {

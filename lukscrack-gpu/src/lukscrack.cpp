@@ -4,16 +4,17 @@ namespace lukscrack {
 
 LuksCrack::LuksCrack(
         const GlobalContext *globalContext, const std::vector<Device> &devices,
-        const PasswordData *passwordData,
-        PasswordGenerator *pwGen, size_t batchSize)
-    : globalContext(globalContext), pwDistributor(pwGen),
+        const PasswordData *passwordData, PasswordGenerator *pwGen,
+        size_t threadPoolSize, size_t batchSize)
+    : globalContext(globalContext),
+      pwDistributor(pwGen), threadPool(threadPoolSize),
       context(globalContext, devices, passwordData), devContexts(),
       passwordMutex(), password(), passwordFound(false)
 {
     devContexts.reserve(devices.size());
     for (auto &dev : devices) {
         devContexts.emplace_back(new gpu::DeviceCrackingContext(
-                    &context, &pwDistributor,
+                    &context, &pwDistributor, &threadPool,
                     [this] (const std::string &found) { setFoundPassword(found); },
                     dev, batchSize));
     }
@@ -48,4 +49,4 @@ void LuksCrack::requestStopCracking()
     }
 }
 
-}
+} // namespace lukscrack

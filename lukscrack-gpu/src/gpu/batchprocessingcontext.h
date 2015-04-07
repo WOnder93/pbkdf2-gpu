@@ -6,6 +6,7 @@
 #include "passwordgenerator.h"
 
 #include "crackingcontext.h"
+#include "threadpool.h"
 
 #include <vector>
 
@@ -18,6 +19,7 @@ class BatchProcessingContext
 {
 private:
     const CrackingContext *parentContext;
+    ThreadPool *threadPool;
 
     size_t batchSize;
 
@@ -28,8 +30,8 @@ private:
     ProcessingUnit mkDigestUnit;
 
     std::vector<std::string> passwords;
-    std::vector<unsigned char> keyMaterialDecryptedBuffer;
-    std::vector<unsigned char> masterKeyBuffer;
+    std::unique_ptr<unsigned char[]> keyMaterialDecryptedBuffers;
+    std::unique_ptr<unsigned char[]> masterKeyBuffers;
 
 public:
     inline const std::vector<std::string> &getCurrentPasswords() const { return passwords; }
@@ -37,8 +39,8 @@ public:
     inline BatchProcessingContext() { }
 
     BatchProcessingContext(
-            const CrackingContext *parentContext,
-            const Device &device, size_t batchSize);
+            const CrackingContext *parentContext, const Device &device,
+            ThreadPool *threadPool, size_t batchSize);
 
     bool initializePasswords(lukscrack::PasswordGenerator &generator);
 

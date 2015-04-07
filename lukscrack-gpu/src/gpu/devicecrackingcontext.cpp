@@ -6,14 +6,15 @@ namespace gpu {
 DeviceCrackingContext::DeviceCrackingContext(
         const CrackingContext *crackingContext,
         PasswordDistributor *pwDistributor,
+        ThreadPool *threadPool,
         std::function<PasswordFoundCallback> callback,
         const Device &device, size_t batchSize)
     : crackingContext(crackingContext),
       pwDistributor(pwDistributor),
       callback(callback),
-      pc1(crackingContext, device, batchSize),
-      pc2(crackingContext, device, batchSize),
-      pc3(crackingContext, device, batchSize),
+      pc1(crackingContext, device, threadPool, batchSize),
+      pc2(crackingContext, device, threadPool, batchSize),
+      pc3(crackingContext, device, threadPool, batchSize),
       stop(false)
 {
 }

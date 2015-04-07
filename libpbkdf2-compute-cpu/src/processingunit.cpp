@@ -18,23 +18,50 @@ ProcessingUnit::ProcessingUnit(const DeviceContext *context, size_t batchSize)
     dkBuffer = std::unique_ptr<unsigned char[]>(dkBuferPtr);
 }
 
-void ProcessingUnit::writePasswords(std::function<PasswordGenerator> passwordGenerator)
+ProcessingUnit::Passwords::Writer::Writer(
+        const Passwords &parent, size_t index)
 {
-    for (size_t i = 0; i < batchSize; i++) {
-        const char *pw;
-        size_t pwSize;
-        passwordGenerator(pw, pwSize);
-
-        passwordBuffer[i].assign(pw, pw + pwSize);
-    }
+    auto unit = parent.parent;
+    it = unit->passwordBuffer.begin() + index;
 }
 
-void ProcessingUnit::readDerivedKeys(std::function<KeyConsumer> keyConsumer)
+void ProcessingUnit::Passwords::Writer::moveForward(size_t offset)
 {
-    auto computeContext = context->getParentContext();
+    it += offset;
+}
 
-    KeyIterator keyIter((const char *)dkBuffer.get(), computeContext->getDerivedKeyLength(), batchSize);
-    keyConsumer(keyIter);
+void ProcessingUnit::Passwords::Writer::moveBackwards(size_t offset)
+{
+    it -= offset;
+}
+
+void ProcessingUnit::Passwords::Writer::setPassword(
+        const void *pw, size_t pwSize) const
+{
+    it->assign((char *)pw, (char *)pw + pwSize);
+}
+
+ProcessingUnit::DerivedKeys::Reader::Reader(
+        const DerivedKeys &parent, size_t index)
+{
+    auto unit = parent.parent;
+    dkLength = unit->context->getParentContext()->getDerivedKeyLength();
+    src = unit->dkBuffer.get() + index * dkLength;
+}
+
+void ProcessingUnit::DerivedKeys::Reader::moveForward(size_t offset)
+{
+    src += offset * dkLength;
+}
+
+void ProcessingUnit::DerivedKeys::Reader::moveBackwards(size_t offset)
+{
+    src -= offset * dkLength;
+}
+
+const void *ProcessingUnit::DerivedKeys::Reader::getDerivedKey() const
+{
+    return src;
 }
 
 void ProcessingUnit::beginProcessing()

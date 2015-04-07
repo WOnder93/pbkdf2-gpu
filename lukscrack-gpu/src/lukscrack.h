@@ -2,6 +2,7 @@
 #define LUKSCRACK_LUKSCRACK_H
 
 #include "passworddistributor.h"
+#include "threadpool.h"
 #include "gpu/devicecrackingcontext.h"
 
 #include <thread>
@@ -16,6 +17,7 @@ class LuksCrack
 private:
     const GlobalContext *globalContext;
     PasswordDistributor pwDistributor;
+    ThreadPool threadPool; /* for parallel key material decryption */
 
     gpu::CrackingContext context;
     std::vector<std::unique_ptr<gpu::DeviceCrackingContext>> devContexts;
@@ -33,7 +35,8 @@ public:
     LuksCrack(const GlobalContext *globalContext,
               const std::vector<Device> &devices,
               const PasswordData *passwordData,
-              PasswordGenerator *pwGen, size_t batchSize);
+              PasswordGenerator *pwGen,
+              size_t threadPoolSize, size_t batchSize);
 
     void runCracking();
     void requestStopCracking();

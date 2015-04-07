@@ -24,31 +24,58 @@ private:
     std::future<void> taskFuture;
 
 public:
-    typedef void PasswordGenerator(const char *&password, size_t &passwordSize);
-    class KeyIterator
+    class Passwords
     {
     private:
-        const char *data;
-        size_t dataSize;
-        size_t index;
-        size_t count;
+        ProcessingUnit *parent;
 
     public:
-        inline KeyIterator(const char *first, size_t dataSize, size_t count)
-            : data(first), dataSize(dataSize), index(0), count(count) { }
-
-        inline const void *nextKey()
+        class Writer
         {
-            if (index == count) {
-                return nullptr;
-            }
-            const void *ret = data;
-            data += dataSize;
-            index++;
-            return ret;
+        private:
+            std::vector<std::string>::iterator it;
+
+        public:
+            Writer(const Passwords &parent, size_t index = 0);
+
+            void moveForward(size_t offset);
+            void moveBackwards(size_t offset);
+
+            void setPassword(const void *pw, size_t pwSize) const;
+        };
+
+        inline Passwords(ProcessingUnit *parent)
+            : parent(parent)
+        {
         }
     };
-    typedef void KeyConsumer(KeyIterator &iter);
+
+    class DerivedKeys
+    {
+    private:
+        const ProcessingUnit *parent;
+
+    public:
+        class Reader
+        {
+        private:
+            size_t dkLength;
+            const unsigned char *src;
+
+        public:
+            Reader(const DerivedKeys &parent, size_t index = 0);
+
+            void moveForward(size_t offset);
+            void moveBackwards(size_t offset);
+
+            const void *getDerivedKey() const;
+        };
+
+        inline DerivedKeys(ProcessingUnit *parent)
+            : parent(parent)
+        {
+        }
+    };
 
     inline size_t getBatchSize() const { return batchSize; }
 
@@ -67,8 +94,8 @@ public:
 
     ProcessingUnit(const DeviceContext *context, size_t batchSize);
 
-    void writePasswords(std::function<PasswordGenerator> passwordGenerator);
-    void readDerivedKeys(std::function<KeyConsumer> keyConsumer);
+    inline Passwords openPasswords() { return Passwords(this); }
+    inline DerivedKeys openDerivedKeys() { return DerivedKeys(this); }
 
     void beginProcessing();
     void endProcessing();

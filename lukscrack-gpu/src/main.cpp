@@ -26,6 +26,7 @@ struct Arguments
     std::set<size_t> deviceIndices = { 0 };
     std::string openclDataDir = "data";
     size_t batchSize = 2048;
+    size_t threads = 1;
 
     bool noNewline = false;
 
@@ -74,6 +75,12 @@ static CommandLineParser<Arguments> buildCmdLineParser()
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
                 state.batchSize = (size_t)num;
             }), "batch-size", 'b', "the number of tasks per batch", "2048", "N"),
+
+        new ArgumentOption<Arguments>(
+            makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
+                state.threads = (size_t)num;
+            }), "threads", 't', "the number of threads to use for CPU-side computation "
+                "(0 = auto)", "1", "N"),
 
         new FlagOption<Arguments>(
             [] (Arguments &state) { state.showHelp = true; },
@@ -175,7 +182,9 @@ int main(int, const char * const *argv)
         }
         devices.push_back(allDevices[i]);
     }
-    LuksCrack crack(&global, devices, &pwData, pwGen.get(), args.batchSize);
+
+    LuksCrack crack(&global, devices, &pwData, pwGen.get(),
+                    args.threads, args.batchSize);
     if (args.action == "crack") {
         crack.runCracking();
 

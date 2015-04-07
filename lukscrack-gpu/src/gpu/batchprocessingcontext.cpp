@@ -1,7 +1,5 @@
 #include "batchprocessingcontext.h"
 
-#include "crypto/af.h"
-
 #include <memory>
 #include <cstring>
 
@@ -62,7 +60,6 @@ void BatchProcessingContext::decryptMasterKey()
     const unsigned char *keyMaterial = passwordData->getKeyMaterial();
 
     size_t keySize = passwordData->getKeySize();
-    size_t afStripes = passwordData->getKeyslotStripes();
 
     size_t keyMaterialSectors = passwordData->getKeyMaterialSectors();
     size_t keyMaterialSize = keyMaterialSectors * PasswordData::SECTOR_SIZE;
@@ -70,6 +67,7 @@ void BatchProcessingContext::decryptMasterKey()
     unsigned char *keyMaterialDecrypted = keyMaterialDecryptedBuffers.get();
     unsigned char *masterKey = masterKeyBuffers.get();
 
+    auto merger = &parentContext->getAFMerger();
     auto decryptor = &parentContext->getSectorDecryptor();
 
     auto keys = keyslotUnit.openDerivedKeys();
@@ -90,9 +88,9 @@ void BatchProcessingContext::decryptMasterKey()
             }
 
             tasks[k] = [=, &keys, &passwords] () {
-
                 ProcessingUnit::DerivedKeys::Reader reader(keys, start);
                 ProcessingUnit::Passwords::Writer writer(passwords, start);
+                AFMerger::Context mergerCtx(merger);
                 for (size_t i = start; i < end; i++) {
                     const void *key = reader.getDerivedKey();
 
@@ -100,11 +98,9 @@ void BatchProcessingContext::decryptMasterKey()
                                 key, keyMaterial, keyMaterialDecrypted,
                                 0, keyMaterialSectors);
 
-                    crypto::AF_merge((char *)keyMaterialDecrypted,
-                                     (char *)masterKey, keySize,
-                                     afStripes, passwordData->getHashSpec().c_str());
+                    mergerCtx.merge(keyMaterialDecrypted, masterKey);
 
-                    writer.setPassword((char *)masterKey, keySize);
+                    writer.setPassword(masterKey, keySize);
 
                     reader.moveForward(1);
                     writer.moveForward(1);
@@ -125,6 +121,7 @@ void BatchProcessingContext::decryptMasterKey()
     } else {
         ProcessingUnit::DerivedKeys::Reader reader(keys);
         ProcessingUnit::Passwords::Writer writer(passwords);
+        AFMerger::Context mergerCtx(merger);
         for (size_t i = 0; i < batchSize; i++) {
             const void *key = reader.getDerivedKey();
 
@@ -132,11 +129,9 @@ void BatchProcessingContext::decryptMasterKey()
                         key, keyMaterial, keyMaterialDecrypted,
                         0, keyMaterialSectors);
 
-            crypto::AF_merge((char *)keyMaterialDecrypted,
-                             (char *)masterKey, keySize,
-                             afStripes, passwordData->getHashSpec().c_str());
+            mergerCtx.merge(keyMaterialDecrypted, masterKey);
 
-            writer.setPassword((char *)masterKey, keySize);
+            writer.setPassword(masterKey, keySize);
 
             reader.moveForward(1);
             writer.moveForward(1);

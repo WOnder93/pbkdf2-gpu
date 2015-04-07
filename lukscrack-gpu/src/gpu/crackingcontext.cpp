@@ -6,9 +6,11 @@ namespace gpu {
 CrackingContext::CrackingContext(const GlobalContext *global, const std::vector<Device> &devices, const PasswordData *passwordData)
     : passwordData(passwordData)
 {
+    auto &hashSpec = passwordData->getHashSpec();
     auto &cipherName = passwordData->getCipherName();
     auto &mode = passwordData->getCipherMode();
     size_t keySize = passwordData->getKeySize();
+    size_t afStripes = passwordData->getKeyslotStripes();
 
     size_t delim = mode.find('-');
     std::string cipherMode, ivmode;
@@ -20,6 +22,7 @@ CrackingContext::CrackingContext(const GlobalContext *global, const std::vector<
     }
 
     decryptor = SectorDecryptor(cipherName, keySize, cipherMode, ivmode);
+    afMerger = AFMerger(keySize, afStripes, hashSpec);
 
     hfContext = HashFunctionContext(global, devices, passwordData->getHashSpec());
 

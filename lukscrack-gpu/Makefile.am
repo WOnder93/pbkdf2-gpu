@@ -21,8 +21,8 @@ lukscrack_gpu_SOURCES = src/main.cpp \
     src/passwordgenerator.cpp \
     src/listpasswordgenerator.cpp \
     src/sectordecryptor.cpp \
+    src/afmerger.cpp \
     src/threadpool.cpp \
-    src/crypto/af.cpp \
     src/gpu/batchprocessingcontext.cpp \
     src/gpu/crackingcontext.cpp \
     src/gpu/devicecrackingcontext.cpp \
@@ -32,8 +32,8 @@ lukscrack_gpu_SOURCES = src/main.cpp \
     src/listpasswordgenerator.h \
     src/passworddistributor.h \
     src/sectordecryptor.h \
+    src/afmerger.h \
     src/threadpool.h \
-    src/crypto/af.h \
     src/gpu/batchprocessingcontext.h \
     src/gpu/crackingcontext.h \
     src/gpu/devicecrackingcontext.h

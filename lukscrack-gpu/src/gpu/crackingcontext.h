@@ -6,6 +6,7 @@
 
 #include "passworddata.h"
 #include "sectordecryptor.h"
+#include "afmerger.h"
 
 namespace lukscrack {
 namespace gpu {
@@ -23,6 +24,7 @@ private:
     ComputeContext mkDigestContext;
 
     SectorDecryptor decryptor;
+    AFMerger afMerger;
 
 public:
     inline const PasswordData *getPasswordData() const { return passwordData; }
@@ -31,6 +33,7 @@ public:
     inline const ComputeContext &getMKDigestContext() const { return mkDigestContext; }
 
     inline const SectorDecryptor &getSectorDecryptor() const { return decryptor; }
+    inline const AFMerger &getAFMerger() const { return afMerger; }
 
     CrackingContext(
             const GlobalContext *global,

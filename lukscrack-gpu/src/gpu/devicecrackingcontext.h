@@ -17,7 +17,6 @@ typedef void PasswordFoundCallback(const std::string &password);
 class DeviceCrackingContext
 {
 private:
-    const CrackingContext *crackingContext;
     PasswordDistributor *pwDistributor;
     std::function<PasswordFoundCallback> callback;
 

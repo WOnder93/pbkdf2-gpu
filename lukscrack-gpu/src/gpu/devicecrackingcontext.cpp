@@ -9,8 +9,7 @@ DeviceCrackingContext::DeviceCrackingContext(
         ThreadPool *threadPool,
         std::function<PasswordFoundCallback> callback,
         const Device &device, size_t batchSize)
-    : crackingContext(crackingContext),
-      pwDistributor(pwDistributor),
+    : pwDistributor(pwDistributor),
       callback(callback),
       pc1(crackingContext, device, threadPool, batchSize),
       pc2(crackingContext, device, threadPool, batchSize),

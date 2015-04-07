@@ -15,7 +15,6 @@ using namespace libpbkdf2::compute::opencl;
 class LuksCrack
 {
 private:
-    const GlobalContext *globalContext;
     PasswordDistributor pwDistributor;
     ThreadPool threadPool; /* for parallel key material decryption */
 

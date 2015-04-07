@@ -6,8 +6,7 @@ LuksCrack::LuksCrack(
         const GlobalContext *globalContext, const std::vector<Device> &devices,
         const PasswordData *passwordData, PasswordGenerator *pwGen,
         size_t threadPoolSize, size_t batchSize)
-    : globalContext(globalContext),
-      pwDistributor(pwGen), threadPool(threadPoolSize),
+    : pwDistributor(pwGen), threadPool(threadPoolSize),
       context(globalContext, devices, passwordData), devContexts(),
       passwordMutex(), password(), passwordFound(false)
 {

@@ -17,6 +17,7 @@
 
 #include "ivgenerator.h"
 
+#include "nullivgenerator.h"
 #include "plainivgenerator.h"
 #include "plain64ivgenerator.h"
 #include "essivivgenerator.h"
@@ -33,7 +34,7 @@ IVGenerator::~IVGenerator()
 {
 }
 
-std::shared_ptr<IVGenerator> buildNullGenerator(const std::string &)
+std::shared_ptr<IVGenerator> buildEmptyGenerator(const std::string &)
 {
     return std::shared_ptr<IVGenerator>(nullptr);
 }
@@ -49,7 +50,8 @@ std::shared_ptr<const IVGenerator> IVGenerator::getGenerator(const std::string &
     typedef std::shared_ptr<IVGenerator> (*GeneratorFactory)(const std::string &opts);
 
     static const std::unordered_map<std::string, GeneratorFactory> factories {
-        { "null",    &buildNullGenerator },
+        { "",        &buildEmptyGenerator },
+        { "null",    &buildGenerator<NullIVGenerator> },
         { "plain",   &buildGenerator<PlainIVGenerator> },
         { "plain64", &buildGenerator<Plain64IVGenerator> },
         { "essiv",   &buildGenerator<EssivIVGenerator> },

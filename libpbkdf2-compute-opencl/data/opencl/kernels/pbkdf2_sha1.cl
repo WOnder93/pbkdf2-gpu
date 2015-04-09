@@ -1,8 +1,8 @@
 /*
+ * PBKDF2-HMAC-SHA1 OpenCL kernel
+ *
  * Copyright (c) 2012, Sayantan Datta <std2048 at gmail dot com>
  * Copyright (c) 2015, Ondrej Mosnacek <omosnacek@gmail.com>
- *
- * PBKDF2-HMAC-SHA1 OpenCL kernel
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,8 +15,7 @@
  * GNU Library General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Based on software published under the following license:
  *

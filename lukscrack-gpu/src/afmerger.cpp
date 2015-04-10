@@ -54,7 +54,7 @@ static void hash_buf(const void *src, void *dst, std::size_t iv,
                      std::size_t len, const HashAlgorithm *hashAlg)
 {
     unsigned char iv_char[4];
-    Endianness::write32LE(iv_char, (std::uint_fast32_t)iv);
+    Endianness::write32BE(iv_char, (std::uint_fast32_t)iv);
 
     HashAlgorithm::Context ctx(*hashAlg);
     ctx.update(iv_char, 4);

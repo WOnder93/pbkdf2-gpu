@@ -84,19 +84,28 @@ public:
 
     inline static void write16LE(void *dst, std::uint_fast16_t i)
     {
-        auto cursor = (unsigned char *)dst + 4 - 1;
-        *cursor = (unsigned char)i; i >>= 8; --cursor;
+        auto cursor = (unsigned char *)dst;
+        *cursor = (unsigned char)i; i >>= 8; ++cursor;
         *cursor = (unsigned char)i;
     }
 
     inline static void write16BE(void *dst, std::uint_fast16_t i)
     {
-        auto cursor = (unsigned char *)dst;
-        *cursor = (unsigned char)i; i >>= 8; ++cursor;
+        auto cursor = (unsigned char *)dst + 2 - 1;
+        *cursor = (unsigned char)i; i >>= 8; --cursor;
         *cursor = (unsigned char)i;
     }
 
     inline static void write32LE(void *dst, std::uint_fast32_t i)
+    {
+        auto cursor = (unsigned char *)dst;
+        *cursor = (unsigned char)i; i >>= 8; ++cursor;
+        *cursor = (unsigned char)i; i >>= 8; ++cursor;
+        *cursor = (unsigned char)i; i >>= 8; ++cursor;
+        *cursor = (unsigned char)i;
+    }
+
+    inline static void write32BE(void *dst, std::uint_fast32_t i)
     {
         auto cursor = (unsigned char *)dst + 4 - 1;
         *cursor = (unsigned char)i; i >>= 8; --cursor;
@@ -105,16 +114,20 @@ public:
         *cursor = (unsigned char)i;
     }
 
-    inline static void write32BE(void *dst, std::uint_fast32_t i)
+    inline static void write64LE(void *dst, std::uint_fast64_t i)
     {
         auto cursor = (unsigned char *)dst;
+        *cursor = (unsigned char)i; i >>= 8; ++cursor;
+        *cursor = (unsigned char)i; i >>= 8; ++cursor;
+        *cursor = (unsigned char)i; i >>= 8; ++cursor;
+        *cursor = (unsigned char)i; i >>= 8; ++cursor;
         *cursor = (unsigned char)i; i >>= 8; ++cursor;
         *cursor = (unsigned char)i; i >>= 8; ++cursor;
         *cursor = (unsigned char)i; i >>= 8; ++cursor;
         *cursor = (unsigned char)i;
     }
 
-    inline static void write64LE(void *dst, std::uint_fast64_t i)
+    inline static void write64BE(void *dst, std::uint_fast64_t i)
     {
         auto cursor = (unsigned char *)dst + 8 - 1;
         *cursor = (unsigned char)i; i >>= 8; --cursor;
@@ -124,19 +137,6 @@ public:
         *cursor = (unsigned char)i; i >>= 8; --cursor;
         *cursor = (unsigned char)i; i >>= 8; --cursor;
         *cursor = (unsigned char)i; i >>= 8; --cursor;
-        *cursor = (unsigned char)i;
-    }
-
-    inline static void write64BE(void *dst, std::uint_fast64_t i)
-    {
-        auto cursor = (unsigned char *)dst;
-        *cursor = (unsigned char)i; i >>= 8; ++cursor;
-        *cursor = (unsigned char)i; i >>= 8; ++cursor;
-        *cursor = (unsigned char)i; i >>= 8; ++cursor;
-        *cursor = (unsigned char)i; i >>= 8; ++cursor;
-        *cursor = (unsigned char)i; i >>= 8; ++cursor;
-        *cursor = (unsigned char)i; i >>= 8; ++cursor;
-        *cursor = (unsigned char)i; i >>= 8; ++cursor;
         *cursor = (unsigned char)i;
     }
 };

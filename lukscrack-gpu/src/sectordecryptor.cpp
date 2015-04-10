@@ -52,7 +52,7 @@ void SectorDecryptor::decryptSectors(
     auto outputCursor = (unsigned char *)dest;
     for (std::size_t i = 0; i < sectorCount; i++) {
         if (ivgenCtx.get() != nullptr) {
-            ivgenCtx->generateIV(startSector + i, ivBuffer.get());
+            ivgenCtx->generateIV(startSector + i, iv);
         }
         decrCtx.decrypt(inputCursor, LUKS_SECTOR_SIZE, iv, outputCursor);
 

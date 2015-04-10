@@ -73,7 +73,7 @@ public:
      * @brief processResults
      * @return the index of the valid password, or -1 if no password is valid
      */
-    ssize_t processResults();
+    bool processResults(size_t &matchIndex);
 };
 
 } // namespace gpu

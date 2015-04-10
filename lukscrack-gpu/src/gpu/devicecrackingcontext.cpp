@@ -77,9 +77,9 @@ void DeviceCrackingContext::runCracking()
     while (true) {
         if (!firstLoop) {
             pc1.endMKDigestUnit();
-            ssize_t res = pc1.processResults();
-            if (res >= 0) {
-                callback(pc1.getCurrentPasswords()[res]);
+            size_t matchIndex;
+            if (pc1.processResults(matchIndex)) {
+                callback(pc1.getCurrentPasswords()[matchIndex]);
                 stop = true;
             }
         }
@@ -97,9 +97,9 @@ void DeviceCrackingContext::runCracking()
             pc3.beginMKDigestUnit();
 
             pc2.endMKDigestUnit();
-            ssize_t res = pc2.processResults();
-            if (res >= 0) {
-                callback(pc2.getCurrentPasswords()[res]);
+            size_t matchIndex;
+            if (pc2.processResults(matchIndex)) {
+                callback(pc2.getCurrentPasswords()[matchIndex]);
                 stop = true;
             }
         }
@@ -119,9 +119,9 @@ void DeviceCrackingContext::runCracking()
 
         if (!firstLoop) {
             pc3.endMKDigestUnit();
-            ssize_t res = pc3.processResults();
-            if (res >= 0) {
-                callback(pc3.getCurrentPasswords()[res]);
+            size_t matchIndex;
+            if (pc3.processResults(matchIndex)) {
+                callback(pc3.getCurrentPasswords()[matchIndex]);
                 stop = true;
             }
         }

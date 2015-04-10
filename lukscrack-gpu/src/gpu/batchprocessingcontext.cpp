@@ -156,7 +156,7 @@ void BatchProcessingContext::decryptMasterKey()
     }
 }
 
-ssize_t BatchProcessingContext::processResults()
+bool BatchProcessingContext::processResults(size_t &matchIndex)
 {
     auto passwordData = parentContext->getPasswordData();
     const unsigned char *mkDigest = passwordData->getMasterKeyDigest();
@@ -166,12 +166,13 @@ ssize_t BatchProcessingContext::processResults()
     for (size_t i = 0; i < batchSize; i++) {
         auto key = reader.getDerivedKey();
         if (std::memcmp(key, mkDigest, PasswordData::MASTER_KEY_DIGEST_LENGTH) == 0) {
-            return i;
+            matchIndex = i;
+            return true;
         }
 
         reader.moveForward(1);
     }
-    return -1;
+    return false;
 }
 
 } // namespace gpu

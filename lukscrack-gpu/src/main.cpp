@@ -200,8 +200,9 @@ int main(int, const char * const *argv)
         devices.push_back(allDevices[i]);
     }
 
+    RootLogger logger(&std::cerr);
     LuksCrack crack(&global, devices, &pwData, pwGen.get(),
-                    args.threads, args.batchSize);
+                    args.threads, args.batchSize, &logger);
     if (args.action == "crack") {
         crack.runCracking();
 

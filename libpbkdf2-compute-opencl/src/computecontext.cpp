@@ -19,7 +19,7 @@
 
 #include "kernelloader.h"
 
-#include "alignment.h"
+#include "libpbkdf2-gpu-common/alignment.h"
 
 namespace libpbkdf2 {
 namespace compute {

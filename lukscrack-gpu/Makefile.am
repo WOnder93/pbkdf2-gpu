@@ -6,7 +6,7 @@ AM_CXXFLAGS += -I$(srcdir)/../libhashspec-hashalgorithm/include
 AM_CXXFLAGS += -I$(srcdir)/../libcipherspec-cipheralgorithm/include
 AM_CXXFLAGS += -I$(srcdir)/../libivmode/include
 AM_CXXFLAGS += -I$(srcdir)/../libcommandline/include
-AM_CXXFLAGS += -I$(srcdir)/../libpbkdf2-compute-opencl/include
+AM_CXXFLAGS += -I$(srcdir)/../libpbkdf2-compute-opencl/include -I$(srcdir)/../libpbkdf2-gpu-common/include
 
 lukscrack_gpu_LDADD = -l$(OPENCL_LIB) -lpthread \
     ../libhashspec-hashalgorithm/libhashspec-hashalgorithm.la \

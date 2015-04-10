@@ -2,6 +2,7 @@ AM_CXXFLAGS = -I$(srcdir)/src -I$(srcdir)/include/libivmode
 
 lib_LTLIBRARIES = libivmode.la
 
+AM_CXXFLAGS += -I$(srcdir)/../libpbkdf2-gpu-common/include
 AM_CXXFLAGS += -I$(srcdir)/../libhashspec-hashalgorithm/include
 AM_CXXFLAGS += -I$(srcdir)/../libcipherspec-cipheralgorithm/include
 

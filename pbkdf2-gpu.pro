@@ -3,6 +3,7 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 SUBDIRS = \
+    libpbkdf2-gpu-common \
     libhashspec-openssl \
     libhashspec-hashalgorithm \
     libpbkdf2-compute-cpu \

@@ -31,6 +31,8 @@ AC_CONFIG_FILES([
     libhashspec-openssl/include/Makefile
     libhashspec-hashalgorithm/Makefile
     libhashspec-hashalgorithm/include/Makefile
+    libpbkdf2-gpu-common/Makefile
+    libpbkdf2-gpu-common/include/Makefile
     libpbkdf2-compute-cpu/Makefile
     libpbkdf2-compute-cpu/include/Makefile
     libpbkdf2-compute-opencl/Makefile

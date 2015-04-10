@@ -22,6 +22,9 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+#include <functional>
+#include <stdexcept>
 
 namespace libpbkdf2 {
 namespace compute {

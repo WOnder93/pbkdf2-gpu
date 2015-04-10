@@ -17,18 +17,11 @@
 
 #include "passworddata.h"
 
+#include "libpbkdf2-gpu-common/endianness.h"
+#include "libpbkdf2-gpu-common/alignment.h"
+
 #include <cstring>
 #include <algorithm>
-
-#define UINT16_BE(buffer) (\
-    (std::uint_least16_t)(buffer)[0] << 8 | \
-    (std::uint_least16_t)(buffer)[1])
-
-#define UINT32_BE(buffer) (\
-    (std::uint_least32_t)(buffer)[0] << 24 | \
-    (std::uint_least32_t)(buffer)[1] << 16 | \
-    (std::uint_least32_t)(buffer)[2] << 8 | \
-    (std::uint_least32_t)(buffer)[3])
 
 #define LUKS_PHDR_SIZE 592
 
@@ -37,6 +30,8 @@
 #define LUKS_KEY_DISABLED 0x0000DEADU
 
 namespace lukscrack {
+
+using namespace pbkdf2_gpu::common;
 
 static const char *LUKS_MAGIC = "LUKS\xBA\xBE";
 
@@ -55,7 +50,7 @@ void PasswordData::readFromLuksHeader(std::istream &stream, std::size_t keyslot)
     }
     cursor += LUKS_MAGIC_LENGTH;
 
-    std::uint_least16_t version = UINT16_BE(cursor);
+    size_t version = Endianness::read16BE(cursor);
     if (version > 1) {
         throw IncompatibleLuksVersionException(version);
     }
@@ -81,7 +76,7 @@ void PasswordData::readFromLuksHeader(std::istream &stream, std::size_t keyslot)
 
     cursor += 4; /* skip payloadOffset */
 
-    std::uint_least32_t keySize = UINT32_BE(cursor);
+    size_t keySize = Endianness::read32BE(cursor);
     cursor += 4;
 
     const unsigned char *mkDigest = cursor;
@@ -90,7 +85,7 @@ void PasswordData::readFromLuksHeader(std::istream &stream, std::size_t keyslot)
     const unsigned char *mkDigestSalt = cursor;
     cursor += 32;
 
-    std::uint_least32_t mkDigestIter = UINT32_BE(cursor);
+    size_t mkDigestIter = Endianness::read32BE(cursor);
     cursor += 4;
 
     cursor += 40; /* skip the UUID */
@@ -99,7 +94,7 @@ void PasswordData::readFromLuksHeader(std::istream &stream, std::size_t keyslot)
         /* jump to keyslot: */
         cursor += 48 * (keyslot - 1);
 
-        std::uint_least32_t active = UINT32_BE(cursor);
+        std::uint_fast32_t active = Endianness::read32BE(cursor);
         if (active == LUKS_KEY_DISABLED) {
             throw KeyslotDisabledException(keyslot);
         } else if (active != LUKS_KEY_ACTIVE) {
@@ -109,7 +104,7 @@ void PasswordData::readFromLuksHeader(std::istream &stream, std::size_t keyslot)
     } else {
         bool found = false;
         for (std::size_t i = 0; i < 8; i++) {
-             std::uint_least32_t active = UINT32_BE(cursor);
+             std::uint_fast32_t active = Endianness::read32BE(cursor);
              if (active == LUKS_KEY_ACTIVE) {
                  cursor += 4;
                  found = true;
@@ -122,24 +117,23 @@ void PasswordData::readFromLuksHeader(std::istream &stream, std::size_t keyslot)
         }
     }
 
-    std::uint_least32_t iter = UINT32_BE(cursor);
+    size_t iter = Endianness::read32BE(cursor);
     cursor += 4;
 
     const unsigned char *keyslotSalt = cursor;
     cursor += 32;
 
-    std::uint_least32_t keyMaterialOffset = UINT32_BE(cursor);
+    size_t keyMaterialOffset = Endianness::read32BE(cursor);
     cursor += 4;
 
-    std::uint_least32_t stripes = UINT32_BE(cursor);
+    size_t stripes = Endianness::read32BE(cursor);
     cursor += 4;
 
     stream.seekg(keyMaterialOffset * SECTOR_SIZE, std::ios_base::beg);
 
-    std::size_t keyMaterialSectors =
-            (keySize * stripes) / SECTOR_SIZE +
-            ((keySize * stripes) % SECTOR_SIZE != 0 ? 1 : 0);
+    std::size_t keyMaterialSectors = BLOCK_COUNT(SECTOR_SIZE, keySize * stripes);
     std::size_t keyMaterialLength = keyMaterialSectors * SECTOR_SIZE;
+
     auto keyMaterial = std::unique_ptr<unsigned char[]>(new unsigned char[keyMaterialLength]);
     stream.read((char *)keyMaterial.get(), keyMaterialLength);
 

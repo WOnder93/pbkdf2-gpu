@@ -25,12 +25,13 @@ DeviceCrackingContext::DeviceCrackingContext(
         PasswordDistributor *pwDistributor,
         ThreadPool *threadPool,
         std::function<PasswordFoundCallback> callback,
-        const Device &device, std::size_t batchSize)
+        const Device &device, std::size_t batchSize,
+        Logger *logger)
     : pwDistributor(pwDistributor),
       callback(callback),
-      pc1(crackingContext, device, threadPool, batchSize),
-      pc2(crackingContext, device, threadPool, batchSize),
-      pc3(crackingContext, device, threadPool, batchSize),
+      pc1(crackingContext, "pc1", device, threadPool, batchSize, logger),
+      pc2(crackingContext, "pc2", device, threadPool, batchSize, logger),
+      pc3(crackingContext, "pc3", device, threadPool, batchSize, logger),
       stop(false)
 {
 }

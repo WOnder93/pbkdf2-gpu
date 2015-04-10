@@ -34,6 +34,7 @@ class LuksCrack
 private:
     PasswordDistributor pwDistributor;
     ThreadPool threadPool; /* for parallel key material decryption */
+    SubLogger logger;
 
     gpu::CrackingContext context;
     std::vector<std::unique_ptr<gpu::DeviceCrackingContext>> devContexts;
@@ -52,7 +53,8 @@ public:
               const std::vector<Device> &devices,
               const PasswordData *passwordData,
               PasswordGenerator *pwGen,
-              std::size_t threadPoolSize, std::size_t batchSize);
+              std::size_t threadPoolSize, std::size_t batchSize,
+              Logger *logger);
 
     void runCracking();
     void requestStopCracking();

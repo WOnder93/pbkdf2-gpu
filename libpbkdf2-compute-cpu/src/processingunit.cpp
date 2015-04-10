@@ -21,8 +21,11 @@ namespace libpbkdf2 {
 namespace compute {
 namespace cpu {
 
-ProcessingUnit::ProcessingUnit(const DeviceContext *context, std::size_t batchSize)
-    : context(context), batchSize(batchSize), taskFuture()
+ProcessingUnit::ProcessingUnit(
+        const DeviceContext *context,
+        std::size_t batchSize, Logger *logger)
+    : context(context), batchSize(batchSize), logger(logger),
+      taskFuture()
 {
     auto computeContext = context->getParentContext();
 

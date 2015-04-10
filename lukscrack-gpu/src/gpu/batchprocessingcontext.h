@@ -40,6 +40,9 @@ private:
 
     std::size_t batchSize;
 
+    SubLogger keyslotUnitLogger;
+    SubLogger mkDigestUnitLogger;
+
     DeviceContext keyslotContext;
     DeviceContext mkDigestContext;
 
@@ -56,8 +59,10 @@ public:
     inline BatchProcessingContext() { }
 
     BatchProcessingContext(
-            const CrackingContext *parentContext, const Device &device,
-            ThreadPool *threadPool, std::size_t batchSize);
+            const CrackingContext *parentContext,
+            const std::string &name, const Device &device,
+            ThreadPool *threadPool, std::size_t batchSize,
+            Logger *logger);
 
     bool initializePasswords(lukscrack::PasswordGenerator &generator);
 

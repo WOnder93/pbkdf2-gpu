@@ -20,6 +20,8 @@
 
 #include "devicecontext.h"
 
+#include "libpbkdf2-gpu-common/logging.h"
+
 #include <functional>
 #include <iterator>
 #include <memory>
@@ -28,12 +30,16 @@ namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
 
+using namespace pbkdf2_gpu::common;
+
 class ProcessingUnit
 {
 private:
     const DeviceContext *context;
     std::size_t batchSize;
+    Logger *logger;
 
+    bool profilingEnabled;
     cl::CommandQueue cmdQueue;
 
     cl::Buffer inputBuffer;
@@ -129,7 +135,8 @@ public:
     ProcessingUnit(ProcessingUnit &&) = default;
     ProcessingUnit &operator=(ProcessingUnit &&) = default;
 
-    ProcessingUnit(const DeviceContext *context, std::size_t batchSize);
+    ProcessingUnit(const DeviceContext *context,
+                   std::size_t batchSize, Logger *logger = nullptr);
 
     inline Passwords openPasswords() { return Passwords(this); }
     inline DerivedKeys openDerivedKeys() { return DerivedKeys(this); }

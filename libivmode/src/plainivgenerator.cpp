@@ -21,18 +21,18 @@
 
 #include "plainivgenerator.h"
 
+#include "libpbkdf2-gpu-common/endianness.h"
+
 #include <cstring>
 
 namespace libivmode {
 
+using namespace pbkdf2_gpu::common;
+
 void PlainIVGenerator::Context::generateIV(std::size_t sector, void *dest) const
 {
-    unsigned char *cursor = (unsigned char *)dest;
-    cursor[0] = sector         & 0xff;
-    cursor[1] = (sector >>  8) & 0xff;
-    cursor[2] = (sector >> 16) & 0xff;
-    cursor[3] = (sector >> 24) & 0xff;
-    std::memset(cursor + 4, 0, ivLength - 4);
+    Endianness::write32LE(dest, (std::uint_fast32_t)sector);
+    std::memset((unsigned char *)dest + 4, 0, ivLength - 4);
 }
 
 std::shared_ptr<const IVGenerator::Context>

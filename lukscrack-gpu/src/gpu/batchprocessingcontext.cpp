@@ -24,18 +24,23 @@ namespace lukscrack {
 namespace gpu {
 
 BatchProcessingContext::BatchProcessingContext(
-        const CrackingContext *parentContext, const Device &deviceIndex,
-        ThreadPool *threadPool, std::size_t batchSize)
+        const CrackingContext *parentContext,
+        const std::string &name, const Device &deviceIndex,
+        ThreadPool *threadPool, std::size_t batchSize,
+        Logger *logger)
     : parentContext(parentContext), threadPool(threadPool),
-      batchSize(batchSize), passwords(batchSize)
+      batchSize(batchSize),
+      keyslotUnitLogger(logger, name + "-keyslot:  "),
+      mkDigestUnitLogger(logger, name + "-mkdigest: "),
+      passwords(batchSize)
 {
     const PasswordData *passwordData = parentContext->getPasswordData();
 
     keyslotContext = DeviceContext(&parentContext->getKeyslotContext(), deviceIndex);
     mkDigestContext = DeviceContext(&parentContext->getMKDigestContext(), deviceIndex);
 
-    keyslotUnit = ProcessingUnit(&keyslotContext, batchSize);
-    mkDigestUnit = ProcessingUnit(&mkDigestContext, batchSize);
+    keyslotUnit = ProcessingUnit(&keyslotContext, batchSize, &keyslotUnitLogger);
+    mkDigestUnit = ProcessingUnit(&mkDigestContext, batchSize, &mkDigestUnitLogger);
 
     std::size_t taskCount = threadPool->getSize();
     if (taskCount <= 1) {

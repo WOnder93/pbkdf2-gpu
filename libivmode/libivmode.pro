@@ -33,6 +33,10 @@ unix {
     INSTALLS += target
 }
 
+# libpbkdf2-gpu-common:
+INCLUDEPATH += $$PWD/../libpbkdf2-gpu-common/include
+DEPENDPATH += $$PWD/../libpbkdf2-gpu-common/include
+
 # libcipherspec-cipheralgorithm:
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libcipherspec-cipheralgorithm/release/ -lcipherspec-cipheralgorithm
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libcipherspec-cipheralgorithm/debug/ -lcipherspec-cipheralgorithm

@@ -44,11 +44,13 @@ private:
 public:
     inline DeviceCrackingContext() { }
 
-    DeviceCrackingContext(const CrackingContext *crackingContext,
-                          PasswordDistributor *pwDistributor,
-                          ThreadPool *threadPool,
-                          std::function<PasswordFoundCallback> callback,
-                          const Device &device, std::size_t batchSize);
+    DeviceCrackingContext(
+            const CrackingContext *crackingContext,
+            PasswordDistributor *pwDistributor,
+            ThreadPool *threadPool,
+            std::function<PasswordFoundCallback> callback,
+            const Device &device, std::size_t batchSize,
+            Logger *logger);
 
     void runCracking();
 

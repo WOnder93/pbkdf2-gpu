@@ -2,7 +2,7 @@ AM_CXXFLAGS = -I$(srcdir)/src
 
 bin_PROGRAMS = benchmarking-tool
 
-AM_CXXFLAGS += -I$(srcdir)/../libpbkdf2-compute-opencl/include -I$(srcdir)/../libhashspec-hashalgorithm/include
+AM_CXXFLAGS += -I$(srcdir)/../libpbkdf2-compute-opencl/include -I$(srcdir)/../libhashspec-hashalgorithm/include -I$(srcdir)/../libpbkdf2-gpu-common/include
 AM_CXXFLAGS += -I$(srcdir)/../libpbkdf2-compute-cpu/include
 AM_CXXFLAGS += -I$(srcdir)/../libcommandline/include
 

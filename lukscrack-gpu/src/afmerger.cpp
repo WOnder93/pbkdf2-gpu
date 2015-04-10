@@ -22,16 +22,15 @@
 
 #include "afmerger.h"
 
+#include "libpbkdf2-gpu-common/alignment.h"
+#include "libpbkdf2-gpu-common/endianness.h"
+
 #include <cstring>
 #include <cstdint>
 
-/* Minimal number of blocks of size 'block' to store 'length' units: */
-#define BLOCK_COUNT(block, length) ((length) / (block) + ((length) % (block) != 0 ? 1 : 0))
-
-/* Minimal size of buffer with size aligned to 'block' to store 'length' units: */
-#define ALIGN(block, length) (BLOCK_COUNT(block, length) * (block))
-
 namespace lukscrack {
+
+using namespace pbkdf2_gpu::common;
 
 AFMerger::Context::Context(const AFMerger *parent)
     : parent(parent)
@@ -55,10 +54,7 @@ static void hash_buf(const void *src, void *dst, std::size_t iv,
                      std::size_t len, const HashAlgorithm *hashAlg)
 {
     unsigned char iv_char[4];
-    iv_char[3] = iv & 0xFF; iv >>= 8;
-    iv_char[2] = iv & 0xFF; iv >>= 8;
-    iv_char[1] = iv & 0xFF; iv >>= 8;
-    iv_char[0] = iv & 0xFF;
+    Endianness::write32LE(iv_char, (std::uint_fast32_t)iv);
 
     HashAlgorithm::Context ctx(*hashAlg);
     ctx.update(iv_char, 4);

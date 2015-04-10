@@ -17,7 +17,7 @@
 
 #include "processingunit.h"
 
-#include "alignment.h"
+#include "libpbkdf2-gpu-common/alignment.h"
 
 #include <cstring>
 
@@ -27,8 +27,10 @@ namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
 
-ProcessingUnit::ProcessingUnit(const DeviceContext *context, std::size_t batchSize)
-    : context(context), batchSize(batchSize)
+ProcessingUnit::ProcessingUnit(
+        const DeviceContext *context, std::size_t batchSize,
+        Logger *logger)
+    : context(context), batchSize(batchSize), logger(logger)
 {
     auto computeContext = context->getParentContext();
     auto hfContext = computeContext->getParentContext();
@@ -49,7 +51,10 @@ ProcessingUnit::ProcessingUnit(const DeviceContext *context, std::size_t batchSi
     outputBlocks = outputLength / obl;
 
     auto &clContext = hfContext->getContext();
-    cmdQueue = cl::CommandQueue(clContext, context->getDevice());
+    auto queueProps = context->getDevice().getInfo<CL_DEVICE_QUEUE_PROPERTIES>();
+    profilingEnabled = (queueProps & CL_QUEUE_PROFILING_ENABLE) != 0;
+    cmdQueue = cl::CommandQueue(clContext, context->getDevice(),
+                                profilingEnabled ? CL_QUEUE_PROFILING_ENABLE : 0);
 
     inputBuffer = cl::Buffer(clContext, CL_MEM_READ_ONLY, inputLength * batchSize);
     outputBuffer = cl::Buffer(clContext, CL_MEM_WRITE_ONLY, outputLength * batchSize);
@@ -69,14 +74,23 @@ ProcessingUnit::Passwords::Passwords(const ProcessingUnit *parent)
     : parent(parent)
 {
     std::size_t inputBufferSize = parent->inputSize * parent->batchSize * sizeof(cl_uint);
+    if (parent->logger != nullptr) {
+        *parent->logger << "Opening passwords..." << std::endl;
+    }
     hostBuffer = parent->cmdQueue.enqueueMapBuffer(
                 parent->inputBuffer, true, CL_MAP_WRITE,
                 0, inputBufferSize);
+    if (parent->logger != nullptr) {
+        *parent->logger << "Passwords opened." << std::endl;
+    }
 }
 ProcessingUnit::Passwords::~Passwords()
 {
     parent->cmdQueue.enqueueUnmapMemObject(
                 parent->inputBuffer, hostBuffer);
+    if (parent->logger != nullptr) {
+        *parent->logger << "Passwords closed." << std::endl;
+    }
 }
 
 ProcessingUnit::Passwords::Writer::Writer(
@@ -132,14 +146,23 @@ ProcessingUnit::DerivedKeys::DerivedKeys(const ProcessingUnit *parent)
     : parent(parent)
 {
     std::size_t outputBufferSize = parent->outputSize * parent->batchSize * sizeof(cl_uint);
+    if (parent->logger != nullptr) {
+        *parent->logger << "Opening derived keys..." << std::endl;
+    }
     hostBuffer = parent->cmdQueue.enqueueMapBuffer(
                 parent->outputBuffer, true, CL_MAP_READ,
                 0, outputBufferSize);
+    if (parent->logger != nullptr) {
+        *parent->logger << "Derived keys opened." << std::endl;
+    }
 }
 ProcessingUnit::DerivedKeys::~DerivedKeys()
 {
     parent->cmdQueue.enqueueUnmapMemObject(
                 parent->outputBuffer, hostBuffer);
+    if (parent->logger != nullptr) {
+        *parent->logger << "Derived keys closed." << std::endl;
+    }
 }
 
 ProcessingUnit::DerivedKeys::Reader::Reader(
@@ -181,12 +204,24 @@ const void *ProcessingUnit::DerivedKeys::Reader::getDerivedKey() const
 
 void ProcessingUnit::beginProcessing()
 {
+    if (logger != nullptr) {
+        *logger << "Starting processing..." << std::endl;
+    }
     cmdQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(batchSize, outputBlocks), cl::NullRange, nullptr, &event);
 }
 
 void ProcessingUnit::endProcessing()
 {
+    if (logger != nullptr) {
+        *logger << "Waiting for processing to end..." << std::endl;
+    }
     event.wait();
+    if (logger != nullptr) {
+        *logger << "Processing ended." << std::endl;
+        if (profilingEnabled) {
+            //logger << event.getProfilingInfo<CL_PROFILING_COMMAND_QUEUED>() << std::endl;
+        }
+    }
     event = cl::Event();
 }
 

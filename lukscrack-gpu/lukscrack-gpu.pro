@@ -34,6 +34,10 @@ HEADERS += \
     src/gpu/crackingcontext.h \
     src/gpu/devicecrackingcontext.h
 
+# libpbkdf2-gpu-common:
+INCLUDEPATH += $$PWD/../libpbkdf2-gpu-common/include
+DEPENDPATH += $$PWD/../libpbkdf2-gpu-common/include
+
 # libhashspec-hashalgorithm:
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libhashspec-hashalgorithm/release/ -lhashspec-hashalgorithm
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libhashspec-hashalgorithm/debug/ -lhashspec-hashalgorithm

@@ -35,6 +35,10 @@ unix {
     INSTALLS += target
 }
 
+# libpbkdf2-gpu-common:
+INCLUDEPATH += $$PWD/../libpbkdf2-gpu-common/include
+DEPENDPATH += $$PWD/../libpbkdf2-gpu-common/include
+
 # libhashspec-openssl:
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libhashspec-openssl/release/ -lhashspec-openssl
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../libhashspec-openssl/debug/ -lhashspec-openssl

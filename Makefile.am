@@ -3,6 +3,7 @@ ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = \
     libhashspec-openssl \
     libhashspec-hashalgorithm \
+    libpbkdf2-gpu-common \
     libpbkdf2-compute-cpu \
     libpbkdf2-compute-opencl \
     libcommandline \

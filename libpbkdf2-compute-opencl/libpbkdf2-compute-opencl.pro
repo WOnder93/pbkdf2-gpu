@@ -26,7 +26,6 @@ HEADERS += \
     include/libpbkdf2-compute-opencl/globalcontext.h \
     include/libpbkdf2-compute-opencl/types.h \
     src/kernelloader.h \
-    src/alignment.h \
     include/libpbkdf2-compute-opencl/device.h
 
 SOURCES += \
@@ -45,6 +44,10 @@ unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+# libpbkdf2-gpu-common:
+INCLUDEPATH += $$PWD/../libpbkdf2-gpu-common/include
+DEPENDPATH += $$PWD/../libpbkdf2-gpu-common/include
 
 # libhashspec-hashalgorithm:
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libhashspec-hashalgorithm/release/ -lhashspec-hashalgorithm

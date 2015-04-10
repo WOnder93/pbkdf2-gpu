@@ -30,22 +30,22 @@ class ComputeContext
 
     cl::Program prog;
     cl::Buffer saltBuffer;
-    size_t saltBufferSize;
+    std::size_t saltBufferSize;
 
     const void *saltData;
-    size_t saltLength;
-    size_t dkLength;
-    size_t iterationCount;
+    std::size_t saltLength;
+    std::size_t dkLength;
+    std::size_t iterationCount;
 
 public:
     inline const HashFunctionContext *getParentContext() const { return parentContext; }
     inline const cl::Program &getProgram() const { return prog; }
     inline const cl::Buffer &getSaltBuffer() const { return saltBuffer; }
-    inline size_t getSaltBufferSize() const { return saltBufferSize; }
+    inline std::size_t getSaltBufferSize() const { return saltBufferSize; }
     inline const void *getSaltData() const { return saltData; }
-    inline size_t getSaltLength() const { return saltLength; }
-    inline size_t getDerivedKeyLength() const { return dkLength; }
-    inline size_t getIterationCount() const { return iterationCount; }
+    inline std::size_t getSaltLength() const { return saltLength; }
+    inline std::size_t getDerivedKeyLength() const { return dkLength; }
+    inline std::size_t getIterationCount() const { return iterationCount; }
 
     /**
      * @brief Empty constructor.
@@ -61,8 +61,8 @@ public:
     ComputeContext &operator=(ComputeContext &&) = default;
 
     ComputeContext(const HashFunctionContext *parentContext,
-                   const void *salt, size_t saltLength,
-                   size_t dkLength, size_t iterationCount);
+                   const void *salt, std::size_t saltLength,
+                   std::size_t dkLength, std::size_t iterationCount);
 };
 
 } // namespace opencl

@@ -19,11 +19,11 @@
 
 namespace lukscrack {
 
-ThreadPool::ThreadPool(size_t size)
+ThreadPool::ThreadPool(std::size_t size)
     : threads(), mutex(), cv(), taskQueue(), finish(false)
 {
     if (size == 0) {
-        size = (size_t)std::thread::hardware_concurrency();
+        size = (std::size_t)std::thread::hardware_concurrency();
         if (size == 0) {
             size = 1;
         }
@@ -31,7 +31,7 @@ ThreadPool::ThreadPool(size_t size)
     this->size = size;
     threads.resize(size);
 
-    for (size_t i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         threads[i] = std::thread(&ThreadPool::processTasks, this);
     }
 }

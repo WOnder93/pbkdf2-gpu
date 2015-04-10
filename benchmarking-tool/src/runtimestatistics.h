@@ -85,7 +85,7 @@ public:
     inline const DataSet &getNanoseconds() const { return ns; }
     inline const DataSet &getNsPer1MIterations() const { return nsPer1MIters; }
 
-    inline RunTimeStatistics(size_t iterationCount, size_t batchSize)
+    inline RunTimeStatistics(std::size_t iterationCount, std::size_t batchSize)
         : iter(iterationCount * batchSize),
           itersPerSec(), ns(), nsPer1MIters()
     {

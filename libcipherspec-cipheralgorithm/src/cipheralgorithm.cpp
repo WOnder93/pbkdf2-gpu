@@ -31,7 +31,7 @@ CipherAlgorithm::EncryptionContex::EncryptionContex(
 }
 
 void CipherAlgorithm::EncryptionContex::encrypt(
-        const void *data, size_t dataLength,
+        const void *data, std::size_t dataLength,
         const void *iv, void *dest) const
 {
     if (dataLength % algorithm->getBlockLength() != 0) {
@@ -62,7 +62,7 @@ CipherAlgorithm::DecryptionContex::DecryptionContex(
 }
 
 void CipherAlgorithm::DecryptionContex::decrypt(
-        const void *data, size_t dataLength,
+        const void *data, std::size_t dataLength,
         const void *iv, void *dest) const
 {
     if (dataLength % algorithm->getBlockLength() != 0) {
@@ -86,24 +86,24 @@ void CipherAlgorithm::DecryptionContex::decrypt(
     EVP_CIPHER_CTX_cleanup(&ctx);
 }
 
-size_t CipherAlgorithm::getKeySize() const
+std::size_t CipherAlgorithm::getKeySize() const
 {
-    return (size_t)::EVP_CIPHER_key_length(cipher);
+    return (std::size_t)::EVP_CIPHER_key_length(cipher);
 }
-size_t CipherAlgorithm::getBlockLength() const
+std::size_t CipherAlgorithm::getBlockLength() const
 {
-    return (size_t)::EVP_CIPHER_block_size(cipher);
+    return (std::size_t)::EVP_CIPHER_block_size(cipher);
 }
-size_t CipherAlgorithm::getIVLength() const
+std::size_t CipherAlgorithm::getIVLength() const
 {
-    return (size_t)::EVP_CIPHER_iv_length(cipher);
+    return (std::size_t)::EVP_CIPHER_iv_length(cipher);
 }
 
 const CipherAlgorithm &CipherAlgorithm::getAlgorithm(
-        const std::string &cipherName, size_t keySize,
+        const std::string &cipherName, std::size_t keySize,
         const std::string &cipherMode)
 {
-    typedef std::tuple<std::string, size_t, std::string> Key;
+    typedef std::tuple<std::string, std::size_t, std::string> Key;
     static const std::map<Key, CipherAlgorithm> algorithms = {
         { Key { "aes",   16, "ecb" }, CipherAlgorithm(::EVP_aes_128_ecb()) },
         { Key { "aes",   16, "cbc" }, CipherAlgorithm(::EVP_aes_128_cbc()) },

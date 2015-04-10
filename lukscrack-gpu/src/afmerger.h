@@ -36,12 +36,12 @@ class AFMerger
 {
 private:
     const HashAlgorithm *hashAlg;
-    size_t blockSize;
-    size_t blockCount;
+    std::size_t blockSize;
+    std::size_t blockCount;
 
-    size_t digestSize;
-    size_t subblockCount;
-    size_t subblockPadding;
+    std::size_t digestSize;
+    std::size_t subblockCount;
+    std::size_t subblockPadding;
 
     void merge(const void *src, void *dst, unsigned char *buffer) const;
 
@@ -63,7 +63,7 @@ public:
 
     inline AFMerger() { }
 
-    AFMerger(size_t blockSize, size_t blockCount,
+    AFMerger(std::size_t blockSize, std::size_t blockCount,
              const std::string &hashSpec);
 };
 

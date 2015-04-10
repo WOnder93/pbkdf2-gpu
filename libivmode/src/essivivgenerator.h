@@ -38,17 +38,17 @@ private:
     class Context : public IVGenerator::Context
     {
     private:
-        size_t ivLength;
+        std::size_t ivLength;
         std::unique_ptr<unsigned char[]> hashedKey;
 
         CipherAlgorithm::EncryptionContex ctx;
 
     public:
-        Context(size_t ivLength,
+        Context(std::size_t ivLength,
                 std::unique_ptr<unsigned char[]> &&hashedKey,
                 const CipherAlgorithm &cipherAlg);
 
-        void generateIV(size_t sector, void *dest) const override;
+        void generateIV(std::size_t sector, void *dest) const override;
     };
 
     const HashAlgorithm *hashAlgorithm;
@@ -57,8 +57,8 @@ public:
     EssivIVGenerator(const std::string &hashSpec);
 
     std::shared_ptr<const IVGenerator::Context> createContext(
-            size_t ivLength, const std::string &cipherName,
-            const void *key, size_t keyLength) const override;
+            std::size_t ivLength, const std::string &cipherName,
+            const void *key, std::size_t keyLength) const override;
 };
 
 } // namespace libivmode

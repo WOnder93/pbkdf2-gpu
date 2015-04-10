@@ -56,7 +56,7 @@ cl::Program KernelLoader::loadProgram(
 cl::Program KernelLoader::loadPBKDF2Program(
         const cl::Context &context,
         const std::string &sourcePath,
-        size_t saltLength,
+        std::size_t saltLength,
         bool log, bool debug, bool tests)
 {
     std::stringstream opts;

@@ -55,14 +55,14 @@ public:
         Context(const HashAlgorithm &hashAlg);
         ~Context();
 
-        void update(const void *data, size_t size);
+        void update(const void *data, std::size_t size);
         void digest(void *dest);
     };
 
-    size_t getInputBlockLength() const;
-    size_t getOutputBlockLength() const;
+    std::size_t getInputBlockLength() const;
+    std::size_t getOutputBlockLength() const;
 
-    inline void computeDigest(const void *data, size_t size, void *dest) const
+    inline void computeDigest(const void *data, std::size_t size, void *dest) const
     {
         Context ctx(*this);
         ctx.update(data, size);

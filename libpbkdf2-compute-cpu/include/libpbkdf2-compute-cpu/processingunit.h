@@ -33,7 +33,7 @@ class ProcessingUnit
 {
 private:
     const DeviceContext *context;
-    size_t batchSize;
+    std::size_t batchSize;
 
     std::vector<std::string> passwordBuffer;
     std::unique_ptr<unsigned char[]> dkBuffer;
@@ -53,12 +53,12 @@ public:
             std::vector<std::string>::iterator it;
 
         public:
-            Writer(const Passwords &parent, size_t index = 0);
+            Writer(const Passwords &parent, std::size_t index = 0);
 
-            void moveForward(size_t offset);
-            void moveBackwards(size_t offset);
+            void moveForward(std::size_t offset);
+            void moveBackwards(std::size_t offset);
 
-            void setPassword(const void *pw, size_t pwSize) const;
+            void setPassword(const void *pw, std::size_t pwSize) const;
         };
 
         inline Passwords(ProcessingUnit *parent)
@@ -76,14 +76,14 @@ public:
         class Reader
         {
         private:
-            size_t dkLength;
+            std::size_t dkLength;
             const unsigned char *src;
 
         public:
-            Reader(const DerivedKeys &parent, size_t index = 0);
+            Reader(const DerivedKeys &parent, std::size_t index = 0);
 
-            void moveForward(size_t offset);
-            void moveBackwards(size_t offset);
+            void moveForward(std::size_t offset);
+            void moveBackwards(std::size_t offset);
 
             const void *getDerivedKey() const;
         };
@@ -94,7 +94,7 @@ public:
         }
     };
 
-    inline size_t getBatchSize() const { return batchSize; }
+    inline std::size_t getBatchSize() const { return batchSize; }
 
     /**
      * @brief Empty constructor.
@@ -109,7 +109,7 @@ public:
     ProcessingUnit(ProcessingUnit &&) = default;
     ProcessingUnit &operator=(ProcessingUnit &&) = default;
 
-    ProcessingUnit(const DeviceContext *context, size_t batchSize);
+    ProcessingUnit(const DeviceContext *context, std::size_t batchSize);
 
     inline Passwords openPasswords() { return Passwords(this); }
     inline DerivedKeys openDerivedKeys() { return DerivedKeys(this); }

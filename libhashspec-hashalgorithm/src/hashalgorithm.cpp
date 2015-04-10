@@ -37,7 +37,7 @@ HashAlgorithm::Context::~Context()
     EVP_MD_CTX_cleanup(&ctx);
 }
 
-void HashAlgorithm::Context::update(const void *data, size_t size)
+void HashAlgorithm::Context::update(const void *data, std::size_t size)
 {
     EVP_DigestUpdate(&ctx, data, size);
 }
@@ -48,14 +48,14 @@ void HashAlgorithm::Context::digest(void *dest)
     EVP_DigestFinal(&ctx, (unsigned char *)dest, NULL);
 }
 
-size_t HashAlgorithm::getInputBlockLength() const
+std::size_t HashAlgorithm::getInputBlockLength() const
 {
-    return (size_t)EVP_MD_block_size(digest);
+    return (std::size_t)EVP_MD_block_size(digest);
 }
 
-size_t HashAlgorithm::getOutputBlockLength() const
+std::size_t HashAlgorithm::getOutputBlockLength() const
 {
-    return (size_t)EVP_MD_size(digest);
+    return (std::size_t)EVP_MD_size(digest);
 }
 
 const HashAlgorithm &HashAlgorithm::getAlgorithm(const std::string &hashSpec)

@@ -32,7 +32,7 @@ class ProcessingUnit
 {
 private:
     const DeviceContext *context;
-    size_t batchSize;
+    std::size_t batchSize;
 
     cl::CommandQueue cmdQueue;
 
@@ -42,10 +42,10 @@ private:
 
     cl::Kernel kernel;
 
-    size_t inputSize;
-    size_t outputSize;
+    std::size_t inputSize;
+    std::size_t outputSize;
 
-    size_t outputBlocks;
+    std::size_t outputBlocks;
 
     std::unique_ptr<cl_uint[]> inputDataBuffer;
     std::unique_ptr<cl_uint[]> outputDataBuffer;
@@ -65,18 +65,18 @@ public:
         private:
             cl_uint *dest;
 
-            size_t count;
-            size_t inputSize;
+            std::size_t count;
+            std::size_t inputSize;
             const HashAlgorithm *hashAlg;
             std::unique_ptr<cl_uint[]> buffer;
 
         public:
-            Writer(const Passwords &parent, size_t index = 0);
+            Writer(const Passwords &parent, std::size_t index = 0);
 
-            void moveForward(size_t offset);
-            void moveBackwards(size_t offset);
+            void moveForward(std::size_t offset);
+            void moveBackwards(std::size_t offset);
 
-            void setPassword(const void *pw, size_t pwSize) const;
+            void setPassword(const void *pw, std::size_t pwSize) const;
         };
 
         Passwords(const ProcessingUnit *parent);
@@ -95,17 +95,17 @@ public:
         private:
             const cl_uint *src;
 
-            size_t count;
-            size_t outputSize;
-            size_t outputBlockCount;
-            size_t outputBlockSize;
+            std::size_t count;
+            std::size_t outputSize;
+            std::size_t outputBlockCount;
+            std::size_t outputBlockSize;
             std::unique_ptr<cl_uint[]> buffer;
 
         public:
-            Reader(const DerivedKeys &parent, size_t index = 0);
+            Reader(const DerivedKeys &parent, std::size_t index = 0);
 
-            void moveForward(size_t offset);
-            void moveBackwards(size_t offset);
+            void moveForward(std::size_t offset);
+            void moveBackwards(std::size_t offset);
 
             const void *getDerivedKey() const;
         };
@@ -114,7 +114,7 @@ public:
         ~DerivedKeys();
     };
 
-    inline size_t getBatchSize() const { return batchSize; }
+    inline std::size_t getBatchSize() const { return batchSize; }
 
     /**
      * @brief Empty constructor.
@@ -129,7 +129,7 @@ public:
     ProcessingUnit(ProcessingUnit &&) = default;
     ProcessingUnit &operator=(ProcessingUnit &&) = default;
 
-    ProcessingUnit(const DeviceContext *context, size_t batchSize);
+    ProcessingUnit(const DeviceContext *context, std::size_t batchSize);
 
     inline Passwords openPasswords() { return Passwords(this); }
     inline DerivedKeys openDerivedKeys() { return DerivedKeys(this); }

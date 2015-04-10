@@ -37,13 +37,13 @@ public:
     inline SectorDecryptor() { }
 
     SectorDecryptor(
-            const std::string &cipherName, size_t keySize,
+            const std::string &cipherName, std::size_t keySize,
             const std::string &cipherMode,
             const std::string &ivmode);
 
     void decryptSectors(
             const void *key, const void *data, void *dest,
-            size_t startSector, size_t sectorCount) const;
+            std::size_t startSector, std::size_t sectorCount) const;
 };
 
 } // namespace lukscrack

@@ -57,7 +57,7 @@ std::shared_ptr<const IVGenerator> IVGenerator::getGenerator(const std::string &
         { "essiv",   &buildGenerator<EssivIVGenerator> },
     };
 
-    size_t pos = ivmode.find(':');
+    std::size_t pos = ivmode.find(':');
     std::string mode, opts;
     if (pos == std::string::npos) {
         mode.assign(ivmode);

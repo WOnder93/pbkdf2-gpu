@@ -40,7 +40,7 @@ AFMerger::Context::Context(const AFMerger *parent)
                 new unsigned char[ALIGN(parent->digestSize, parent->blockSize)]);
 }
 
-AFMerger::AFMerger(size_t blockSize, size_t blockCount,
+AFMerger::AFMerger(std::size_t blockSize, std::size_t blockCount,
                    const std::string &hashSpec)
     : blockSize(blockSize), blockCount(blockCount)
 {
@@ -51,8 +51,8 @@ AFMerger::AFMerger(size_t blockSize, size_t blockCount,
     subblockPadding = blockSize % digestSize;
 }
 
-static void hash_buf(const void *src, void *dst, size_t iv,
-                     size_t len, const HashAlgorithm *hashAlg)
+static void hash_buf(const void *src, void *dst, std::size_t iv,
+                     std::size_t len, const HashAlgorithm *hashAlg)
 {
     unsigned char iv_char[4];
     iv_char[3] = iv & 0xFF; iv >>= 8;
@@ -68,10 +68,10 @@ static void hash_buf(const void *src, void *dst, size_t iv,
 
 static const unsigned char *diffuse(
         const unsigned char *src, unsigned char *dst,
-        size_t subblockCount, size_t subblockPadding,
-        size_t digestSize, const HashAlgorithm *hashAlg)
+        std::size_t subblockCount, std::size_t subblockPadding,
+        std::size_t digestSize, const HashAlgorithm *hashAlg)
 {
-    size_t k;
+    std::size_t k;
     for (k = 0; k < subblockCount; k++) {
         hash_buf(src, dst, k, digestSize, hashAlg);
         src += digestSize;
@@ -86,9 +86,9 @@ static const unsigned char *diffuse(
 
 static void xor_buf(const unsigned char *src1,
                     const unsigned char *src2,
-                    unsigned char *dst, size_t bytes)
+                    unsigned char *dst, std::size_t bytes)
 {
-    for (size_t i = 0; i < bytes; i++) {
+    for (std::size_t i = 0; i < bytes; i++) {
         dst[i] = src1[i] ^ src2[i];
     }
 }
@@ -100,9 +100,9 @@ void AFMerger::merge(const void *src, void *dst, unsigned char *buffer) const
         return;
     }
 
-    size_t digestSize = this->digestSize;
-    size_t subblockCount = this->subblockCount;
-    size_t subblockPadding = this->subblockPadding;
+    std::size_t digestSize = this->digestSize;
+    std::size_t subblockCount = this->subblockCount;
+    std::size_t subblockPadding = this->subblockPadding;
     auto hashAlg = this->hashAlg;
     auto srcCursor = (const unsigned char *)src;
 
@@ -110,7 +110,7 @@ void AFMerger::merge(const void *src, void *dst, unsigned char *buffer) const
     srcCursor = diffuse(srcCursor, buffer, subblockCount, subblockPadding,
                         digestSize, hashAlg);
 
-    for (size_t i = 0; i < blockCount - 2; i++) {
+    for (std::size_t i = 0; i < blockCount - 2; i++) {
         /* XOR: */
         xor_buf(srcCursor, buffer, buffer, blockSize);
         srcCursor += blockSize;

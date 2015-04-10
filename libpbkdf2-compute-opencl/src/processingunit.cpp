@@ -27,18 +27,18 @@ namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
 
-ProcessingUnit::ProcessingUnit(const DeviceContext *context, size_t batchSize)
+ProcessingUnit::ProcessingUnit(const DeviceContext *context, std::size_t batchSize)
     : context(context), batchSize(batchSize)
 {
     auto computeContext = context->getParentContext();
     auto hfContext = computeContext->getParentContext();
 
     auto hashAlg = hfContext->getHashAlgorithm();
-    size_t ibl = hashAlg->getInputBlockLength();
-    size_t obl = hashAlg->getOutputBlockLength();
+    std::size_t ibl = hashAlg->getInputBlockLength();
+    std::size_t obl = hashAlg->getOutputBlockLength();
 
-    size_t inputLength = ibl;
-    size_t outputLength = ALIGN(obl, computeContext->getDerivedKeyLength());
+    std::size_t inputLength = ibl;
+    std::size_t outputLength = ALIGN(obl, computeContext->getDerivedKeyLength());
 
     inputSize = inputLength / sizeof(cl_uint);
     outputSize = outputLength / sizeof(cl_uint);
@@ -68,7 +68,7 @@ ProcessingUnit::ProcessingUnit(const DeviceContext *context, size_t batchSize)
 ProcessingUnit::Passwords::Passwords(const ProcessingUnit *parent)
     : parent(parent)
 {
-    size_t inputBufferSize = parent->inputSize * parent->batchSize * sizeof(cl_uint);
+    std::size_t inputBufferSize = parent->inputSize * parent->batchSize * sizeof(cl_uint);
     hostBuffer = parent->cmdQueue.enqueueMapBuffer(
                 parent->inputBuffer, true, CL_MAP_WRITE,
                 0, inputBufferSize);
@@ -80,7 +80,7 @@ ProcessingUnit::Passwords::~Passwords()
 }
 
 ProcessingUnit::Passwords::Writer::Writer(
-        const Passwords &parent, size_t index)
+        const Passwords &parent, std::size_t index)
 {
     dest = (cl_uint *)parent.hostBuffer + index;
 
@@ -95,21 +95,21 @@ ProcessingUnit::Passwords::Writer::Writer(
     buffer = std::unique_ptr<cl_uint[]>(new cl_uint[inputSize * count]);
 }
 
-void ProcessingUnit::Passwords::Writer::moveForward(size_t offset)
+void ProcessingUnit::Passwords::Writer::moveForward(std::size_t offset)
 {
     dest += offset;
 }
 
-void ProcessingUnit::Passwords::Writer::moveBackwards(size_t offset)
+void ProcessingUnit::Passwords::Writer::moveBackwards(std::size_t offset)
 {
     dest -= offset;
 }
 
 void ProcessingUnit::Passwords::Writer::setPassword(
-        const void *pw, size_t pwSize) const
+        const void *pw, std::size_t pwSize) const
 {
-    size_t ibl = hashAlg->getInputBlockLength();
-    size_t obl = hashAlg->getOutputBlockLength();
+    std::size_t ibl = hashAlg->getInputBlockLength();
+    std::size_t obl = hashAlg->getOutputBlockLength();
 
     cl_uint *buffer = this->buffer.get();
     if (pwSize > ibl) {
@@ -122,7 +122,7 @@ void ProcessingUnit::Passwords::Writer::setPassword(
     }
 
     cl_uint *dest2 = dest;
-    for (size_t row = 0; row < inputSize; row++) {
+    for (std::size_t row = 0; row < inputSize; row++) {
         *dest2 = buffer[row];
         dest2 += count;
     }
@@ -131,7 +131,7 @@ void ProcessingUnit::Passwords::Writer::setPassword(
 ProcessingUnit::DerivedKeys::DerivedKeys(const ProcessingUnit *parent)
     : parent(parent)
 {
-    size_t outputBufferSize = parent->outputSize * parent->batchSize * sizeof(cl_uint);
+    std::size_t outputBufferSize = parent->outputSize * parent->batchSize * sizeof(cl_uint);
     hostBuffer = parent->cmdQueue.enqueueMapBuffer(
                 parent->outputBuffer, true, CL_MAP_READ,
                 0, outputBufferSize);
@@ -143,7 +143,7 @@ ProcessingUnit::DerivedKeys::~DerivedKeys()
 }
 
 ProcessingUnit::DerivedKeys::Reader::Reader(
-        const DerivedKeys &parent, size_t index)
+        const DerivedKeys &parent, std::size_t index)
 {
     auto unit = parent.parent;
     count = unit->batchSize;
@@ -155,12 +155,12 @@ ProcessingUnit::DerivedKeys::Reader::Reader(
     src = (cl_uint *)parent.hostBuffer + index * outputBlockCount;
 }
 
-void ProcessingUnit::DerivedKeys::Reader::moveForward(size_t offset)
+void ProcessingUnit::DerivedKeys::Reader::moveForward(std::size_t offset)
 {
     src += offset * outputBlockCount;
 }
 
-void ProcessingUnit::DerivedKeys::Reader::moveBackwards(size_t offset)
+void ProcessingUnit::DerivedKeys::Reader::moveBackwards(std::size_t offset)
 {
     src -= offset * outputBlockCount;
 }
@@ -168,9 +168,9 @@ void ProcessingUnit::DerivedKeys::Reader::moveBackwards(size_t offset)
 const void *ProcessingUnit::DerivedKeys::Reader::getDerivedKey() const
 {
     auto dst = buffer.get();
-    for (size_t outputBlock = 0; outputBlock < outputBlockCount; outputBlock++) {
+    for (std::size_t outputBlock = 0; outputBlock < outputBlockCount; outputBlock++) {
         auto src = this->src + outputBlock;
-        for (size_t row = 0; row < outputBlockSize; row++) {
+        for (std::size_t row = 0; row < outputBlockSize; row++) {
             *dst = *src;
             src += count * outputBlockCount;
             dst += 1;

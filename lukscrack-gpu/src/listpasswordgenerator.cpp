@@ -19,7 +19,7 @@
 
 namespace lukscrack {
 
-bool ListPasswordGenerator::nextPassword(const char *&pwData, size_t &pwLength)
+bool ListPasswordGenerator::nextPassword(const char *&pwData, std::size_t &pwLength)
 {
     if (stream->eof()) {
         return false;

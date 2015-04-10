@@ -43,9 +43,9 @@ public:
     {
     }
 
-    void operator()(const char *&password, size_t &passwordSize) {
+    void operator()(const char *&password, std::size_t &passwordSize) {
         currentPw.resize(PASSWORD_LENGTH);
-        for (size_t i = 0; i < PASSWORD_LENGTH; i++) {
+        for (std::size_t i = 0; i < PASSWORD_LENGTH; i++) {
             currentPw[i] = (unsigned char)gen();
         }
         password = currentPw.data();
@@ -59,9 +59,9 @@ RunTimeStatistics runBenchmark(
         const typename Types::TDevice &dev,
         bool beVerbose,
         const std::string &hashSpec,
-        const void *salt, size_t saltLength,
-        size_t iterationCount, size_t dkLength,
-        size_t batchSize, size_t sampleCount)
+        const void *salt, std::size_t saltLength,
+        std::size_t iterationCount, std::size_t dkLength,
+        std::size_t batchSize, std::size_t sampleCount)
 {
     std::vector<typename Types::TDevice> devices(&dev, &dev + 1);
 
@@ -78,7 +78,7 @@ RunTimeStatistics runBenchmark(
 
     DummyPasswordGenerator pwgen;
     RunTimeStatistics compTimeStats(iterationCount, batchSize);
-    for (size_t i = 0; i < sampleCount; i++) {
+    for (std::size_t i = 0; i < sampleCount; i++) {
         if (beVerbose) {
             std::cout << "  Sample " << i << "..." << std::endl;
         }
@@ -87,9 +87,9 @@ RunTimeStatistics runBenchmark(
         {
             auto passwords = unit.openPasswords();
             typename Types::TProcessingUnit::Passwords::Writer writer(passwords);
-            for (size_t i = 0; i < batchSize; i++) {
+            for (std::size_t i = 0; i < batchSize; i++) {
                 const char *pw;
-                size_t pwLength;
+                std::size_t pwLength;
                 pwgen(pw, pwLength);
                 writer.setPassword(pw, pwLength);
 
@@ -105,7 +105,7 @@ RunTimeStatistics runBenchmark(
         {
             auto keys = unit.openDerivedKeys();
             typename Types::TProcessingUnit::DerivedKeys::Reader reader(keys);
-            for (size_t i = 0; i < batchSize; i++) {
+            for (std::size_t i = 0; i < batchSize; i++) {
                 reader.moveForward(1);
             }
         }

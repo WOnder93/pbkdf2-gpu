@@ -22,7 +22,7 @@
 namespace lukscrack {
 
 SectorDecryptor::SectorDecryptor(
-        const std::string &cipherName, size_t keySize,
+        const std::string &cipherName, std::size_t keySize,
         const std::string &cipherMode,
         const std::string &ivmode)
     : cipherName(cipherName)
@@ -33,9 +33,9 @@ SectorDecryptor::SectorDecryptor(
 
 void SectorDecryptor::decryptSectors(
         const void *key, const void *data, void *dest,
-        size_t startSector, size_t sectorCount) const
+        std::size_t startSector, std::size_t sectorCount) const
 {
-    size_t ivLength = cipherAlg->getIVLength();
+    std::size_t ivLength = cipherAlg->getIVLength();
     CipherAlgorithm::DecryptionContex decrCtx(cipherAlg, key);
     auto ivgenCtx = ivgen->createContext(
                 cipherAlg->getIVLength(), cipherName,
@@ -50,7 +50,7 @@ void SectorDecryptor::decryptSectors(
     auto iv = ivBuffer.get();
     auto inputCursor = (const unsigned char *)data;
     auto outputCursor = (unsigned char *)dest;
-    for (size_t i = 0; i < sectorCount; i++) {
+    for (std::size_t i = 0; i < sectorCount; i++) {
         if (ivgenCtx.get() != nullptr) {
             ivgenCtx->generateIV(startSector + i, ivBuffer.get());
         }

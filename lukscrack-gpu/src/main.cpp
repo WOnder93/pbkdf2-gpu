@@ -40,14 +40,14 @@ struct Arguments
     std::string pwgen = "list";
     std::string pwgenOpts = "-";
 
-    std::set<size_t> deviceIndices = { 0 };
+    std::set<std::size_t> deviceIndices = { 0 };
     std::string openclDataDir = "data";
-    size_t batchSize = 2048;
-    size_t threads = 1;
+    std::size_t batchSize = 2048;
+    std::size_t threads = 1;
 
     bool noNewline = false;
 
-    size_t keyslot = 0;
+    std::size_t keyslot = 0;
     std::string headerFile;
 };
 
@@ -69,7 +69,7 @@ static CommandLineParser<Arguments> buildCmdLineParser()
             "action", 'a', "the action to perform", "crack", "crack|benchmark"),
         new ArgumentOption<Arguments>(
             [] (Arguments &state, const std::string &pwgenSpec) {
-                size_t delim = pwgenSpec.find(':');
+                std::size_t delim = pwgenSpec.find(':');
                 if (delim == std::string::npos) {
                     state.pwgen.assign(pwgenSpec);
                     state.pwgenOpts.clear();
@@ -81,7 +81,7 @@ static CommandLineParser<Arguments> buildCmdLineParser()
 
         new ArgumentOption<Arguments>(
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type index) {
-                state.deviceIndices.insert((size_t)index);
+                state.deviceIndices.insert((std::size_t)index);
             }), "device", 'd', "use device with index INDEX", "0", "INDEX"),
 
         new ArgumentOption<Arguments>(
@@ -90,12 +90,12 @@ static CommandLineParser<Arguments> buildCmdLineParser()
 
         new ArgumentOption<Arguments>(
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
-                state.batchSize = (size_t)num;
+                state.batchSize = (std::size_t)num;
             }), "batch-size", 'b', "the number of tasks per batch", "2048", "N"),
 
         new ArgumentOption<Arguments>(
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
-                state.threads = (size_t)num;
+                state.threads = (std::size_t)num;
             }), "threads", 't', "the number of threads to use for CPU-side computation "
                 "(0 = auto)", "1", "N"),
 
@@ -105,7 +105,7 @@ static CommandLineParser<Arguments> buildCmdLineParser()
 
         new ArgumentOption<Arguments>(
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
-                state.keyslot = (size_t)num;
+                state.keyslot = (std::size_t)num;
             }), "keyslot", 'k', "the keyslot to crack (0-8, 0 will use first active slot)", "0", "N"),
 
         new FlagOption<Arguments>(
@@ -139,7 +139,7 @@ int main(int, const char * const *argv)
 
     GlobalContext global(args.openclDataDir);
     if (args.listDevices) {
-        size_t i = 0;
+        std::size_t i = 0;
         for (auto &device : global.getAllDevices()) {
             std::cout << "Device #" << i << ": " << device.getInfo() << std::endl;
             i++;

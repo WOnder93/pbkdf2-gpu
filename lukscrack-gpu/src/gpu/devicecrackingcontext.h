@@ -48,7 +48,7 @@ public:
                           PasswordDistributor *pwDistributor,
                           ThreadPool *threadPool,
                           std::function<PasswordFoundCallback> callback,
-                          const Device &device, size_t batchSize);
+                          const Device &device, std::size_t batchSize);
 
     void runCracking();
 

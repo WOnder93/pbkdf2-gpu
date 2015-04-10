@@ -21,7 +21,7 @@ namespace libpbkdf2 {
 namespace compute {
 namespace cpu {
 
-ProcessingUnit::ProcessingUnit(const DeviceContext *context, size_t batchSize)
+ProcessingUnit::ProcessingUnit(const DeviceContext *context, std::size_t batchSize)
     : context(context), batchSize(batchSize), taskFuture()
 {
     auto computeContext = context->getParentContext();
@@ -36,42 +36,42 @@ ProcessingUnit::ProcessingUnit(const DeviceContext *context, size_t batchSize)
 }
 
 ProcessingUnit::Passwords::Writer::Writer(
-        const Passwords &parent, size_t index)
+        const Passwords &parent, std::size_t index)
 {
     auto unit = parent.parent;
     it = unit->passwordBuffer.begin() + index;
 }
 
-void ProcessingUnit::Passwords::Writer::moveForward(size_t offset)
+void ProcessingUnit::Passwords::Writer::moveForward(std::size_t offset)
 {
     it += offset;
 }
 
-void ProcessingUnit::Passwords::Writer::moveBackwards(size_t offset)
+void ProcessingUnit::Passwords::Writer::moveBackwards(std::size_t offset)
 {
     it -= offset;
 }
 
 void ProcessingUnit::Passwords::Writer::setPassword(
-        const void *pw, size_t pwSize) const
+        const void *pw, std::size_t pwSize) const
 {
     it->assign((char *)pw, (char *)pw + pwSize);
 }
 
 ProcessingUnit::DerivedKeys::Reader::Reader(
-        const DerivedKeys &parent, size_t index)
+        const DerivedKeys &parent, std::size_t index)
 {
     auto unit = parent.parent;
     dkLength = unit->context->getParentContext()->getDerivedKeyLength();
     src = unit->dkBuffer.get() + index * dkLength;
 }
 
-void ProcessingUnit::DerivedKeys::Reader::moveForward(size_t offset)
+void ProcessingUnit::DerivedKeys::Reader::moveForward(std::size_t offset)
 {
     src += offset * dkLength;
 }
 
-void ProcessingUnit::DerivedKeys::Reader::moveBackwards(size_t offset)
+void ProcessingUnit::DerivedKeys::Reader::moveBackwards(std::size_t offset)
 {
     src -= offset * dkLength;
 }
@@ -89,14 +89,14 @@ void ProcessingUnit::beginProcessing()
         auto hfContext = computeContext->getParentContext();
 
         const unsigned char *salt = (const unsigned char *)computeContext->getSaltData();
-        size_t saltLength = computeContext->getSaltLength();
-        size_t dkLength = computeContext->getDerivedKeyLength();
-        size_t iterations = computeContext->getIterationCount();
+        std::size_t saltLength = computeContext->getSaltLength();
+        std::size_t dkLength = computeContext->getDerivedKeyLength();
+        std::size_t iterations = computeContext->getIterationCount();
 
         const EVP_MD *digest = hfContext->getDigest();
 
         unsigned char *dest = dkBuffer.get();
-        for (size_t i = 0; i < batchSize; i++) {
+        for (std::size_t i = 0; i < batchSize; i++) {
             auto &pw = passwordBuffer[i];
             PKCS5_PBKDF2_HMAC(pw.data(), (int)pw.size(),
                               salt, saltLength, iterations,

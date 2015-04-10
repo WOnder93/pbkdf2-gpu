@@ -25,14 +25,14 @@
 
 namespace libivmode {
 
-void NullIVGenerator::Context::generateIV(size_t, void *dest) const
+void NullIVGenerator::Context::generateIV(std::size_t, void *dest) const
 {
     std::memset(dest, 0, ivLength);
 }
 
 std::shared_ptr<const IVGenerator::Context>
     NullIVGenerator::createContext(
-        size_t ivLength, const std::string &, const void *, size_t) const
+        std::size_t ivLength, const std::string &, const void *, std::size_t) const
 {
     return std::make_shared<Context>(ivLength);
 }

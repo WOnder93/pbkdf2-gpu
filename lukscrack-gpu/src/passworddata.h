@@ -104,17 +104,17 @@ private:
     std::string cipherMode;
     std::string hashSpec;
 
-    size_t keySize;
+    std::size_t keySize;
 
     unsigned char masterKeyDigest[MASTER_KEY_DIGEST_LENGTH];
     unsigned char masterKeyDigestSalt[SALT_LENGTH];
-    size_t masterKeyDigestIter;
+    std::size_t masterKeyDigestIter;
 
     unsigned char keyslotSalt[SALT_LENGTH];
-    size_t keyslotIter;
-    size_t keyslotStripes;
+    std::size_t keyslotIter;
+    std::size_t keyslotStripes;
 
-    size_t keyMaterialSectors;
+    std::size_t keyMaterialSectors;
     std::unique_ptr<unsigned char[]> keyMaterial;
 
 public:
@@ -122,22 +122,22 @@ public:
     inline const std::string &getCipherMode() const { return cipherMode; }
     inline const std::string &getHashSpec() const { return hashSpec; }
 
-    inline size_t getKeySize() const { return keySize; }
+    inline std::size_t getKeySize() const { return keySize; }
 
     inline const unsigned char *getMasterKeyDigest() const { return masterKeyDigest; }
     inline const unsigned char *getMasterKeyDigestSalt() const { return masterKeyDigestSalt; }
-    inline size_t getMasterKeyDigestIter() const { return masterKeyDigestIter; }
+    inline std::size_t getMasterKeyDigestIter() const { return masterKeyDigestIter; }
 
     inline const unsigned char *getKeyslotSalt() const { return keyslotSalt; }
-    inline size_t getKeyslotIter() const { return keyslotIter; }
-    inline size_t getKeyslotStripes() const { return keyslotStripes; }
+    inline std::size_t getKeyslotIter() const { return keyslotIter; }
+    inline std::size_t getKeyslotStripes() const { return keyslotStripes; }
 
-    inline size_t getKeyMaterialSectors() const { return keyMaterialSectors; }
+    inline std::size_t getKeyMaterialSectors() const { return keyMaterialSectors; }
     inline const unsigned char *getKeyMaterial() const { return keyMaterial.get(); }
 
     inline PasswordData() : keyMaterial() { }
 
-    void readFromLuksHeader(std::istream &stream, size_t keyslot);
+    void readFromLuksHeader(std::istream &stream, std::size_t keyslot);
 };
 
 } // namespace lukscrack

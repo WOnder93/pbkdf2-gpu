@@ -46,7 +46,7 @@ namespace KernelLoader
 
     cl::Program loadPBKDF2Program(const cl::Context &context,
                                   const std::string &sourcePath,
-                                  size_t saltLength,
+                                  std::size_t saltLength,
                                   bool log = false, bool debug = false, bool tests = false);
 }
 

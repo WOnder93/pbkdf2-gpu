@@ -40,7 +40,7 @@ namespace lukscrack {
 
 static const char *LUKS_MAGIC = "LUKS\xBA\xBE";
 
-void PasswordData::readFromLuksHeader(std::istream &stream, size_t keyslot)
+void PasswordData::readFromLuksHeader(std::istream &stream, std::size_t keyslot)
 {
     if (keyslot > 8) {
         throw std::logic_error("Keyslot must be between 0-8!");
@@ -108,7 +108,7 @@ void PasswordData::readFromLuksHeader(std::istream &stream, size_t keyslot)
         cursor += 4;
     } else {
         bool found = false;
-        for (size_t i = 0; i < 8; i++) {
+        for (std::size_t i = 0; i < 8; i++) {
              std::uint_least32_t active = UINT32_BE(cursor);
              if (active == LUKS_KEY_ACTIVE) {
                  cursor += 4;
@@ -136,10 +136,10 @@ void PasswordData::readFromLuksHeader(std::istream &stream, size_t keyslot)
 
     stream.seekg(keyMaterialOffset * SECTOR_SIZE, std::ios_base::beg);
 
-    size_t keyMaterialSectors =
+    std::size_t keyMaterialSectors =
             (keySize * stripes) / SECTOR_SIZE +
             ((keySize * stripes) % SECTOR_SIZE != 0 ? 1 : 0);
-    size_t keyMaterialLength = keyMaterialSectors * SECTOR_SIZE;
+    std::size_t keyMaterialLength = keyMaterialSectors * SECTOR_SIZE;
     auto keyMaterial = std::unique_ptr<unsigned char[]>(new unsigned char[keyMaterialLength]);
     stream.read((char *)keyMaterial.get(), keyMaterialLength);
 

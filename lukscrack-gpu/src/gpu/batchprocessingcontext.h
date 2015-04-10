@@ -38,7 +38,7 @@ private:
     const CrackingContext *parentContext;
     ThreadPool *threadPool;
 
-    size_t batchSize;
+    std::size_t batchSize;
 
     DeviceContext keyslotContext;
     DeviceContext mkDigestContext;
@@ -57,7 +57,7 @@ public:
 
     BatchProcessingContext(
             const CrackingContext *parentContext, const Device &device,
-            ThreadPool *threadPool, size_t batchSize);
+            ThreadPool *threadPool, std::size_t batchSize);
 
     bool initializePasswords(lukscrack::PasswordGenerator &generator);
 
@@ -73,7 +73,7 @@ public:
      * @brief processResults
      * @return the index of the valid password, or -1 if no password is valid
      */
-    bool processResults(size_t &matchIndex);
+    bool processResults(std::size_t &matchIndex);
 };
 
 } // namespace gpu

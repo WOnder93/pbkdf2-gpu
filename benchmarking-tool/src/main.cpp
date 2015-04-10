@@ -34,17 +34,17 @@ struct Arguments
 
     std::string mode = "opencl";
 
-    size_t deviceIndex = 0;
+    std::size_t deviceIndex = 0;
 
     std::string outputType = "iters-per-sec";
     std::string outputMode = "verbose";
 
     std::string hashSpec = "sha1";
     std::string salt = "saltSALTsaltSALTsaltSALTsaltSALTsalt";
-    size_t iterations = 4096;
-    size_t dkLength = 20;
-    size_t batchSize = 2048;
-    size_t sampleCount = 10;
+    std::size_t iterations = 4096;
+    std::size_t dkLength = 20;
+    std::size_t batchSize = 2048;
+    std::size_t sampleCount = 10;
 
     std::string openclDataDir = "data";
 };
@@ -66,7 +66,7 @@ static CommandLineParser<Arguments> buildCmdLineParser()
 
         new ArgumentOption<Arguments>(
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type index) {
-                state.deviceIndex = (size_t)index;
+                state.deviceIndex = (std::size_t)index;
             }), "device", 'd', "use device with index INDEX", "0", "INDEX"),
 
         new ArgumentOption<Arguments>(
@@ -84,19 +84,19 @@ static CommandLineParser<Arguments> buildCmdLineParser()
             "salt", '\0', "the salt", "saltSALTsaltSALTsaltSALTsaltSALTsalt", "SALT"),
         new ArgumentOption<Arguments>(
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
-                state.iterations = (size_t)num;
+                state.iterations = (std::size_t)num;
             }), "iterations", 'i', "the number of PBKDF2 iterations", "4096", "N"),
         new ArgumentOption<Arguments>(
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
-                state.dkLength = (size_t)num;
+                state.dkLength = (std::size_t)num;
             }), "dk-length", 'k', "the length of the derived key", "20", "BYTES"),
         new ArgumentOption<Arguments>(
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
-                state.batchSize = (size_t)num;
+                state.batchSize = (std::size_t)num;
             }), "batch-size", 'b', "the number of tasks per batch", "2048", "N"),
         new ArgumentOption<Arguments>(
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
-                state.sampleCount = (size_t)num;
+                state.sampleCount = (std::size_t)num;
             }), "samples", 's', "the number of batches to run and measure", "10", "N"),
 
         new ArgumentOption<Arguments>(
@@ -124,7 +124,7 @@ int doStuff(std::string progname,
     }
 
     if (args.listDevices) {
-        size_t i = 0;
+        std::size_t i = 0;
         for (auto &device : globalCtx->getAllDevices()) {
             std::cout << "Device #" << i << ": " << device.getInfo() << std::endl;
             i++;

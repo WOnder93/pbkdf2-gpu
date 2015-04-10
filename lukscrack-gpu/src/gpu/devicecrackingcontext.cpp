@@ -25,7 +25,7 @@ DeviceCrackingContext::DeviceCrackingContext(
         PasswordDistributor *pwDistributor,
         ThreadPool *threadPool,
         std::function<PasswordFoundCallback> callback,
-        const Device &device, size_t batchSize)
+        const Device &device, std::size_t batchSize)
     : pwDistributor(pwDistributor),
       callback(callback),
       pc1(crackingContext, device, threadPool, batchSize),
@@ -77,7 +77,7 @@ void DeviceCrackingContext::runCracking()
     while (true) {
         if (!firstLoop) {
             pc1.endMKDigestUnit();
-            size_t matchIndex;
+            std::size_t matchIndex;
             if (pc1.processResults(matchIndex)) {
                 callback(pc1.getCurrentPasswords()[matchIndex]);
                 stop = true;
@@ -97,7 +97,7 @@ void DeviceCrackingContext::runCracking()
             pc3.beginMKDigestUnit();
 
             pc2.endMKDigestUnit();
-            size_t matchIndex;
+            std::size_t matchIndex;
             if (pc2.processResults(matchIndex)) {
                 callback(pc2.getCurrentPasswords()[matchIndex]);
                 stop = true;
@@ -119,7 +119,7 @@ void DeviceCrackingContext::runCracking()
 
         if (!firstLoop) {
             pc3.endMKDigestUnit();
-            size_t matchIndex;
+            std::size_t matchIndex;
             if (pc3.processResults(matchIndex)) {
                 callback(pc3.getCurrentPasswords()[matchIndex]);
                 stop = true;

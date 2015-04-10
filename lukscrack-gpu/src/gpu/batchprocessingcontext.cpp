@@ -25,7 +25,7 @@ namespace gpu {
 
 BatchProcessingContext::BatchProcessingContext(
         const CrackingContext *parentContext, const Device &deviceIndex,
-        ThreadPool *threadPool, size_t batchSize)
+        ThreadPool *threadPool, std::size_t batchSize)
     : parentContext(parentContext), threadPool(threadPool),
       batchSize(batchSize), passwords(batchSize)
 {
@@ -37,13 +37,13 @@ BatchProcessingContext::BatchProcessingContext(
     keyslotUnit = ProcessingUnit(&keyslotContext, batchSize);
     mkDigestUnit = ProcessingUnit(&mkDigestContext, batchSize);
 
-    size_t taskCount = threadPool->getSize();
+    std::size_t taskCount = threadPool->getSize();
     if (taskCount <= 1) {
         taskCount = 1;
     }
-    size_t keySize = passwordData->getKeySize();
-    size_t keyMaterialSectors = passwordData->getKeyMaterialSectors();
-    size_t keyMaterialSize = keyMaterialSectors * PasswordData::SECTOR_SIZE;
+    std::size_t keySize = passwordData->getKeySize();
+    std::size_t keyMaterialSectors = passwordData->getKeyMaterialSectors();
+    std::size_t keyMaterialSize = keyMaterialSectors * PasswordData::SECTOR_SIZE;
     keyMaterialDecryptedBuffers = std::unique_ptr<unsigned char[]>(
                 new unsigned char[taskCount * keyMaterialSize]);
     masterKeyBuffers = std::unique_ptr<unsigned char[]>(
@@ -55,9 +55,9 @@ bool BatchProcessingContext::initializePasswords(lukscrack::PasswordGenerator &g
     bool passwordsLeft = true;
     auto passwords = keyslotUnit.openPasswords();
     ProcessingUnit::Passwords::Writer writer(passwords);
-    for (size_t i = 0; i < batchSize; i++) {
+    for (std::size_t i = 0; i < batchSize; i++) {
         const char *pwData;
-        size_t pwLength;
+        std::size_t pwLength;
         if (!generator.nextPassword(pwData, pwLength)) {
             pwData = nullptr;
             pwLength = 0;
@@ -76,10 +76,10 @@ void BatchProcessingContext::decryptMasterKey()
 
     const unsigned char *keyMaterial = passwordData->getKeyMaterial();
 
-    size_t keySize = passwordData->getKeySize();
+    std::size_t keySize = passwordData->getKeySize();
 
-    size_t keyMaterialSectors = passwordData->getKeyMaterialSectors();
-    size_t keyMaterialSize = keyMaterialSectors * PasswordData::SECTOR_SIZE;
+    std::size_t keyMaterialSectors = passwordData->getKeyMaterialSectors();
+    std::size_t keyMaterialSize = keyMaterialSectors * PasswordData::SECTOR_SIZE;
 
     unsigned char *keyMaterialDecrypted = keyMaterialDecryptedBuffers.get();
     unsigned char *masterKey = masterKeyBuffers.get();
@@ -92,14 +92,14 @@ void BatchProcessingContext::decryptMasterKey()
 
     if (threadPool->getSize() > 1) {
         /* run key material decryption in parallel: */
-        size_t taskCount = threadPool->getSize();
+        std::size_t taskCount = threadPool->getSize();
         std::vector<std::function<void()>> tasks(taskCount);
 
-        size_t div = batchSize / taskCount;
-        size_t mod = batchSize % taskCount;
-        size_t start = 0;
-        for (size_t k = 0; k < taskCount; k++) {
-            size_t end = start + div;
+        std::size_t div = batchSize / taskCount;
+        std::size_t mod = batchSize % taskCount;
+        std::size_t start = 0;
+        for (std::size_t k = 0; k < taskCount; k++) {
+            std::size_t end = start + div;
             if (k < mod) {
                 end += 1;
             }
@@ -108,7 +108,7 @@ void BatchProcessingContext::decryptMasterKey()
                 ProcessingUnit::DerivedKeys::Reader reader(keys, start);
                 ProcessingUnit::Passwords::Writer writer(passwords, start);
                 AFMerger::Context mergerCtx(merger);
-                for (size_t i = start; i < end; i++) {
+                for (std::size_t i = start; i < end; i++) {
                     const void *key = reader.getDerivedKey();
 
                     decryptor->decryptSectors(
@@ -139,7 +139,7 @@ void BatchProcessingContext::decryptMasterKey()
         ProcessingUnit::DerivedKeys::Reader reader(keys);
         ProcessingUnit::Passwords::Writer writer(passwords);
         AFMerger::Context mergerCtx(merger);
-        for (size_t i = 0; i < batchSize; i++) {
+        for (std::size_t i = 0; i < batchSize; i++) {
             const void *key = reader.getDerivedKey();
 
             decryptor->decryptSectors(
@@ -156,14 +156,14 @@ void BatchProcessingContext::decryptMasterKey()
     }
 }
 
-bool BatchProcessingContext::processResults(size_t &matchIndex)
+bool BatchProcessingContext::processResults(std::size_t &matchIndex)
 {
     auto passwordData = parentContext->getPasswordData();
     const unsigned char *mkDigest = passwordData->getMasterKeyDigest();
 
     auto keys = mkDigestUnit.openDerivedKeys();
     ProcessingUnit::DerivedKeys::Reader reader(keys);
-    for (size_t i = 0; i < batchSize; i++) {
+    for (std::size_t i = 0; i < batchSize; i++) {
         auto key = reader.getDerivedKey();
         if (std::memcmp(key, mkDigest, PasswordData::MASTER_KEY_DIGEST_LENGTH) == 0) {
             matchIndex = i;

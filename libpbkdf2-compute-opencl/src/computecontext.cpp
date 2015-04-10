@@ -26,8 +26,8 @@ namespace compute {
 namespace opencl {
 
 ComputeContext::ComputeContext(const HashFunctionContext *parentContext,
-                               const void *salt, size_t saltLength,
-                               size_t dkLength, size_t iterationCount)
+                               const void *salt, std::size_t saltLength,
+                               std::size_t dkLength, std::size_t iterationCount)
     : parentContext(parentContext), saltData(salt), saltLength(saltLength),
       dkLength(dkLength), iterationCount(iterationCount)
 {

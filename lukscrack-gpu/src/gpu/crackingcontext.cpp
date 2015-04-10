@@ -26,10 +26,10 @@ CrackingContext::CrackingContext(const GlobalContext *global, const std::vector<
     auto &hashSpec = passwordData->getHashSpec();
     auto &cipherName = passwordData->getCipherName();
     auto &mode = passwordData->getCipherMode();
-    size_t keySize = passwordData->getKeySize();
-    size_t afStripes = passwordData->getKeyslotStripes();
+    std::size_t keySize = passwordData->getKeySize();
+    std::size_t afStripes = passwordData->getKeyslotStripes();
 
-    size_t delim = mode.find('-');
+    std::size_t delim = mode.find('-');
     std::string cipherMode, ivmode;
     if (delim == std::string::npos) {
         cipherMode.assign(mode);

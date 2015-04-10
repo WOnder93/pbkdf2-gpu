@@ -31,7 +31,7 @@ namespace lukscrack {
 class ThreadPool
 {
 private:
-    size_t size;
+    std::size_t size;
     std::vector<std::thread> threads;
     std::mutex mutex;
     std::condition_variable cv;
@@ -41,9 +41,9 @@ private:
     void processTasks();
 
 public:
-    inline size_t getSize() const { return size; }
+    inline std::size_t getSize() const { return size; }
 
-    ThreadPool(size_t size);
+    ThreadPool(std::size_t size);
     ~ThreadPool();
 
     std::vector<std::future<void>> enqueueTasks(

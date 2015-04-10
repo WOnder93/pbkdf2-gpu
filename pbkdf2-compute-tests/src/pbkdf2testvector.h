@@ -32,13 +32,13 @@ private:
     std::string name;
 
     const void *password;
-    size_t password_length;
+    std::size_t password_length;
     const void *salt;
-    size_t salt_length;
+    std::size_t salt_length;
     const void *dk;
-    size_t dk_length;
+    std::size_t dk_length;
 
-    size_t iter;
+    std::size_t iter;
 
 public:
     inline const std::string &getName() const { return name; }
@@ -47,19 +47,19 @@ public:
     inline const void *getSaltData() const { return salt; }
     inline const void *getDerivedKeyData() const { return dk; }
 
-    inline size_t getPasswordLength() const { return password_length; }
-    inline size_t getSaltLength() const { return salt_length; }
-    inline size_t getDerivedKeyLength() const { return dk_length; }
+    inline std::size_t getPasswordLength() const { return password_length; }
+    inline std::size_t getSaltLength() const { return salt_length; }
+    inline std::size_t getDerivedKeyLength() const { return dk_length; }
 
-    inline size_t getIterationCount() const { return iter; }
+    inline std::size_t getIterationCount() const { return iter; }
 
     inline PBKDF2TestVector() { }
     inline PBKDF2TestVector(
             const std::string &name,
-            const void *password, size_t password_length,
-            const void *salt, size_t salt_length,
-            const void *dk, size_t dk_length,
-            size_t iter) :
+            const void *password, std::size_t password_length,
+            const void *salt, std::size_t salt_length,
+            const void *dk, std::size_t dk_length,
+            std::size_t iter) :
         name(name),
         password(password), password_length(password_length),
         salt(salt), salt_length(salt_length),

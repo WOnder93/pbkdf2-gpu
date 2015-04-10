@@ -98,7 +98,7 @@ void CommandLineParser<TState>::printHelp(const char * const * argv) const
     }
     std::cerr << std::endl;
 
-    size_t longest = 0;
+    std::size_t longest = 0;
     std::vector<std::string> names {};
     for (auto &opt : options) {
         auto ptr = opt.get();
@@ -111,11 +111,11 @@ void CommandLineParser<TState>::printHelp(const char * const * argv) const
     }
     std::cerr << "Options:" << std::endl;
 
-    for (size_t i = 0; i < options.size(); i++) {
+    for (std::size_t i = 0; i < options.size(); i++) {
         auto ptr = options[i].get();
         auto &name = names[i];
 
-        size_t padding = longest - name.size();
+        std::size_t padding = longest - name.size();
         std::cerr << "  " << name
                   << std::string(padding + 2, ' ')
                   << ptr->getHelpText() << std::endl;
@@ -198,7 +198,7 @@ int CommandLineParser<TState>::parseArguments(
             }
         } else if (arg[1] != '-') {
             /* short option */
-            size_t optIndex = 1;
+            std::size_t optIndex = 1;
             do {
                 char name = arg[optIndex++];
                 auto entry = mapShort.find(name);

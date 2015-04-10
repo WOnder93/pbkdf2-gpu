@@ -25,7 +25,7 @@
 
 namespace libivmode {
 
-void Plain64IVGenerator::Context::generateIV(size_t sector, void *dest) const
+void Plain64IVGenerator::Context::generateIV(std::size_t sector, void *dest) const
 {
     unsigned char *cursor = (unsigned char *)dest;
     cursor[0] = sector         & 0xff;
@@ -41,7 +41,7 @@ void Plain64IVGenerator::Context::generateIV(size_t sector, void *dest) const
 
 std::shared_ptr<const IVGenerator::Context>
     Plain64IVGenerator::createContext(
-        size_t ivLength, const std::string &, const void *, size_t) const
+        std::size_t ivLength, const std::string &, const void *, std::size_t) const
 {
     return std::make_shared<Context>(ivLength);
 }

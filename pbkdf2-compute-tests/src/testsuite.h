@@ -40,10 +40,10 @@ public:
     inline TestSuite(const std::string &name, const std::vector<Test> &tests) :
         name(name), tests(tests) { }
 
-    inline size_t runTests() const {
+    inline std::size_t runTests() const {
         return runTests(std::cerr);
     }
-    size_t runTests(std::ostream &out) const;
+    std::size_t runTests(std::ostream &out) const;
 };
 
 } // namespace tests

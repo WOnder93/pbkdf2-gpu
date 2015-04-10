@@ -46,7 +46,7 @@ public:
         stream->exceptions(std::ios::failbit | std::ios::badbit);
     }
 
-    bool nextPassword(const char *&pwData, size_t &pwLength) override;
+    bool nextPassword(const char *&pwData, std::size_t &pwLength) override;
 };
 
 } // namespace lukscrack

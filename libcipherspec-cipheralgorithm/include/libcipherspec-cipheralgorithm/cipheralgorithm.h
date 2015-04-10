@@ -57,7 +57,7 @@ public:
 
         EncryptionContex(const CipherAlgorithm *algorithm, const void *key);
 
-        void encrypt(const void *data, size_t dataLength,
+        void encrypt(const void *data, std::size_t dataLength,
                      const void *iv, void *dest) const;
     };
     class DecryptionContex
@@ -71,16 +71,16 @@ public:
 
         DecryptionContex(const CipherAlgorithm *algorithm, const void *key);
 
-        void decrypt(const void *data, size_t dataLength,
+        void decrypt(const void *data, std::size_t dataLength,
                      const void *iv, void *dest) const;
     };
 
-    size_t getKeySize() const;
-    size_t getBlockLength() const;
-    size_t getIVLength() const;
+    std::size_t getKeySize() const;
+    std::size_t getBlockLength() const;
+    std::size_t getIVLength() const;
 
     static const CipherAlgorithm &getAlgorithm(
-            const std::string &cipherName, size_t keySize,
+            const std::string &cipherName, std::size_t keySize,
             const std::string &cipherMode);
 };
 

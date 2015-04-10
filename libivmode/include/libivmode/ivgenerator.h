@@ -31,16 +31,16 @@ public:
     public:
         virtual ~Context();
 
-        virtual void generateIV(size_t sector, void *dest) const = 0;
+        virtual void generateIV(std::size_t sector, void *dest) const = 0;
     };
 
     virtual ~IVGenerator();
 
     virtual std::shared_ptr<const Context> createContext(
-            size_t ivLength,
+            std::size_t ivLength,
             /* these arguments are used by essiv and such: */
             const std::string &cipherName,
-            const void *key, size_t keyLength) const = 0;
+            const void *key, std::size_t keyLength) const = 0;
 
     static std::shared_ptr<const IVGenerator> getGenerator(const std::string &ivmode);
 };

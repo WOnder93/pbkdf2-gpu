@@ -21,8 +21,8 @@ namespace libpbkdf2 {
 namespace compute {
 namespace tests {
 
-size_t TestSuite::runTests(std::ostream &out) const {
-    size_t failed = 0;
+std::size_t TestSuite::runTests(std::ostream &out) const {
+    std::size_t failed = 0;
     out << "Running test suite '" << name << "'..." << std::endl;
     for (const Test &test : tests) {
         try {

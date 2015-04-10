@@ -31,7 +31,7 @@ EssivIVGenerator::EssivIVGenerator(const std::string &hashSpec)
 }
 
 EssivIVGenerator::Context::Context(
-        size_t ivLength,
+        std::size_t ivLength,
         std::unique_ptr<unsigned char[]> &&hashedKey,
         const CipherAlgorithm &cipherAlg)
     : ivLength(ivLength), hashedKey(std::move(hashedKey))
@@ -40,7 +40,7 @@ EssivIVGenerator::Context::Context(
 }
 
 void EssivIVGenerator::Context::generateIV(
-        size_t sector, void *dest) const
+        std::size_t sector, void *dest) const
 {
     unsigned char *cursor = (unsigned char *)dest;
     cursor[0] = sector         & 0xff;
@@ -57,10 +57,10 @@ void EssivIVGenerator::Context::generateIV(
 }
 
 std::shared_ptr<const IVGenerator::Context> EssivIVGenerator::createContext(
-        size_t ivLength, const std::string &cipherName,
-        const void *key, size_t keyLength) const
+        std::size_t ivLength, const std::string &cipherName,
+        const void *key, std::size_t keyLength) const
 {
-    size_t hashLength = hashAlgorithm->getOutputBlockLength();
+    std::size_t hashLength = hashAlgorithm->getOutputBlockLength();
     auto buffer = std::unique_ptr<unsigned char[]>(new unsigned char[hashLength]);
     hashAlgorithm->computeDigest(key, keyLength, buffer.get());
 

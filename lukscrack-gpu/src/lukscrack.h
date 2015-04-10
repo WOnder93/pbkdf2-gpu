@@ -52,7 +52,7 @@ public:
               const std::vector<Device> &devices,
               const PasswordData *passwordData,
               PasswordGenerator *pwGen,
-              size_t threadPoolSize, size_t batchSize);
+              std::size_t threadPoolSize, std::size_t batchSize);
 
     void runCracking();
     void requestStopCracking();

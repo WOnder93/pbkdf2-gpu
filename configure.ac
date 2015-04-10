@@ -3,6 +3,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_INIT([pbkdf2-gpu], [0.1], [])
 LT_INIT
 AM_INIT_AUTOMAKE([foreign subdir-objects])
+AM_SILENT_RULES([yes])
 
 dnl # Check for the crypto library:
 AC_CHECK_HEADER([openssl/evp.h], [], [AC_MSG_ERROR([You need the OpenSSL crypto library.])])

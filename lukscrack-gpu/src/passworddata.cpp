@@ -50,7 +50,7 @@ void PasswordData::readFromLuksHeader(std::istream &stream, std::size_t keyslot)
     }
     cursor += LUKS_MAGIC_LENGTH;
 
-    size_t version = Endianness::read16BE(cursor);
+    std::size_t version = Endianness::read16BE(cursor);
     if (version > 1) {
         throw IncompatibleLuksVersionException(version);
     }
@@ -76,7 +76,7 @@ void PasswordData::readFromLuksHeader(std::istream &stream, std::size_t keyslot)
 
     cursor += 4; /* skip payloadOffset */
 
-    size_t keySize = Endianness::read32BE(cursor);
+    std::size_t keySize = Endianness::read32BE(cursor);
     cursor += 4;
 
     const unsigned char *mkDigest = cursor;
@@ -85,7 +85,7 @@ void PasswordData::readFromLuksHeader(std::istream &stream, std::size_t keyslot)
     const unsigned char *mkDigestSalt = cursor;
     cursor += 32;
 
-    size_t mkDigestIter = Endianness::read32BE(cursor);
+    std::size_t mkDigestIter = Endianness::read32BE(cursor);
     cursor += 4;
 
     cursor += 40; /* skip the UUID */
@@ -117,16 +117,16 @@ void PasswordData::readFromLuksHeader(std::istream &stream, std::size_t keyslot)
         }
     }
 
-    size_t iter = Endianness::read32BE(cursor);
+    std::size_t iter = Endianness::read32BE(cursor);
     cursor += 4;
 
     const unsigned char *keyslotSalt = cursor;
     cursor += 32;
 
-    size_t keyMaterialOffset = Endianness::read32BE(cursor);
+    std::size_t keyMaterialOffset = Endianness::read32BE(cursor);
     cursor += 4;
 
-    size_t stripes = Endianness::read32BE(cursor);
+    std::size_t stripes = Endianness::read32BE(cursor);
     cursor += 4;
 
     stream.seekg(keyMaterialOffset * SECTOR_SIZE, std::ios_base::beg);

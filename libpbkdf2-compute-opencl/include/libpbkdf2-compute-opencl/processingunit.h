@@ -46,6 +46,12 @@ private:
     cl::Buffer outputBuffer;
     cl::Buffer debugBuffer;
 
+    std::size_t inputBufferSize;
+    std::size_t outputBufferSize;
+
+    void *mappedInputBuffer;
+    void *mappedOutputBuffer;
+
     cl::Kernel kernel;
 
     std::size_t inputSize;
@@ -59,65 +65,43 @@ private:
     cl::Event event;
 
 public:
-    class Passwords
+    class PasswordWriter
     {
     private:
-        const ProcessingUnit *parent;
-        void *hostBuffer;
+        cl_uint *dest;
+
+        std::size_t count;
+        std::size_t inputSize;
+        const HashAlgorithm *hashAlg;
+        std::unique_ptr<cl_uint[]> buffer;
 
     public:
-        class Writer
-        {
-        private:
-            cl_uint *dest;
+        PasswordWriter(ProcessingUnit &parent, std::size_t index = 0);
 
-            std::size_t count;
-            std::size_t inputSize;
-            const HashAlgorithm *hashAlg;
-            std::unique_ptr<cl_uint[]> buffer;
+        void moveForward(std::size_t offset);
+        void moveBackwards(std::size_t offset);
 
-        public:
-            Writer(const Passwords &parent, std::size_t index = 0);
-
-            void moveForward(std::size_t offset);
-            void moveBackwards(std::size_t offset);
-
-            void setPassword(const void *pw, std::size_t pwSize) const;
-        };
-
-        Passwords(const ProcessingUnit *parent);
-        ~Passwords();
+        void setPassword(const void *pw, std::size_t pwSize) const;
     };
 
-    class DerivedKeys
+    class DerivedKeyReader
     {
     private:
-        const ProcessingUnit *parent;
-        void *hostBuffer;
+        const cl_uint *src;
+
+        std::size_t count;
+        std::size_t outputSize;
+        std::size_t outputBlockCount;
+        std::size_t outputBlockSize;
+        std::unique_ptr<cl_uint[]> buffer;
 
     public:
-        class Reader
-        {
-        private:
-            const cl_uint *src;
+        DerivedKeyReader(ProcessingUnit &parent, std::size_t index = 0);
 
-            std::size_t count;
-            std::size_t outputSize;
-            std::size_t outputBlockCount;
-            std::size_t outputBlockSize;
-            std::unique_ptr<cl_uint[]> buffer;
+        void moveForward(std::size_t offset);
+        void moveBackwards(std::size_t offset);
 
-        public:
-            Reader(const DerivedKeys &parent, std::size_t index = 0);
-
-            void moveForward(std::size_t offset);
-            void moveBackwards(std::size_t offset);
-
-            const void *getDerivedKey() const;
-        };
-
-        DerivedKeys(const ProcessingUnit *parent);
-        ~DerivedKeys();
+        const void *getDerivedKey() const;
     };
 
     inline std::size_t getBatchSize() const { return batchSize; }
@@ -137,9 +121,6 @@ public:
 
     ProcessingUnit(const DeviceContext *context,
                    std::size_t batchSize, Logger *logger);
-
-    inline Passwords openPasswords() { return Passwords(this); }
-    inline DerivedKeys openDerivedKeys() { return DerivedKeys(this); }
 
     void beginProcessing();
     void endProcessing();

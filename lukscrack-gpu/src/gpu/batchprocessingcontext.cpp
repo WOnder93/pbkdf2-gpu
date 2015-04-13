@@ -58,8 +58,7 @@ BatchProcessingContext::BatchProcessingContext(
 bool BatchProcessingContext::initializePasswords(lukscrack::PasswordGenerator &generator)
 {
     bool passwordsLeft = true;
-    auto passwords = keyslotUnit.openPasswords();
-    ProcessingUnit::Passwords::Writer writer(passwords);
+    ProcessingUnit::PasswordWriter writer(keyslotUnit);
     for (std::size_t i = 0; i < batchSize; i++) {
         const char *pwData;
         std::size_t pwLength;
@@ -92,9 +91,6 @@ void BatchProcessingContext::decryptMasterKey()
     auto merger = &parentContext->getAFMerger();
     auto decryptor = &parentContext->getSectorDecryptor();
 
-    auto keys = keyslotUnit.openDerivedKeys();
-    auto passwords = mkDigestUnit.openPasswords();
-
     if (threadPool->getSize() > 1) {
         /* run key material decryption in parallel: */
         std::size_t taskCount = threadPool->getSize();
@@ -109,9 +105,9 @@ void BatchProcessingContext::decryptMasterKey()
                 end += 1;
             }
 
-            tasks[k] = [=, &keys, &passwords] () {
-                ProcessingUnit::DerivedKeys::Reader reader(keys, start);
-                ProcessingUnit::Passwords::Writer writer(passwords, start);
+            tasks[k] = [=] () {
+                ProcessingUnit::DerivedKeyReader reader(keyslotUnit, start);
+                ProcessingUnit::PasswordWriter writer(mkDigestUnit, start);
                 AFMerger::Context mergerCtx(merger);
                 for (std::size_t i = start; i < end; i++) {
                     const void *key = reader.getDerivedKey();
@@ -141,8 +137,8 @@ void BatchProcessingContext::decryptMasterKey()
             future.get();
         }
     } else {
-        ProcessingUnit::DerivedKeys::Reader reader(keys);
-        ProcessingUnit::Passwords::Writer writer(passwords);
+        ProcessingUnit::DerivedKeyReader reader(keyslotUnit);
+        ProcessingUnit::PasswordWriter writer(mkDigestUnit);
         AFMerger::Context mergerCtx(merger);
         for (std::size_t i = 0; i < batchSize; i++) {
             const void *key = reader.getDerivedKey();
@@ -166,8 +162,7 @@ bool BatchProcessingContext::processResults(std::size_t &matchIndex)
     auto passwordData = parentContext->getPasswordData();
     const unsigned char *mkDigest = passwordData->getMasterKeyDigest();
 
-    auto keys = mkDigestUnit.openDerivedKeys();
-    ProcessingUnit::DerivedKeys::Reader reader(keys);
+    ProcessingUnit::DerivedKeyReader reader(mkDigestUnit);
     for (std::size_t i = 0; i < batchSize; i++) {
         auto key = reader.getDerivedKey();
         if (std::memcmp(key, mkDigest, PasswordData::MASTER_KEY_DIGEST_LENGTH) == 0) {

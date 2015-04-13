@@ -88,8 +88,7 @@ RunTimeStatistics runBenchmark(
 
         clock_type::time_point checkpt0 = clock_type::now();
         {
-            auto passwords = unit.openPasswords();
-            typename Types::TProcessingUnit::Passwords::Writer writer(passwords);
+            typename Types::TProcessingUnit::PasswordWriter writer(unit);
             for (std::size_t i = 0; i < batchSize; i++) {
                 const char *pw;
                 std::size_t pwLength;
@@ -106,8 +105,7 @@ RunTimeStatistics runBenchmark(
 
         clock_type::time_point checkpt2 = clock_type::now();
         {
-            auto keys = unit.openDerivedKeys();
-            typename Types::TProcessingUnit::DerivedKeys::Reader reader(keys);
+            typename Types::TProcessingUnit::DerivedKeyReader reader(unit);
             for (std::size_t i = 0; i < batchSize; i++) {
                 reader.moveForward(1);
             }

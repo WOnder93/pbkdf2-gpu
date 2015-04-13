@@ -38,6 +38,7 @@ DeviceContext::DeviceContext(const ComputeContext *parentContext, const Device &
     std::memset((char *)hostSaltBuffer + parentContext->getSaltLength(), 0, parentContext->getSaltBufferSize() - parentContext->getSaltLength());
 
     queue.enqueueUnmapMemObject(parentContext->getSaltBuffer(), hostSaltBuffer);
+    queue.finish();
 }
 
 } // namespace opencl

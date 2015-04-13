@@ -38,48 +38,46 @@ ProcessingUnit::ProcessingUnit(
     dkBuffer = std::unique_ptr<unsigned char[]>(dkBuferPtr);
 }
 
-ProcessingUnit::Passwords::Writer::Writer(
-        const Passwords &parent, std::size_t index)
+ProcessingUnit::PasswordWriter::PasswordWriter(
+        ProcessingUnit &parent, std::size_t index)
 {
-    auto unit = parent.parent;
-    it = unit->passwordBuffer.begin() + index;
+    it = parent.passwordBuffer.begin() + index;
 }
 
-void ProcessingUnit::Passwords::Writer::moveForward(std::size_t offset)
+void ProcessingUnit::PasswordWriter::moveForward(std::size_t offset)
 {
     it += offset;
 }
 
-void ProcessingUnit::Passwords::Writer::moveBackwards(std::size_t offset)
+void ProcessingUnit::PasswordWriter::moveBackwards(std::size_t offset)
 {
     it -= offset;
 }
 
-void ProcessingUnit::Passwords::Writer::setPassword(
+void ProcessingUnit::PasswordWriter::setPassword(
         const void *pw, std::size_t pwSize) const
 {
     it->assign((char *)pw, (char *)pw + pwSize);
 }
 
-ProcessingUnit::DerivedKeys::Reader::Reader(
-        const DerivedKeys &parent, std::size_t index)
+ProcessingUnit::DerivedKeyReader::DerivedKeyReader(
+        ProcessingUnit &parent, std::size_t index)
 {
-    auto unit = parent.parent;
-    dkLength = unit->context->getParentContext()->getDerivedKeyLength();
-    src = unit->dkBuffer.get() + index * dkLength;
+    dkLength = parent.context->getParentContext()->getDerivedKeyLength();
+    src = parent.dkBuffer.get() + index * dkLength;
 }
 
-void ProcessingUnit::DerivedKeys::Reader::moveForward(std::size_t offset)
+void ProcessingUnit::DerivedKeyReader::moveForward(std::size_t offset)
 {
     src += offset * dkLength;
 }
 
-void ProcessingUnit::DerivedKeys::Reader::moveBackwards(std::size_t offset)
+void ProcessingUnit::DerivedKeyReader::moveBackwards(std::size_t offset)
 {
     src -= offset * dkLength;
 }
 
-const void *ProcessingUnit::DerivedKeys::Reader::getDerivedKey() const
+const void *ProcessingUnit::DerivedKeyReader::getDerivedKey() const
 {
     return src;
 }

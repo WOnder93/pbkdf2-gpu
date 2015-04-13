@@ -46,57 +46,33 @@ private:
     std::future<void> taskFuture;
 
 public:
-    class Passwords
+    class PasswordWriter
     {
     private:
-        ProcessingUnit *parent;
+        std::vector<std::string>::iterator it;
 
     public:
-        class Writer
-        {
-        private:
-            std::vector<std::string>::iterator it;
+        PasswordWriter(ProcessingUnit &parent, std::size_t index = 0);
 
-        public:
-            Writer(const Passwords &parent, std::size_t index = 0);
+        void moveForward(std::size_t offset);
+        void moveBackwards(std::size_t offset);
 
-            void moveForward(std::size_t offset);
-            void moveBackwards(std::size_t offset);
-
-            void setPassword(const void *pw, std::size_t pwSize) const;
-        };
-
-        inline Passwords(ProcessingUnit *parent)
-            : parent(parent)
-        {
-        }
+        void setPassword(const void *pw, std::size_t pwSize) const;
     };
 
-    class DerivedKeys
+    class DerivedKeyReader
     {
     private:
-        const ProcessingUnit *parent;
+        std::size_t dkLength;
+        const unsigned char *src;
 
     public:
-        class Reader
-        {
-        private:
-            std::size_t dkLength;
-            const unsigned char *src;
+        DerivedKeyReader(ProcessingUnit &parent, std::size_t index = 0);
 
-        public:
-            Reader(const DerivedKeys &parent, std::size_t index = 0);
+        void moveForward(std::size_t offset);
+        void moveBackwards(std::size_t offset);
 
-            void moveForward(std::size_t offset);
-            void moveBackwards(std::size_t offset);
-
-            const void *getDerivedKey() const;
-        };
-
-        inline DerivedKeys(ProcessingUnit *parent)
-            : parent(parent)
-        {
-        }
+        const void *getDerivedKey() const;
     };
 
     inline std::size_t getBatchSize() const { return batchSize; }
@@ -116,9 +92,6 @@ public:
 
     ProcessingUnit(const DeviceContext *context,
                    std::size_t batchSize, Logger *logger);
-
-    inline Passwords openPasswords() { return Passwords(this); }
-    inline DerivedKeys openDerivedKeys() { return DerivedKeys(this); }
 
     void beginProcessing();
     void endProcessing();

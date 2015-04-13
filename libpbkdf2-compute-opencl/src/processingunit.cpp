@@ -56,9 +56,15 @@ ProcessingUnit::ProcessingUnit(
     cmdQueue = cl::CommandQueue(clContext, context->getDevice(),
                                 profilingEnabled ? CL_QUEUE_PROFILING_ENABLE : 0);
 
-    inputBuffer = cl::Buffer(clContext, CL_MEM_READ_ONLY, inputLength * batchSize);
-    outputBuffer = cl::Buffer(clContext, CL_MEM_WRITE_ONLY, outputLength * batchSize);
+    inputBufferSize = inputLength * batchSize;
+    outputBufferSize = outputLength * batchSize;
+
+    inputBuffer = cl::Buffer(clContext, CL_MEM_READ_ONLY, inputBufferSize);
+    outputBuffer = cl::Buffer(clContext, CL_MEM_WRITE_ONLY, outputBufferSize);
     debugBuffer = cl::Buffer(clContext, CL_MEM_WRITE_ONLY, DEBUG_BUFFER_SIZE);
+
+    mappedInputBuffer = cmdQueue.enqueueMapBuffer(inputBuffer, true, CL_MAP_WRITE, 0, inputBufferSize);
+    mappedOutputBuffer = nullptr;
 
     kernel = cl::Kernel(computeContext->getProgram(), "pbkdf2_kernel");
     kernel.setArg<cl::Buffer>(0, inputBuffer);
@@ -70,50 +76,32 @@ ProcessingUnit::ProcessingUnit(
     kernel.setArg<cl::Buffer>(6, debugBuffer);
 }
 
-ProcessingUnit::Passwords::Passwords(const ProcessingUnit *parent)
-    : parent(parent)
+ProcessingUnit::PasswordWriter::PasswordWriter(
+        ProcessingUnit &parent, std::size_t index)
 {
-    std::size_t inputBufferSize = parent->inputSize * parent->batchSize * sizeof(cl_uint);
-    *parent->logger << "Opening passwords..." << std::endl;
-    hostBuffer = parent->cmdQueue.enqueueMapBuffer(
-                parent->inputBuffer, true, CL_MAP_WRITE,
-                0, inputBufferSize);
-    *parent->logger << "Passwords opened." << std::endl;
-}
-ProcessingUnit::Passwords::~Passwords()
-{
-    parent->cmdQueue.enqueueUnmapMemObject(
-                parent->inputBuffer, hostBuffer);
-    *parent->logger << "Passwords closed." << std::endl;
-}
+    dest = (cl_uint *)parent.mappedInputBuffer + index;
 
-ProcessingUnit::Passwords::Writer::Writer(
-        const Passwords &parent, std::size_t index)
-{
-    dest = (cl_uint *)parent.hostBuffer + index;
+    count = parent.batchSize;
+    inputSize = parent.inputSize;
 
-    auto unit = parent.parent;
-    count = unit->batchSize;
-    inputSize = unit->inputSize;
-
-    auto computeContext = unit->context->getParentContext();
+    auto computeContext = parent.context->getParentContext();
     auto hfContext = computeContext->getParentContext();
     hashAlg = hfContext->getHashAlgorithm();
 
     buffer = std::unique_ptr<cl_uint[]>(new cl_uint[inputSize * count]);
 }
 
-void ProcessingUnit::Passwords::Writer::moveForward(std::size_t offset)
+void ProcessingUnit::PasswordWriter::moveForward(std::size_t offset)
 {
     dest += offset;
 }
 
-void ProcessingUnit::Passwords::Writer::moveBackwards(std::size_t offset)
+void ProcessingUnit::PasswordWriter::moveBackwards(std::size_t offset)
 {
     dest -= offset;
 }
 
-void ProcessingUnit::Passwords::Writer::setPassword(
+void ProcessingUnit::PasswordWriter::setPassword(
         const void *pw, std::size_t pwSize) const
 {
     std::size_t ibl = hashAlg->getInputBlockLength();
@@ -136,47 +124,29 @@ void ProcessingUnit::Passwords::Writer::setPassword(
     }
 }
 
-ProcessingUnit::DerivedKeys::DerivedKeys(const ProcessingUnit *parent)
-    : parent(parent)
+ProcessingUnit::DerivedKeyReader::DerivedKeyReader(
+        ProcessingUnit &parent, std::size_t index)
 {
-    std::size_t outputBufferSize = parent->outputSize * parent->batchSize * sizeof(cl_uint);
-    *parent->logger << "Opening derived keys..." << std::endl;
-    hostBuffer = parent->cmdQueue.enqueueMapBuffer(
-                parent->outputBuffer, true, CL_MAP_READ,
-                0, outputBufferSize);
-    *parent->logger << "Derived keys opened." << std::endl;
-}
-ProcessingUnit::DerivedKeys::~DerivedKeys()
-{
-    parent->cmdQueue.enqueueUnmapMemObject(
-                parent->outputBuffer, hostBuffer);
-    *parent->logger << "Derived keys closed." << std::endl;
-}
-
-ProcessingUnit::DerivedKeys::Reader::Reader(
-        const DerivedKeys &parent, std::size_t index)
-{
-    auto unit = parent.parent;
-    count = unit->batchSize;
-    outputSize = unit->outputSize;
-    outputBlockCount = unit->outputBlocks;
+    count = parent.batchSize;
+    outputSize = parent.outputSize;
+    outputBlockCount = parent.outputBlocks;
     outputBlockSize = outputSize / outputBlockCount;
 
     buffer = std::unique_ptr<cl_uint[]>(new cl_uint[outputSize * count]);
-    src = (cl_uint *)parent.hostBuffer + index * outputBlockCount;
+    src = (cl_uint *)parent.mappedOutputBuffer + index * outputBlockCount;
 }
 
-void ProcessingUnit::DerivedKeys::Reader::moveForward(std::size_t offset)
+void ProcessingUnit::DerivedKeyReader::moveForward(std::size_t offset)
 {
     src += offset * outputBlockCount;
 }
 
-void ProcessingUnit::DerivedKeys::Reader::moveBackwards(std::size_t offset)
+void ProcessingUnit::DerivedKeyReader::moveBackwards(std::size_t offset)
 {
     src -= offset * outputBlockCount;
 }
 
-const void *ProcessingUnit::DerivedKeys::Reader::getDerivedKey() const
+const void *ProcessingUnit::DerivedKeyReader::getDerivedKey() const
 {
     auto dst = buffer.get();
     for (std::size_t outputBlock = 0; outputBlock < outputBlockCount; outputBlock++) {
@@ -193,7 +163,18 @@ const void *ProcessingUnit::DerivedKeys::Reader::getDerivedKey() const
 void ProcessingUnit::beginProcessing()
 {
     *logger << "Starting processing..." << std::endl;
-    cmdQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(batchSize, outputBlocks), cl::NullRange, nullptr, &event);
+
+    if (mappedInputBuffer != nullptr) {
+        cmdQueue.enqueueUnmapMemObject(inputBuffer, mappedInputBuffer);
+    }
+    if (mappedOutputBuffer != nullptr) {
+        cmdQueue.enqueueUnmapMemObject(outputBuffer, mappedOutputBuffer);
+    }
+
+    cmdQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(batchSize, outputBlocks), cl::NullRange);
+
+    mappedInputBuffer = cmdQueue.enqueueMapBuffer(inputBuffer, false, CL_MAP_WRITE, 0, inputBufferSize);
+    mappedOutputBuffer = cmdQueue.enqueueMapBuffer(outputBuffer, false, CL_MAP_READ, 0, outputBufferSize, nullptr, &event);
 }
 
 void ProcessingUnit::endProcessing()

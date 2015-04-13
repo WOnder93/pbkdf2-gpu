@@ -58,8 +58,7 @@ void runComputeTests(
             typename Types::TProcessingUnit unit(&deviceContext, 1, logger);
 
             {
-                auto passwords = unit.openPasswords();
-                typename Types::TProcessingUnit::Passwords::Writer writer(passwords);
+                typename Types::TProcessingUnit::PasswordWriter writer(unit);
                 writer.setPassword(
                             (const char *)tv.getPasswordData(),
                             tv.getPasswordLength());
@@ -70,8 +69,7 @@ void runComputeTests(
 
             bool match = false;
             {
-                auto keys = unit.openDerivedKeys();
-                typename Types::TProcessingUnit::DerivedKeys::Reader reader(keys);
+                typename Types::TProcessingUnit::DerivedKeyReader reader(unit);
                 match = memcmp(tv.getDerivedKeyData(),
                                reader.getDerivedKey(),
                                tv.getDerivedKeyLength()) == 0;

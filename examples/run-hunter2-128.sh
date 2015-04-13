@@ -5,4 +5,4 @@ if [ "x$1" == "x" ]; then
     exit 1
 fi
 
-./run-lukscrack.sh $1 hunter2-128.pwlist 32 hunter2.luks
+./run-lukscrack.sh $1 hunter2-128.pwlist 64 hunter2.luks

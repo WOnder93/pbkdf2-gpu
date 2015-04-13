@@ -28,10 +28,10 @@ DeviceCrackingContext::DeviceCrackingContext(
         const Device &device, std::size_t batchSize,
         Logger *logger)
     : pwDistributor(pwDistributor),
-      callback(callback),
-      pc1(crackingContext, "pc1", device, threadPool, batchSize, logger),
-      pc2(crackingContext, "pc2", device, threadPool, batchSize, logger),
-      pc3(crackingContext, "pc3", device, threadPool, batchSize, logger),
+      callback(callback), logger(logger, device.getName() + ": "),
+      pc1(crackingContext, "pc1", device, threadPool, batchSize, &this->logger),
+      pc2(crackingContext, "pc2", device, threadPool, batchSize, &this->logger),
+      pc3(crackingContext, "pc3", device, threadPool, batchSize, &this->logger),
       stop(false)
 {
 }
@@ -78,65 +78,84 @@ void DeviceCrackingContext::runCracking()
     while (true) {
         if (!firstLoop) {
             pc1.endMKDigestUnit();
+
+            logger << "pc1: Processing results..." << std::endl;
             std::size_t matchIndex;
             if (pc1.processResults(matchIndex)) {
                 callback(pc1.getCurrentPasswords()[matchIndex]);
                 stop = true;
             }
+            logger << "pc1: Done processing results." << std::endl;
         }
         if (!lastLoop) {
             std::lock_guard<std::mutex> guard(pwMutex);
+            logger << "pc1: Initializing passwords..." << std::endl;
             if (!pc1.initializePasswords(pwGen)) {
                 stop = true;
             }
+            logger << "pc1: Done initializing passwords." << std::endl;
             pc1.beginKeyslotUnit();
         }
 
         if (!firstLoop) {
             pc3.endKeyslotUnit();
+            logger << "pc3: Decrypting master key..." << std::endl;
             pc3.decryptMasterKey();
+            logger << "pc3: Done decrypting master key." << std::endl;
             pc3.beginMKDigestUnit();
 
             pc2.endMKDigestUnit();
+            logger << "pc2: Processing results..." << std::endl;
             std::size_t matchIndex;
             if (pc2.processResults(matchIndex)) {
                 callback(pc2.getCurrentPasswords()[matchIndex]);
                 stop = true;
             }
+            logger << "pc2: Done processing results." << std::endl;
         }
         if (!lastLoop) {
             {
                 std::lock_guard<std::mutex> guard(pwMutex);
+                logger << "pc2: Initializing passwords..." << std::endl;
                 if (!pc2.initializePasswords(pwGen)) {
                     stop = true;
                 }
+                logger << "pc2: Done initializing passwords." << std::endl;
             }
             pc2.beginKeyslotUnit();
 
             pc1.endKeyslotUnit();
+            logger << "pc1: Decrypting master key..." << std::endl;
             pc1.decryptMasterKey();
+            logger << "pc1: Done decrypting master key." << std::endl;
             pc1.beginMKDigestUnit();
         }
 
         if (!firstLoop) {
             pc3.endMKDigestUnit();
+            logger << "pc3: Processing results..." << std::endl;
             std::size_t matchIndex;
             if (pc3.processResults(matchIndex)) {
                 callback(pc3.getCurrentPasswords()[matchIndex]);
                 stop = true;
             }
+            logger << "pc3: Done processing results." << std::endl;
         }
         if (!lastLoop) {
             {
                 std::lock_guard<std::mutex> guard(pwMutex);
+                logger << "pc3: Initializing passwords..." << std::endl;
                 if (!pc3.initializePasswords(pwGen)) {
                     stop = true;
                 }
+                logger << "pc3: Done initializing passwords." << std::endl;
             }
             pc3.beginKeyslotUnit();
 
             pc2.endKeyslotUnit();
+            logger << "pc2: Decrypting master key..." << std::endl;
             pc2.decryptMasterKey();
+            logger << "pc2: Done decrypting master key." << std::endl;
             pc2.beginMKDigestUnit();
         }
 

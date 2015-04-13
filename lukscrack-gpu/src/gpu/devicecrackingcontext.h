@@ -36,6 +36,7 @@ class DeviceCrackingContext
 private:
     PasswordDistributor *pwDistributor;
     std::function<PasswordFoundCallback> callback;
+    SubLogger logger;
 
     BatchProcessingContext pc1, pc2, pc3;
 

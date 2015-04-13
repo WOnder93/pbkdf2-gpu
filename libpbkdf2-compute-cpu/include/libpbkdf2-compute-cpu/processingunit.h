@@ -115,8 +115,7 @@ public:
     ProcessingUnit &operator=(ProcessingUnit &&) = default;
 
     ProcessingUnit(const DeviceContext *context,
-                   std::size_t batchSize,
-                   Logger *logger = nullptr);
+                   std::size_t batchSize, Logger *logger);
 
     inline Passwords openPasswords() { return Passwords(this); }
     inline DerivedKeys openDerivedKeys() { return DerivedKeys(this); }

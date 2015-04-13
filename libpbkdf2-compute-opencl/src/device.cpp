@@ -25,6 +25,13 @@ namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
 
+std::string Device::getName() const
+{
+    return "OpenCL Device '"
+            + device.getInfo<CL_DEVICE_NAME>()
+            + "' (" + device.getInfo<CL_DEVICE_VENDOR>() + ")";
+}
+
 template<class T>
 static std::ostream &printBitfield(std::ostream &out, T value, const std::vector<std::pair<T, std::string>> &lookup)
 {

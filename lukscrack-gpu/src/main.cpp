@@ -36,6 +36,9 @@ struct Arguments
     bool showHelp = false;
     bool listDevices = false;
 
+    std::string logMode = "none";
+    std::string logOpts = "";
+
     std::string action = "crack";
     std::string pwgen = "list";
     std::string pwgenOpts = "-";
@@ -65,19 +68,27 @@ static CommandLineParser<Arguments> buildCmdLineParser()
             "list-devices", 'l', "list all available devices and exit"),
 
         new ArgumentOption<Arguments>(
+            makeArgumentWithOptionsHandler<Arguments>(
+                [] (Arguments &state,
+                    const std::string &logMode,
+                    const std::string &logOpts)
+            {
+                state.logMode = logMode;
+                state.logOpts = logOpts;
+            }), "log", 'g', "logging mode", "none", "none|stderr|stdout|file:LOGFILE"),
+
+        new ArgumentOption<Arguments>(
             [] (Arguments &state, const std::string &action) { state.action = action; },
             "action", 'a', "the action to perform", "crack", "crack|benchmark"),
         new ArgumentOption<Arguments>(
-            [] (Arguments &state, const std::string &pwgenSpec) {
-                std::size_t delim = pwgenSpec.find(':');
-                if (delim == std::string::npos) {
-                    state.pwgen.assign(pwgenSpec);
-                    state.pwgenOpts.clear();
-                } else {
-                    state.pwgen.assign(pwgenSpec.begin(), pwgenSpec.begin() + delim);
-                    state.pwgenOpts.assign(pwgenSpec.begin() + delim + 1, pwgenSpec.end());
-                }
-            }, "pwgen", 'p', "the password generator to use", "list:-", "list:PWLISTFILE"),
+            makeArgumentWithOptionsHandler<Arguments>(
+                [] (Arguments &state,
+                    const std::string &pwgen,
+                    const std::string &pwgenOpts)
+            {
+                state.pwgen = pwgen;
+                state.pwgenOpts = pwgenOpts;
+            }), "pwgen", 'p', "the password generator to use", "list:-", "list:PWLISTFILE"),
 
         new ArgumentOption<Arguments>(
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type index) {
@@ -200,7 +211,31 @@ int main(int, const char * const *argv)
         devices.push_back(allDevices[i]);
     }
 
-    RootLogger logger(&std::cerr);
+    std::ostream *logStream;
+    std::ofstream logFile;
+    logFile.exceptions(std::istream::failbit | std::istream::badbit);
+    if (args.logMode == "none") {
+        logStream = nullptr;
+    } else if (args.logMode == "stderr") {
+        logStream = &std::cerr;
+    } else if (args.logMode == "stdout") {
+        logStream = &std::cout;
+    } else if (args.logMode == "file") {
+        try {
+            logFile.open(args.logOpts);
+        } catch (std::ios::failure &ex) {
+            std::cerr << progname << ": unable to open log file: "
+                      << args.logOpts << ": "
+                      << ex.what() << std::endl;
+        }
+        logStream = &logFile;
+    } else {
+        std::cerr << progname << ": invalid logging mode: "
+                  << args.logMode << std::endl;
+        return 1;
+    }
+
+    RootLogger logger(logStream);
     LuksCrack crack(&global, devices, &pwData, pwGen.get(),
                     args.threads, args.batchSize, &logger);
     if (args.action == "crack") {

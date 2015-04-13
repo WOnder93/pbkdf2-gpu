@@ -18,6 +18,8 @@
 #ifndef BENCHMARK_H
 #define BENCHMARK_H
 
+#include "libpbkdf2-gpu-common/logging.h"
+
 #include "runtimestatistics.h"
 
 #include <string>
@@ -65,10 +67,11 @@ RunTimeStatistics runBenchmark(
 {
     std::vector<typename Types::TDevice> devices(&dev, &dev + 1);
 
+    pbkdf2_gpu::common::RootLogger logger(nullptr);
     typename Types::THashFunctionContext hfContext(globalCtx, devices, hashSpec);
     typename Types::TComputeContext computeContext(&hfContext, salt, saltLength, dkLength, iterationCount);
     typename Types::TDeviceContext deviceContext(&computeContext, dev);
-    typename Types::TProcessingUnit unit(&deviceContext, batchSize);
+    typename Types::TProcessingUnit unit(&deviceContext, batchSize, &logger);
 
     typedef std::chrono::steady_clock clock_type;
 

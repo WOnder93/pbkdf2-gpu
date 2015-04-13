@@ -31,10 +31,12 @@ namespace libpbkdf2 {
 namespace compute {
 namespace tests {
 
+using namespace pbkdf2_gpu::common;
+
 template<class Types>
 void runComputeTests(
         std::ostream &out, const std::string &platformName, const std::string &hashSpec,
-        const typename Types::TGlobalContext *globalCtx)
+        const typename Types::TGlobalContext *globalCtx, Logger *logger)
 {
     auto &devices = globalCtx->getAllDevices();
     if (devices.size() == 0) {
@@ -53,7 +55,7 @@ void runComputeTests(
                         tv.getSaltData(), tv.getSaltLength(),
                         tv.getDerivedKeyLength(), tv.getIterationCount());
             typename Types::TDeviceContext deviceContext(&computeContext, devices[0]);
-            typename Types::TProcessingUnit unit(&deviceContext, 1);
+            typename Types::TProcessingUnit unit(&deviceContext, 1, logger);
 
             {
                 auto passwords = unit.openPasswords();
@@ -82,29 +84,33 @@ void runComputeTests(
     suite.runTests(out);
 }
 
-static void runOpenCLTests(std::ostream &out)
+static void runOpenCLTests(std::ostream &out, Logger *logger)
 {
     using namespace libpbkdf2::compute::opencl;
 
     GlobalContext global("data");
 
-    runComputeTests<Types>(out, "OpenCL", "sha1", &global);
+    runComputeTests<Types>(out, "OpenCL", "sha1", &global, logger);
 }
 
-static void runCPUTests(std::ostream &out)
+static void runCPUTests(std::ostream &out, Logger *logger)
 {
     using namespace libpbkdf2::compute::cpu;
 
     GlobalContext global(nullptr);
 
-    runComputeTests<Types>(out, "CPU", "sha1", &global);
+    runComputeTests<Types>(out, "CPU", "sha1", &global, logger);
 }
 
 void Tests::runTests(std::ostream &out)
 {
-    runOpenCLTests(out);
+    RootLogger logger(&out);
 
-    runCPUTests(out);
+    SubLogger openclLogger(&logger, "OpenCL: ");
+    runOpenCLTests(out, &openclLogger);
+
+    SubLogger cpuLogger(&logger, "CPU: ");
+    runCPUTests(out, &cpuLogger);
 }
 
 } // namespace tests

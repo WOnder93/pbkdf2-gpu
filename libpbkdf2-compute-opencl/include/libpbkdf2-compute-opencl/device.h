@@ -30,6 +30,7 @@ private:
     cl::Device device;
 
 public:
+    std::string getName() const;
     std::string getInfo() const;
 
     const cl::Device &getCLDevice() const { return device; }

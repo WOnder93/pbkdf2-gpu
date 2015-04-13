@@ -74,23 +74,17 @@ ProcessingUnit::Passwords::Passwords(const ProcessingUnit *parent)
     : parent(parent)
 {
     std::size_t inputBufferSize = parent->inputSize * parent->batchSize * sizeof(cl_uint);
-    if (parent->logger != nullptr) {
-        *parent->logger << "Opening passwords..." << std::endl;
-    }
+    *parent->logger << "Opening passwords..." << std::endl;
     hostBuffer = parent->cmdQueue.enqueueMapBuffer(
                 parent->inputBuffer, true, CL_MAP_WRITE,
                 0, inputBufferSize);
-    if (parent->logger != nullptr) {
-        *parent->logger << "Passwords opened." << std::endl;
-    }
+    *parent->logger << "Passwords opened." << std::endl;
 }
 ProcessingUnit::Passwords::~Passwords()
 {
     parent->cmdQueue.enqueueUnmapMemObject(
                 parent->inputBuffer, hostBuffer);
-    if (parent->logger != nullptr) {
-        *parent->logger << "Passwords closed." << std::endl;
-    }
+    *parent->logger << "Passwords closed." << std::endl;
 }
 
 ProcessingUnit::Passwords::Writer::Writer(
@@ -146,23 +140,17 @@ ProcessingUnit::DerivedKeys::DerivedKeys(const ProcessingUnit *parent)
     : parent(parent)
 {
     std::size_t outputBufferSize = parent->outputSize * parent->batchSize * sizeof(cl_uint);
-    if (parent->logger != nullptr) {
-        *parent->logger << "Opening derived keys..." << std::endl;
-    }
+    *parent->logger << "Opening derived keys..." << std::endl;
     hostBuffer = parent->cmdQueue.enqueueMapBuffer(
                 parent->outputBuffer, true, CL_MAP_READ,
                 0, outputBufferSize);
-    if (parent->logger != nullptr) {
-        *parent->logger << "Derived keys opened." << std::endl;
-    }
+    *parent->logger << "Derived keys opened." << std::endl;
 }
 ProcessingUnit::DerivedKeys::~DerivedKeys()
 {
     parent->cmdQueue.enqueueUnmapMemObject(
                 parent->outputBuffer, hostBuffer);
-    if (parent->logger != nullptr) {
-        *parent->logger << "Derived keys closed." << std::endl;
-    }
+    *parent->logger << "Derived keys closed." << std::endl;
 }
 
 ProcessingUnit::DerivedKeys::Reader::Reader(
@@ -204,23 +192,17 @@ const void *ProcessingUnit::DerivedKeys::Reader::getDerivedKey() const
 
 void ProcessingUnit::beginProcessing()
 {
-    if (logger != nullptr) {
-        *logger << "Starting processing..." << std::endl;
-    }
+    *logger << "Starting processing..." << std::endl;
     cmdQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(batchSize, outputBlocks), cl::NullRange, nullptr, &event);
 }
 
 void ProcessingUnit::endProcessing()
 {
-    if (logger != nullptr) {
-        *logger << "Waiting for processing to end..." << std::endl;
-    }
+    *logger << "Waiting for processing to end..." << std::endl;
     event.wait();
-    if (logger != nullptr) {
-        *logger << "Processing ended." << std::endl;
-        if (profilingEnabled) {
-            //logger << event.getProfilingInfo<CL_PROFILING_COMMAND_QUEUED>() << std::endl;
-        }
+    *logger << "Processing ended." << std::endl;
+    if (profilingEnabled) {
+        //*logger << event.getProfilingInfo<CL_PROFILING_COMMAND_QUEUED>() << std::endl;
     }
     event = cl::Event();
 }

@@ -148,6 +148,26 @@ static std::function<void(TState &, T)> makeCheckHandler(
     };
 }
 
+template<class TState>
+static std::function<void(TState &, const std::string &)>
+makeArgumentWithOptionsHandler(
+        std::function<void(TState &, const std::string &, const std::string &)> callback,
+        char delim = ':')
+{
+    return [=] (TState &state, const std::string &arg) {
+        std::string name, opts;
+        std::size_t delimPos = arg.find(delim);
+        if (delimPos == std::string::npos) {
+            name.assign(arg);
+            opts.clear();
+        } else {
+            name.assign(arg.begin(), arg.begin() + delimPos);
+            opts.assign(arg.begin() + delimPos + 1, arg.end());
+        }
+        callback(state, name, opts);
+    };
+}
+
 } // namespace libcommandline
 
 #endif // LIBCOMMANDLINE_ARGUMENTHANDLERS_H

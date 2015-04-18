@@ -213,7 +213,7 @@ int main(int, const char * const *argv)
 
     std::ostream *logStream;
     std::ofstream logFile;
-    logFile.exceptions(std::istream::failbit | std::istream::badbit);
+    logFile.exceptions(std::ios::failbit | std::ios::badbit);
     if (args.logMode == "none") {
         logStream = nullptr;
     } else if (args.logMode == "stderr") {

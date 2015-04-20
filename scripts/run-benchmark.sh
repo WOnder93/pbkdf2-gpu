@@ -19,8 +19,8 @@ if [ "$MODE" = cpu ]; then
     DEFAULT_BATCH_SIZE=256
 
     DL_FROM=16
-    DL_TO=256
-    ITER_FROM=4
+    DL_TO=512
+    ITER_FROM=1
     ITER_TO=8192
     BS_FROM=32
     BS_TO=8192
@@ -32,16 +32,16 @@ if [ "$MODE" = cpu ]; then
 elif [ "$MODE" = gpu ]; then
     SAMPLES=10
 
-    DEFAULT_ITERATIONS=16384 # !!! This should perhaps be more
+    DEFAULT_ITERATIONS=16384
     DEFAULT_DK_LENGTH=16
     DEFAULT_BATCH_SIZE=65536
 
     DL_FROM=16
-    DL_TO=256
-    ITER_FROM=4
+    DL_TO=512
+    ITER_FROM=1
     ITER_TO=65536
     BS_FROM=1024
-    BS_TO=65536
+    BS_TO=$((256 * 1024))
     SL_FROM=32
     SL_TO=65536
 
@@ -91,6 +91,18 @@ case "$TASK" in
                     done
                     echo >> $DATA_FILE
                 done
+            done
+        done
+        ;;
+    dl-bs)
+        for (( dl = $DL_FROM; dl <= $DL_TO; dl *= 2 )); do
+            for (( bs = $BS_FROM; bs <= $BS_TO; bs *= 2 )); do
+                echo -n "$dl,$bs" >> $DATA_FILE
+                for sample in `run_benchmark $SAMPLES "$SALT" $DEFAULT_ITERATIONS $dl $bs`; do
+                    echo -n "," >> $DATA_FILE
+                    echo -n "$sample" >> $DATA_FILE
+                done
+                echo >> $DATA_FILE
             done
         done
         ;;

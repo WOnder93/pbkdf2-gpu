@@ -1,0 +1,65 @@
+DEFAULT_ITERATIONS=16384
+DEFAULT_DK_LENGTH=16
+DEFAULT_BATCH_SIZE=65536
+
+BEGIN Device info
+Running benchmark in 'opencl' mode...
+Device #0: OpenCL Device 'Tesla M2090':
+  Type: GPU
+  Available: 1
+  Compiler available: 1
+
+  Version: OpenCL 1.1 CUDA
+  OpenCL C Version: OpenCL C 1.1 
+  Extensions: cl_khr_byte_addressable_store cl_khr_icd cl_khr_gl_sharing cl_nv_compiler_options cl_nv_device_attribute_query cl_nv_pragma_unroll  cl_khr_global_int32_base_atomics cl_khr_global_int32_extended_atomics cl_khr_local_int32_base_atomics cl_khr_local_int32_extended_atomics cl_khr_fp64 
+
+  Vendor: NVIDIA Corporation
+  Vendor ID: 4318
+
+  Platform name: NVIDIA CUDA
+  Platform vendor: NVIDIA Corporation
+  Platform version: OpenCL 1.1 CUDA 6.5.14
+  Platform extensions: cl_khr_byte_addressable_store cl_khr_icd cl_khr_gl_sharing cl_nv_compiler_options cl_nv_device_attribute_query cl_nv_pragma_unroll 
+
+  Driver version: 340.32
+  Little-endian: 1
+
+  Max compute units: 16
+  Max work-item dimensions: 3
+  Max work-item sizes: [1024, 1024, 64]
+
+  Max clock frequency: 1301 MHz
+
+  Address bits: 32
+  Max memory allocation size: 1409138688 bytes
+  Max parameter size: 4352 bytes
+  Memory base address alignment: 4096 bits
+  Min data type alignment: 128 bytes
+
+  Unified memory: 0
+  Global memory cache type: Read-write
+  Global memory cacheline size: 128 bytes
+  Global memory cache size: 262144 bytes
+  Global memory size: 5636554752 bytes
+
+  Max constant buffer size: 65536 bytes
+  Max constant arguments: 9
+
+  Local memory type: Dedicated
+  Local memory size: 49151 bytes
+
+  Preferred vector width (char): 1 (native: 1)
+  Preferred vector width (short): 1 (native: 1)
+  Preferred vector width (int): 1 (native: 1)
+  Preferred vector width (long): 1 (native: 1)
+  Preferred vector width (float): 1 (native: 1)
+  Preferred vector width (double): 1 (native: 1)
+  Preferred vector width (half): 0 (native: 0)
+
+  Error correction supported: 1
+  Profiling timer resolution: 1000 ns
+
+  Execution capabilites: OpenCL kernels
+  Command queue properties: Out-of-order execution | Profiling
+
+END   Device info

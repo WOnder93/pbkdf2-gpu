@@ -1,0 +1,166 @@
+DEFAULT_ITERATIONS=4096
+DEFAULT_DK_LENGTH=16
+DEFAULT_BATCH_SIZE=256
+
+BEGIN Device info
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 15
+model name	: Intel(R) Xeon(R) CPU           E5345  @ 2.33GHz
+stepping	: 7
+microcode	: 0x69
+cpu MHz		: 2327.550
+cache size	: 4096 KB
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 10
+wp		: yes
+flags		: fpu de tsc msr pae cx8 sep cmov pat clflush mmx fxsr sse sse2 ss ht syscall nx lm constant_tsc rep_good nopl pni ssse3 cx16 hypervisor lahf_lm dtherm
+bogomips	: 4655.10
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 1
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 15
+model name	: Intel(R) Xeon(R) CPU           E5345  @ 2.33GHz
+stepping	: 7
+microcode	: 0x69
+cpu MHz		: 2327.550
+cache size	: 4096 KB
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 10
+wp		: yes
+flags		: fpu de tsc msr pae cx8 sep cmov pat clflush mmx fxsr sse sse2 ss ht syscall nx lm constant_tsc rep_good nopl pni ssse3 cx16 hypervisor lahf_lm dtherm
+bogomips	: 4655.10
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 2
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 15
+model name	: Intel(R) Xeon(R) CPU           E5345  @ 2.33GHz
+stepping	: 7
+microcode	: 0x69
+cpu MHz		: 2327.550
+cache size	: 4096 KB
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 10
+wp		: yes
+flags		: fpu de tsc msr pae cx8 sep cmov pat clflush mmx fxsr sse sse2 ss ht syscall nx lm constant_tsc rep_good nopl pni ssse3 cx16 hypervisor lahf_lm dtherm
+bogomips	: 4655.10
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 3
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 15
+model name	: Intel(R) Xeon(R) CPU           E5345  @ 2.33GHz
+stepping	: 7
+microcode	: 0x69
+cpu MHz		: 2327.550
+cache size	: 4096 KB
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 10
+wp		: yes
+flags		: fpu de tsc msr pae cx8 sep cmov pat clflush mmx fxsr sse sse2 ss ht syscall nx lm constant_tsc rep_good nopl pni ssse3 cx16 hypervisor lahf_lm dtherm
+bogomips	: 4655.10
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 4
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 15
+model name	: Intel(R) Xeon(R) CPU           E5345  @ 2.33GHz
+stepping	: 7
+microcode	: 0x69
+cpu MHz		: 2327.550
+cache size	: 4096 KB
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 10
+wp		: yes
+flags		: fpu de tsc msr pae cx8 sep cmov pat clflush mmx fxsr sse sse2 ss ht syscall nx lm constant_tsc rep_good nopl pni ssse3 cx16 hypervisor lahf_lm dtherm
+bogomips	: 4655.10
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 5
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 15
+model name	: Intel(R) Xeon(R) CPU           E5345  @ 2.33GHz
+stepping	: 7
+microcode	: 0x69
+cpu MHz		: 2327.550
+cache size	: 4096 KB
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 10
+wp		: yes
+flags		: fpu de tsc msr pae cx8 sep cmov pat clflush mmx fxsr sse sse2 ss ht syscall nx lm constant_tsc rep_good nopl pni ssse3 cx16 hypervisor lahf_lm dtherm
+bogomips	: 4655.10
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 6
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 15
+model name	: Intel(R) Xeon(R) CPU           E5345  @ 2.33GHz
+stepping	: 7
+microcode	: 0x69
+cpu MHz		: 2327.550
+cache size	: 4096 KB
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 10
+wp		: yes
+flags		: fpu de tsc msr pae cx8 sep cmov pat clflush mmx fxsr sse sse2 ss ht syscall nx lm constant_tsc rep_good nopl pni ssse3 cx16 hypervisor lahf_lm dtherm
+bogomips	: 4655.10
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 7
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 15
+model name	: Intel(R) Xeon(R) CPU           E5345  @ 2.33GHz
+stepping	: 7
+microcode	: 0x69
+cpu MHz		: 2327.550
+cache size	: 4096 KB
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 10
+wp		: yes
+flags		: fpu de tsc msr pae cx8 sep cmov pat clflush mmx fxsr sse sse2 ss ht syscall nx lm constant_tsc rep_good nopl pni ssse3 cx16 hypervisor lahf_lm dtherm
+bogomips	: 4655.10
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+END   Device info

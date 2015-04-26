@@ -18,8 +18,8 @@ if [ "$MODE" = cpu ]; then
     DEFAULT_DK_LENGTH=16
     DEFAULT_BATCH_SIZE=256
 
-    DL_FROM=16
-    DL_TO=512
+    DL_FROM=20
+    DL_TO=$((20 * 32))
     ITER_FROM=1
     ITER_TO=8192
     BS_FROM=32
@@ -36,8 +36,8 @@ elif [ "$MODE" = gpu ]; then
     DEFAULT_DK_LENGTH=16
     DEFAULT_BATCH_SIZE=65536
 
-    DL_FROM=16
-    DL_TO=512
+    DL_FROM=20
+    DL_TO=$((20 * 32))
     ITER_FROM=1
     ITER_TO=65536
     BS_FROM=1024

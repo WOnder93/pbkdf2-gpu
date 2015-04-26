@@ -1,0 +1,122 @@
+\documentclass[12pt,oneside]{fithesis2}
+
+\usepackage[english]{babel}       % Multilingual support
+\usepackage[utf8]{inputenc}       % UTF-8 encoding
+\usepackage[T1]{fontenc}          % T1 font encoding
+\usepackage{hyperref}             % Clickable links
+\usepackage{xcolor}               % For specifying the link colors
+\usepackage{ccicons}              % http://ctan.org/pkg/ccicons
+\usepackage{etoolbox}
+
+\hypersetup{
+  plainpages = false,             % We have multiple page numberings
+  %pdfpagelabels,                 % (alreaty set) Generate pdf page labels
+  colorlinks,                     % We want nice, colored links, not those ugly boxes
+  linkcolor={red!50!black},
+  citecolor={green!50!black},
+  urlcolor={blue!80!black}
+}
+
+% shut up those bibliography warnings:
+\apptocmd{\sloppy}{\hbadness 10000\relax}{}{}
+
+\thesislang{en}                   % The language of the thesis
+\thesistitle                      % The title of the thesis
+{Key derivation functions and their GPU implementation}
+\thesissubtitle{Bachelor's Thesis}% The type of the thesis
+\thesisstudent{Ondrej Mosnáček}   % Your name
+\thesiswoman{false}               % Your gender
+\thesisfaculty{fi}                % Your faculty
+\thesisyear{Spring \the\year}     % The academic term of your thesis defense
+\thesisadvisor{Ing. Milan Brož}   % Your advisor
+
+\widowpenalty=500
+\clubpenalty=500
+
+\begin{document}
+  \FrontMatter                    % The front matter
+    \ThesisTitlePage                % The title page
+    
+    % The license:
+    This work is licensed under a \href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License}.
+    \begin{center}
+      \Large \ccbyncsa
+    \end{center}
+    
+    \begin{ThesisDeclaration}       % The declaration
+      \DeclarationText
+      \AdvisorName
+    \end{ThesisDeclaration}
+    
+    \begin{ThesisThanks}            % The acknowledgements (optional)
+      \sloppy
+      I would like to thank my supervisor for his guidance and support, and also for his extensive contributions to the Cryptsetup open-source project.
+      
+      Next, I would like to thank my family for their support and patience and also to my friends who were falling behind schedule just like me and thus helped me not to panic :)
+      
+      \sloppy
+      Last but not least, access to computing and storage facilities owned by parties and projects contributing to the National Grid Infrastructure MetaCentrum, provided under the programme “Projects of Large Infrastructure for Research, Development, and Innovations” (LM2010005), is also greatly appreciated.
+    \end{ThesisThanks}
+    
+    \begin{ThesisAbstract}          % The abstract
+      TODO
+    \end{ThesisAbstract}
+    
+    \begin{ThesisKeyWords}          % The keywords
+      key derivation function, PBKDF2, GPU, OpenCL, CUDA, password hashing, disk encryption, password cracking, LUKS
+    \end{ThesisKeyWords}
+    
+    \tableofcontents                % The table of contents
+%   \listoftables                   % The list of tables (optional)
+%   \listoffigures                  % The list of figures (optional)
+  
+  \MainMatter                     % The main matter
+    \chapter{Introduction}          % Chapters
+      Encryption is the process of encoding information or data in such a way that only authorized parties can read it \cite{wikiEncryption}. The encryption uses a parameter -- the key. The key is an information that is only known to the authorized parties and which is necessary to read the encrypted data. In general, any piece of information can be used as the key, but since it usually has to be memorized by a human, it often has the form of a password or passphrase.
+    
+      Passwords and passphrases generally have the form of text (a variable-length sequence of characters), while most encryption algorithms expect a key in binary form (a long, usually fixed-size, sequence of bits or bytes). This means that for any password- or pass\-phrase-based cryptosystem it is necessary to define the process of converting the password (passphrase) into binary form. Merely encoding the text using a common character encoding (e. g. ASCII or UTF-8) and padding it with zeroes is often not sufficient, because the resulting key might be susceptible to various attacks.
+    
+      For this reason, a cryptographic primitive called “key derivation function” (KDF, plural KDFs) are used to derive encryption keys from passwords. KDFs are often also used for password hashing (transforming the password to a hash in such a way that it is easy to verify a given password against a hash, but infeasible to determine the original password from the hash) or key diversification (deriving multiple keys from a master key so that it is infeasible to determine the master key or any other derived key from one or more derived keys) \cite{wikiKDF}.
+    
+      KDFs usually have various security parameters, such as the number of iterations of an internal algorithm, which control the amount of time or memory required to perform the derivation in order to thwart brute-force attacks. Another common parameter is the cryptographic salt, which is a unique or random piece of data that is used together with the password to derive the key. Its main purpose is to protect against dictionary and rainbow table attacks and it is usually not kept secret \cite{rfc2898}.
+    
+      \section{Goals}
+      The goal of this work is to compare the speed of a brute-force attack on a specific key derivation function (PBKDF2) performed on standard computer processors against an attack using GPUs\footnote{GPU = Central Processing Unit}. Modern GPUs can be programmed using various high-level APIs (such as OpenCL\footnote{\url{https://www.khronos.org/opencl/}}, CUDA\footnote{\url{http://www.nvidia.com/object/cuda_home_new.html}}, DirectCompute or C++ AMP) and can be used not only for graphics processing but also for general purpose computation. Due to their specific architecture GPUs are suitable for parallel processing of massive amounts of data. Tasks that can be split into many small subtasks which can be run in parallel can be processed by a single GPU several times faster than by a single CPU. As was shown by Harrison and Waldron\cite{Harrison}, using GPUs it is possible to accelerate also various algorithms of symmetric cryptography.
+    
+      This work also includes analysis of susceptibility of PBKDF2 to attacks using parallel processing and the implementation of an illustration program performing a brute-force attack on the password of a LUKS\footnote{\url{https://gitlab.com/cryptsetup/cryptsetup/wikis/home}} encrypted partition.
+    
+      \section{Summary of results}
+      TODO
+    
+      \section{Chapter contents}
+      TODO
+    
+    \chapter{Key derivation functions}
+      Key derivation functions are cryptographic primitives that are used to derive encryption keys from a secret value. Depending on the application, the secret value can be another key or a password or passphrase \cite{wikiKDF}. A KDF that is designed for deriving cryptographic key from another key is called a “key-based key derivation function” (KBKDF); a KDF that is designed to take a password or passphrase as input is called a “password-based key derivation function” (PBKDF).
+      
+      \section{Key-based key derivation functions}
+      Key-based key derivation functions are most often used to derive additional keys from a key that already has the properties of a cryptographic key -- that is, it is a truly random or pseudorandom binary string that is computationally indistinguishable from one selected uniformly at random from the set of all binary strings of the same length \cite{nistsp800108}.
+      
+      
+      \section{Password-based key derivation functions}
+      
+    \chapter{Attacks on key derivation functions}
+    \chapter{Acceleration of algorithms using GPUs}
+    \chapter{Comparison of CPU and GPU attack speeds}
+    \chapter{Implementing PBKDF2 on GPUs}
+    \chapter{Conclusion}
+    
+    \iffalse
+    \appendix
+    \chapter{First appendix}        % Appendices
+    TODO
+    \chapter{Another appendix}
+    TODO
+    \fi
+    
+    % Bibliography goes here
+    \bibliographystyle{acm}
+    \bibliography{thesis}
+    
+    % Index goes here (optional)
+\end{document}

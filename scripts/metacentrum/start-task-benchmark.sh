@@ -3,6 +3,7 @@
 TASK=$1
 MODE=$2
 MACHINE=$3
+DURATION=$4
 
 if [ -z "$TASK" ]; then
     echo "ERROR: Task not specified!" 1>&2
@@ -29,6 +30,10 @@ else
     exit 1
 fi
 
+if [ -z "$DURATION" ]; then
+    DURATION=1d
+fi
+
 DEST_DIR=`pwd`
 
 TASK_FILE=`mktemp`
@@ -36,7 +41,7 @@ TASK_FILE=`mktemp`
 cat >$TASK_FILE <<EOF
 #!/bin/bash
 #PBS -N benchmark-$TASK-$MODE-$MACHINE
-#PBS -l walltime=1d
+#PBS -l walltime=$DURATION
 #PBS -l nodes=1:ppn=1:cl_$MACHINE
 $EXTRA_ARGS
 

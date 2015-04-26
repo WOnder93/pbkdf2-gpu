@@ -80,12 +80,19 @@ rm -f "$LOG_FILE"
 print_dev_info >> $LOG_FILE
 
 case "$TASK" in
+    simple)
+        for sample in `run_benchmark $SAMPLES "$DEFAULT_SALT" $DEFAULT_ITERATIONS $DEFAULT_DK_LENGTH $DEFAULT_BATCH_SIZE`; do
+            echo -n "," >> $DATA_FILE
+            echo -n "$sample" >> $DATA_FILE
+        done
+        echo >> $DATA_FILE
+        ;;
     dl-iter-bs)
         for (( dl = $DL_FROM; dl <= $DL_TO; dl *= 2 )); do
             for (( it = $ITER_FROM; it <= $ITER_TO; it *= 2 )); do
                 for (( bs = $BS_FROM; bs <= $BS_TO; bs *= 2 )); do
                     echo -n "$dl,$it,$bs" >> $DATA_FILE
-                    for sample in `run_benchmark $SAMPLES "$SALT" $it $dl $bs`; do
+                    for sample in `run_benchmark $SAMPLES "$DEFAULT_SALT" $it $dl $bs`; do
                         echo -n "," >> $DATA_FILE
                         echo -n "$sample" >> $DATA_FILE
                     done
@@ -98,7 +105,7 @@ case "$TASK" in
         for (( dl = $DL_FROM; dl <= $DL_TO; dl *= 2 )); do
             for (( bs = $BS_FROM; bs <= $BS_TO; bs *= 2 )); do
                 echo -n "$dl,$bs" >> $DATA_FILE
-                for sample in `run_benchmark $SAMPLES "$SALT" $DEFAULT_ITERATIONS $dl $bs`; do
+                for sample in `run_benchmark $SAMPLES "$DEFAULT_SALT" $DEFAULT_ITERATIONS $dl $bs`; do
                     echo -n "," >> $DATA_FILE
                     echo -n "$sample" >> $DATA_FILE
                 done

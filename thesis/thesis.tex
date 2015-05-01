@@ -7,11 +7,12 @@
 \usepackage{xcolor}               % For specifying the link colors
 \usepackage{ccicons}              % http://ctan.org/pkg/ccicons
 \usepackage{etoolbox}
+\usepackage{amsmath}
 
 \hypersetup{
   plainpages = false,             % We have multiple page numberings
   %pdfpagelabels,                 % (alreaty set) Generate pdf page labels
-  colorlinks,                     % We want nice, colored links, not those ugly boxes
+  colorlinks,                     % We want nice colored links, not those ugly boxes
   linkcolor={red!50!black},
   citecolor={green!50!black},
   urlcolor={blue!80!black}
@@ -74,9 +75,9 @@
     \chapter{Introduction}          % Chapters
       Encryption is the process of encoding information or data in such a way that only authorized parties can read it \cite{appliedCrypto, foundations}. The encryption uses a parameter -- the key. The key is an information that is only known to the authorized parties and which is necessary to read the encrypted data. In general, any piece of information can be used as the key, but since it usually has to be memorized by a human, it often has the form of a password or passphrase.
     
-      Passwords and passphrases generally have the form of text (a variable-length sequence of characters), while most encryption algorithms expect a key in binary form (a long, usually fixed-size, sequence of bits or bytes). This means that for any password- or pass\-phrase-based cryptosystem it is necessary to define the process of converting the password (passphrase) into binary form. Merely encoding the text using a common character encoding (e. g. ASCII or UTF-8) and padding it with zeroes is often not sufficient, because the resulting key might be susceptible to various attacks.
+      Passwords and passphrases generally have the form of text (a variable-length sequence of characters), while most encryption algorithms expect a key in binary form (a long, usually fixed-size, sequence of bits or bytes). This means that for any password- or pass\-phrase-based cryptosystem it is necessary to define the process of converting the password (passphrase) into binary form. Merely encoding the text using a common character encoding (e. g. ASCII or UTF-8) and padding it with zeroes is often not sufficient, because the resulting key might be susceptible to various attacks. An \emph{attack} on a cryptographic key is an attempt by an unauthorized party to determine the key from publicly known information or from a certain partial information about the key (e. g. some knowledge about the domain from which the key was chosen, the first few bits of the key, etc.). % TODO: add some reference for "attack"
     
-      For this reason, a cryptographic primitive called \emph{key derivation function} (KDF, plural KDFs) is used to derive encryption keys from passwords. KDFs are also often used for password hashing (transforming the password to a hash in such a way that it is easy to verify a given password against a hash, but infeasible to determine the original password from the hash) or key diversification (deriving multiple keys from a master key so that it is infeasible to determine the master key or any other derived key from one or more derived keys) \cite{wikiKDF, nist:sp800:108}.
+      For this reason, a cryptographic primitive called \emph{key derivation function} (KDF, plural KDFs) is used to derive encryption keys from passwords. KDFs are also often used for \emph{password hashing} (transforming the password to a hash in such a way that it is easy to verify a given password against a hash, but infeasible to determine the original password from the hash) or \emph{key diversification} (also \emph{key separation}; deriving multiple keys from a master key so that it is infeasible to determine the master key or any other derived key from one or more derived keys) \cite{wikiKDF, nist:sp800:108}.
     
       KDFs usually have various security parameters, such as the number of iterations of an internal algorithm, which control the amount of time or memory required to perform the derivation in order to thwart brute-force attacks. Another common parameter is the cryptographic salt, which is a unique or random piece of data that is used together with the password to derive the key. Its main purpose is to protect against dictionary and rainbow table attacks and it is usually not kept secret \cite{rfc2898}.
       
@@ -88,7 +89,7 @@
       \section{Goals}
       The goal of this work is to compare the speed of a brute-force attack on a specific key derivation function (PBKDF2) performed on standard computer processors against an attack using GPUs. Modern GPUs can be programmed using various high-level APIs (such as OpenCL\footnote{\url{https://www.khronos.org/opencl/}}, CUDA\footnote{\url{http://www.nvidia.com/object/cuda_home_new.html}}, DirectCompute or C++ AMP) and can be used not only for graphics processing but also for general purpose computation. Due to their specific architecture GPUs are suitable for parallel processing of massive amounts of data. Tasks that can be split into many small subtasks which can be run in parallel can be processed by a single GPU several times faster than by a single CPU. As was shown by Harrison and Waldron\cite{Harrison}, using GPUs it is possible to accelerate also various algorithms of symmetric cryptography.
     
-      This work also includes analysis of susceptibility of PBKDF2 to attacks using parallel processing and the implementation of an illustration program performing a brute-force attack on the password of a LUKS encrypted partition.
+      This work also includes analysis of susceptibility of PBKDF2 to attacks using parallel processing and the implementation of an illustration program performing a brute-force attack on the password of a LUKS\footnote{LUKS = Linux Unified Key Setup} encrypted partition.
     
       \section{Summary of results}
       TODO
@@ -102,8 +103,43 @@
       \section{Key-based key derivation functions}
       Key-based key derivation functions are most often used to derive additional keys from a key that already has the properties of a cryptographic key -- that is, it is a truly random or pseudorandom binary string that is computationally indistinguishable from one selected uniformly at random from the set of all binary strings of the same length \cite{nist:sp800:108}.
       
+      Since the input to a KBKDF is already a cryptographic key, KBKDFs usually do not try to make brute-forcing more difficult by making the algorithm more computationally complex. A good cryptographic key has entropy of at least 128 bits, which means there are at least $2^{128}$ possible keys. Testing so many keys would be infeasible even with a very fast algorithm and an enormous computer cluster.
+      
+      An example of a simple KBKDF is HKDF (HMAC-based extract-and-expand Key Derivation Function), which proceeds in two stages. The optional \emph{extract} stage first extracts a suitable pseudorandom key from the (possibly low-entropy) input key material and an optional salt. Then the \emph{expand} stage expands the extracted pseudorandom key, along with an optional context and application specific information (this can be used for key diversification), to the output key of the desired length \cite{hkdf, rfc5869}.
       
       \section{Password-based key derivation functions}
+      As opposed to key-based key derivation functions, password-based key derivation functions are designed specifically to take low-entropy input such as a password or passphrase and to resist brute-force and dictionary attacks.
+      
+      A brute-force attack is ...
+      
+      A dictionary attack is ...
+      
+      PBKDFs aim to reduce the feasibility of these attacks by increasing the amount of time and/or memory required to test a single key. The basic principle of this approach is that in practice, the extra time/memory requirements are only a minor inconvenience for a user (especially given that these measures provide an increased resistance against a mass attack), while for an attacker (who has to repeatedly process millions or billions of possible passwords) this means that the resources needed to perform a brute-force (or dictionary) attack increase significantly.
+      
+      A well-designed PBKDF also takes into account the difference between the hardware that is used in the legitimate scenario and the hardware that the attacker might have available. A highly motivated and well-funded attacker might have access to massive amounts of computing power, might often be willing to wait even years until the password is found and might possess an expensive specialized hardware which would minimize the time and resources needed to successfully break the password. A typical user, on the other hand, will use a consumer-grade hardware (such as a personal computer or a laptop), so the PBKDF should be designed so that it performs with reasonable efficiency on the user's hardware, but at the same time it is difficult to utilize specialized hardware to gain advantage in an attack \cite{openwall:pwHashing}.
+      
+      In order to protect against attacks using highly parallel architectures, modern PBKDFs use \emph{sequential memory-hard functions}, which are designed in such a way that any time-efficient computation needs to use a certain configurable amount of memory. Requiring a certain non-trivial amount of memory to compute a single instance of the PBKDF increases the size of each compute unit, thus making any increase in parallelism more expensive (as opposed to functions that use only a small constant amount of memory) \cite{scrypt}.
+      
+      Another desirable property of PBKDFs is the ability to upgrade an existing derived key/hash to another having different (stronger) security parameters (e. g. the iteration count) without knowledge of the original password \cite{openwall:pwHashing}. However, there are no PBKDFs having this property currently available.
+      % TODO: upgrading existing hashes
+      % TODO: ?auth servers
+      
+      \paragraph*{}
+      The most widely used password-based key derivation functions are currently \emph{PBKDF2} and \emph{bcrypt}.
+      
+      PBKDF2 was standardized under PKCS\footnote{PKCS = Public-Key Cryptography Standards; a group of standards published by RSA Security, Inc. (see \url{https://www.emc.com/emc-plus/rsa-labs/standards-initiatives/public-key-cryptography-standards.htm})} \#5, Version 2.0 in 1999 (also published as RFC 2898 in 2000 \cite{rfc2898}) and later specified in NIST Special Publication 800-132 \cite{nist:sp800:132} as the only password-based key derivation function approved by the U.S. National Institute of Standards and Technology. PBKDF2 is widely used in many practical applications, such as Wi-Fi Protected Access (security protocols used to secure wireless networks), disk encryption software (Cryptsetup, TrueCrypt/VeraCrypt\footnote{\url{https://veracrypt.codeplex.com/}}, ...) and password managers (LastPass\footnote{\url{https://lastpass.com/}}, 1Password\footnote{\url{https://agilebits.com/onepassword}}, ...).
+      
+      Bcrypt was introduced in 1999 \cite{bcrypt} and although it is somewhat more secure than PBKDF2, it is not as widely used.
+      
+      In 2009, a new password-based key derivation function \emph{scrypt} was introduced \cite{scrypt}, which uses the aforementioned sequential memory-hard functions.
+      
+      In 2013, an open competition called \emph{Password Hashing Competition}\footnote{\url{https://password-hashing.net/}} was announced. The competition aims to ``identify new password hashing schemes in order to improve on the state-of-the-art'' \cite{phc}. The competition is organized by a group of cryptography experts, not by a standardization body. It is expected, however, that it will lead to a new standard for password-based key derivation and password hashing.
+      
+      \section{PBKDF2}
+      TODO
+      
+      \section{Scrypt}
+      TODO
       
     \chapter{Attacks on key derivation functions}
     \chapter{Acceleration of algorithms using GPUs}

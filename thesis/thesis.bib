@@ -21,8 +21,8 @@
  author = {{Wikipedia contributors}},
  title = "Key derivation function --- {W}ikipedia{,} The Free Encyclopedia",
  year = "2015",
- howpublished = "Retrieved from \url{https://en.wikipedia.org/w/index.php?title=Key_derivation_function&oldid=644734578}",
- note = "[Online, accessed 11-April-2015]",
+ howpublished = "Wikimedia Foundation, Inc.",
+ note = "[Online, accessed 11-April-2015, retrieved from \url{https://en.wikipedia.org/w/index.php?title=Key_derivation_function&oldid=644734578}]",
 }
 
 @inproceedings{Harrison,
@@ -58,22 +58,56 @@
  note = {[Available at \url{https://tools.ietf.org/html/rfc2898}]},
 }
 
+@techreport{rfc5869,
+ author = {H. Krawczyk and P. Eronen},
+ title = {{{HMAC}}-based Extract-and-Expand Key Derivation Function ({{HKDF}})},
+ howpublished = {Internet Requests for Comments},
+ type ="{RFC}",
+ number = 5869,
+ numpages = {14},
+ year = {2010},
+ month = {May},
+ ISSN = {2070-1721},
+ publisher = "{RFC Editor}",
+ institution = "{RFC Editor}",
+ url = {https://www.rfc-editor.org/rfc/rfc5869.txt},
+ note = {[Available at \url{https://tools.ietf.org/html/rfc5869}]},
+}
+
+@misc{scrypt,
+ author={Percival, Colin},
+ title={Stronger key derivation via sequential memory-hard functions},
+ year = {2009},
+ month = {May},
+ url = {https://www.tarsnap.com/scrypt/scrypt.pdf},
+ note = {[Online, accessed 30-April-2015, retrieved from \url{https://www.tarsnap.com/scrypt/scrypt.pdf}]}
+}
+
 @misc{luks,
  author = {Clemens Fruhwirth and Milan Brož},
  title = {{{LUKS}} On-Disk Format Specification},
  subtitle = {Version 1.2.1},
  year = {2011},
  month = {October},
- day = {16},
  url = {https://gitlab.com/cryptsetup/cryptsetup/wikis/LUKS-standard/on-disk-format.pdf},
- howpublished = {Retrieved from \url{https://gitlab.com/cryptsetup/cryptsetup/wikis/LUKS-standard/on-disk-format.pdf}},
- note = {[Online, accessed 27-April-2015]}
+ note = {[Online, accessed 27-April-2015, retrieved from \url{https://gitlab.com/cryptsetup/cryptsetup/wikis/LUKS-standard/on-disk-format.pdf}]}
+}
+
+@misc{openwall:pwHashing,
+  author = {Alexander Peslyak and Simon Marechal},
+  title = {Password security: past, present, future},
+  subtitle = {(with strong bias towards password hashing)},
+  year = {2012},
+  month = {December},
+  url = {http://www.openwall.com/presentations/Passwords12-The-Future-Of-Hashing/},
+  howpublished = {Openwall, Inc.},
+ note = {[Online, accessed 30-April-2015, retrieved from \url{http://www.openwall.com/presentations/Passwords12-The-Future-Of-Hashing/Passwords12-The-Future-Of-Hashing.pdf}]}
 }
 
 @techreport{nist:sp800:108,
  author = {Lidong Chen},
  title = {Recommendation for Key Derivation Using Pseudorandom Functions},
- type = {NIST SP},
+ type = {NIST Special Publication},
  number = {800-108},
  numpages = {20},
  year = {2008},
@@ -82,4 +116,52 @@
  institution = {The U.S. National Institute of Standards and Technology},
  url = {http://www.nist.gov/manuscript-publication-search.cfm?pub_id=900147},
  note = {[Available at \url{http://csrc.nist.gov/publications/nistpubs/800-108/sp800-108.pdf}]},
+}
+
+@techreport{nist:sp800:132,
+ author = {Meltem Sonmez Turan and Elaine B. Barker and William E. Burr and Lidong Chen},
+ title = {Recommendation for Password-Based Key Derivation, {P}art 1: Storage Applications},
+ type = {NIST Special Publication},
+ number = {800-132},
+ numpages = {18},
+ year = {2010},
+ month = {December},
+ publisher = {The U.S. National Institute of Standards and Technology},
+ institution = {The U.S. National Institute of Standards and Technology},
+ url = {http://www.nist.gov/manuscript-publication-search.cfm?pub_id=907381},
+ note = {[Available at \url{http://csrc.nist.gov/publications/nistpubs/800-132/nist-sp800-132.pdf}]},
+}
+
+@techreport{hkdf,
+ author = {Hugo Krawczyk},
+ title = {Cryptographic Extraction and Key Derivation: The {{HKDF}} Scheme},
+ type = {Cryptology ePrint Archive, Report},
+ number = {2010/264},
+ year = {2010},
+ howpublished = {Cryptology ePrint Archive},
+ publisher = {International Association for Cryptologic Research},
+ institution = {International Association for Cryptologic Research},
+ url = {https://eprint.iacr.org/2010/264},
+ note = {[Available at \url{https://eprint.iacr.org/2010/264}]},
+}
+
+@inproceedings{bcrypt,
+ author = {Provos, Niels and Mazi\`{e}res, David},
+ title = {A Future-Adaptable Password Scheme},
+ booktitle = {Proceedings of the Annual Conference on USENIX Annual Technical Conference},
+ series = {ATEC '99},
+ year = {1999},
+ location = {Monterey, California},
+ pages = {32--32},
+ numpages = {1},
+ url = {http://dl.acm.org/citation.cfm?id=1268708.1268740},
+ publisher = {USENIX Association},
+ address = {Berkeley, CA, USA},
+ note = {[Available at \url{https://www.usenix.org/legacy/publications/library/proceedings/usenix99/provos/provos.pdf}]},
+}
+
+@misc{phc,
+ title = {Password Hashing Competition},
+ year = "2015",
+ note = "[Online, accessed 30-April-2015, retrieved from \url{https://password-hashing.net/}]",
 }

@@ -41,10 +41,25 @@
  note = {[Available at \url{https://www.usenix.org/legacy/event/sec08/tech/full_papers/harrison/harrison.pdf}]},
 }
 
+@techreport{rfc2104,
+ author = {H. Krawczyk and M. Bellare and R. Canetti},
+ title = {{HMAC: Keyed-Hashing for Message Authentication}},
+ howpublished = {Internet Requests for Comments},
+ type ="{RFC}",
+ number = 2104,
+ numpages = {11},
+ year = {1997},
+ month = {February},
+ ISSN = {2070-1721},
+ publisher = "{RFC Editor}",
+ institution = "{RFC Editor}",
+ url = {https://www.rfc-editor.org/rfc/rfc2104.txt},
+ note = {[Available at \url{https://tools.ietf.org/html/rfc2104}]},
+}
+
 @techreport{rfc2898,
  author = {B. Kaliski},
- title = {{{PKCS}} \#5: Password-Based Cryptography Specification},
- subtitle = {Version 2.0},
+ title = {{PKCS \#5: Password-Based Cryptography Specification Version 2.0}},
  howpublished = {Internet Requests for Comments},
  type ="{RFC}",
  number = 2898,
@@ -60,7 +75,7 @@
 
 @techreport{rfc5869,
  author = {H. Krawczyk and P. Eronen},
- title = {{{HMAC}}-based Extract-and-Expand Key Derivation Function ({{HKDF}})},
+ title = {{HMAC-based Extract-and-Expand Key Derivation Function (HKDF)}},
  howpublished = {Internet Requests for Comments},
  type ="{RFC}",
  number = 5869,
@@ -94,14 +109,25 @@
 }
 
 @misc{openwall:pwHashing,
-  author = {Alexander Peslyak and Simon Marechal},
-  title = {Password security: past, present, future},
-  subtitle = {(with strong bias towards password hashing)},
-  year = {2012},
-  month = {December},
-  url = {http://www.openwall.com/presentations/Passwords12-The-Future-Of-Hashing/},
-  howpublished = {Openwall, Inc.},
+ author = {Alexander Peslyak and Simon Marechal},
+ title = {Password security: past, present, future},
+ subtitle = {(with strong bias towards password hashing)},
+ year = {2012},
+ month = {December},
+ url = {http://www.openwall.com/presentations/Passwords12-The-Future-Of-Hashing/},
+ howpublished = {Openwall, Inc.},
  note = {[Online, accessed 30-April-2015, retrieved from \url{http://www.openwall.com/presentations/Passwords12-The-Future-Of-Hashing/Passwords12-The-Future-Of-Hashing.pdf}]}
+}
+
+@misc{scrypt:tradeoff,
+ author = {Colin Percival},
+ title = {{Re: scrypt time-memory tradeoff}},
+ year = {2011},
+ month = {June},
+ day = {30},
+ howpublished = {scrypt@tarsnap.com (mailing list)},
+ url = {http://mail.tarsnap.com/scrypt/msg00029.html},
+ note = {[Available at \url{http://mail.tarsnap.com/scrypt/msg00029.html}]}
 }
 
 @techreport{nist:sp800:108,
@@ -158,6 +184,23 @@
  publisher = {USENIX Association},
  address = {Berkeley, CA, USA},
  note = {[Available at \url{https://www.usenix.org/legacy/publications/library/proceedings/usenix99/provos/provos.pdf}]},
+}
+
+@incollection{Durmuth,
+ author={Dürmuth, Markus and Güneysu, Tim and Kasper, Markus and Paar, Christof and Yalcin, Tolga and Zimmermann, Ralf},
+ title={Evaluation of Standardized Password-Based Key Derivation against Parallel Processing Platforms},
+ booktitle={Computer Security – ESORICS 2012},
+ year={2012},
+ pages={716-733},
+ series={Lecture Notes in Computer Science},
+ volume={7459},
+ publisher={Springer Berlin Heidelberg},
+ editor={Foresti, Sara and Yung, Moti and Martinelli, Fabio},
+ isbn={978-3-642-33166-4},
+ doi={10.1007/978-3-642-33167-1_41},
+ url={http://dx.doi.org/10.1007/978-3-642-33167-1_41},
+ language={English},
+ note={[Available at \url{https://hgi.rub.de/media/crypto/veroeffentlichungen/2013/01/29/esorics_pbkdf2.pdf}]}
 }
 
 @misc{phc,

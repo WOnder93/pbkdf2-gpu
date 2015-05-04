@@ -10,6 +10,7 @@
 \usepackage{amsmath}              % https://ctan.org/pkg/amsmath
 \usepackage{algorithm}            % https://ctan.org/pkg/algorithms
 \usepackage{algpseudocode}        % https://ctan.org/pkg/algorithmicx
+\usepackage{graphicx}             % https://ctan.org/pkg/graphicx
 
 \hypersetup{
   plainpages = false,             % We have multiple page numberings
@@ -76,9 +77,9 @@
     \chapter{Introduction}          % Chapters
       Encryption is the process of encoding information or data in such a way that only authorized parties can read it \cite{appliedCrypto, foundations}. The encryption uses a parameter -- the key. The key is an information that is only known to the authorized parties and which is necessary to read the encrypted data. In general, any piece of information can be used as the key, but since it usually has to be memorized by a human, it often has the form of a password or passphrase.
     
-      Passwords and passphrases generally have the form of text (a variable-length sequence of characters), while most encryption algorithms expect a key in binary form (a long, usually fixed-size, sequence of bits or bytes). This means that for any password- or pass\-phrase-based cryptosystem it is necessary to define the process of converting the password (passphrase) into binary form. Merely encoding the text using a common character encoding (e. g. ASCII or UTF-8) and padding it with zeroes is often not sufficient, because the resulting key might be susceptible to various attacks. An \emph{attack} on a cryptographic key is an attempt by an unauthorized party to determine the key from publicly known information or from a certain partial information about the key (e. g. some knowledge about the domain from which the key was chosen, the first few bits of the key, etc.). % TODO: add some reference for "attack"
+      Passwords and passphrases generally have the form of text (a variable-length sequence of characters), while most encryption algorithms expect a key in binary form (a long, usually fixed-size, sequence of bits or bytes). This means that for any password- or pass\-phrase-based cryptosystem it is necessary to define the process of converting the password (passphrase) into binary form. Merely encoding the text using a common character encoding (e. g. ASCII or UTF-8) and padding it with zeroes is often not sufficient, because the resulting key might be susceptible to various attacks. An \emph{attack} on a cryptographic key is an attempt by an unauthorized party to determine the key from publicly known information or from a certain partial information about the key (e. g. some knowledge about the domain from which the key was chosen, the first few bits of the key, etc.)."
     
-      For this reason, a cryptographic primitive called \emph{key derivation function} (KDF, plural KDFs) is used to derive encryption keys from passwords. KDFs are also often used for \emph{password hashing} (transforming the password to a hash in such a way that it is easy to verify a given password against a hash, but infeasible to determine the original password from the hash) or \emph{key diversification} (also \emph{key separation}; deriving multiple keys from a master key so that it is infeasible to determine the master key or any other derived key from one or more derived keys) \cite{wikiKDF, nist:sp800:108}.
+      For this reason, a cryptographic primitive called \emph{key derivation function} (KDF, plural KDFs) is used to derive encryption keys from passwords. KDFs are also often used for \emph{password hashing} (transforming the password to a hash in such a way that it is easy to verify a given password against a hash, but infeasible to determine the original password from the hash) or \emph{key diversification} (also \emph{key separation}; deriving multiple keys from a master key so that it is infeasible to determine the master key or any other derived key from one or more derived keys) \cite{wiki:KDF, nist:sp800:108}.
     
       KDFs usually have various security parameters, such as the number of iterations of an internal algorithm, which control the amount of time or memory required to perform the derivation in order to thwart brute-force attacks. Another common parameter is the cryptographic salt, which is a unique or random piece of data that is used together with the password to derive the key. Its main purpose is to protect against dictionary and rainbow table attacks and it is usually not kept secret \cite{rfc2898}.
       
@@ -101,7 +102,7 @@
       TODO
     
     \chapter{Key derivation functions}
-      Key derivation functions are cryptographic primitives that are used to derive encryption keys from a secret value. Depending on the application, the secret value can be another key or a password or passphrase \cite{wikiKDF}. A KDF that is designed for deriving cryptographic key from another key is called a \emph{key-based key derivation function} (KBKDF); a KDF that is designed to take a password or passphrase as input is called a \emph{password-based key derivation function} (PBKDF).
+      Key derivation functions are cryptographic primitives that are used to derive encryption keys from a secret value. Depending on the application, the secret value can be another key or a password or passphrase \cite{wiki:KDF}. A KDF that is designed for deriving cryptographic key from another key is called a \emph{key-based key derivation function} (KBKDF); a KDF that is designed to take a password or passphrase as input is called a \emph{password-based key derivation function} (PBKDF).
       
       \section{Key-based key derivation functions}
       Key-based key derivation functions are most often used to derive additional keys from a key that already has the properties of a cryptographic key -- that is, it is a truly random or pseudorandom binary string that is computationally indistinguishable from one selected uniformly at random from the set of all binary strings of the same length \cite{nist:sp800:108}.
@@ -113,10 +114,14 @@
       \section{Password-based key derivation functions}\label{s:PBKDFs}
       As opposed to key-based key derivation functions, password-based key derivation functions are designed specifically to take low-entropy input such as a password or passphrase and to resist brute-force and dictionary attacks.
       
-      A brute-force attack is ...
+      \paragraph*{}
+      A \emph{brute-force attack} is a kind of cryptanalytic attack in which the attacker attempts to determine a cryptographic key or password by systematically verifying (testing) all possible keys (this is also referred to as \emph{exhaustive key search}) \cite{appliedCrypto} or a large portion of all possible keys. In order to be able to perform the attack, the attacker must have a means to verify an unlimited number of different keys.
       
-      A dictionary attack is ...
+      A \emph{dictionary attack} is a kind of cryptanalytic attack in which the attacker attempts to determine a password by going through all passwords from a list of common passwords and/or (variations of) words from a dictionary \cite{appliedCrypto}. Dictionary attacks tend to be very successful in practice thanks to the users' tendency to pick very simple and predictable passwords.
       
+      When the attacker tests the keys against a live system, the attack is called an \emph{online attack}. When the attacker holds an information sufficient to verify the keys on their own (for example one or more encryption plaintext and cryptotext pairs or password hashes), they can perform an \emph{offline attack} \cite{appliedCrypto}. An offline attack is usually significantly faster than an online attack because the attacker can optimize the verification algorithm and/or use specific hardware to accelerate the verification.
+      
+      \paragraph*{}
       PBKDFs aim to reduce the feasibility of these attacks by increasing the amount of time and/or memory required to test a single key. The basic principle of this approach is that in practice, the extra time/memory requirements are only a minor inconvenience for a user (especially given that these measures provide an increased resistance against a mass attack), while for an attacker (who has to repeatedly process millions or billions of possible passwords) this means that the resources needed to perform a brute-force (or dictionary) attack increase significantly.
       
       A well-designed PBKDF also takes into account the difference between the hardware that is used in the legitimate scenario and the hardware that the attacker might have available. A highly motivated and well-funded attacker might have access to massive amounts of computing power, might often be willing to wait even years until the password is found and might possess an expensive specialized hardware which would minimize the time and resources needed to successfully break the password. A typical user, on the other hand, will use a consumer-grade hardware (such as a personal computer or a laptop), so the PBKDF should be designed so that it performs with reasonable efficiency on the user's hardware, but at the same time it is difficult to utilize specialized hardware to gain advantage in an attack \cite{openwall:pwHashing}.
@@ -219,8 +224,32 @@
       
       In the following section, we describe the architecture of GPUs in detail and discuss the considerations for implementing algorithms on these devices.
       
-      \section{The GPU architecture}
-      TODO
+      \section{GPU architecture}
+      A standard, general-purpose CPU consists of a single and relatively complex \emph{control unit} (CU)\footnote{The CU is the part of the CPU that decodes a program's instructions and controls the operation of the rest of the CPU, the computer's memory and the input/output devices based on these instructions \cite{wiki:CU}.} and one or more \emph{arithmetic logic units} (ALU)\footnote{The ALU ``performs arithmetic and bitwise logical operations on integer binary numbers'' \cite{wiki:ALU}.}. Between the CPU and main memory there are several layers of cache -- a small and fast memory that stores recently accessed contents of the main memory for faster access.
+      
+      \paragraph*{}
+      A GPU consists of several main parts -- multiple \emph{streaming multiprocessors}, the \emph{global memory}, the \emph{texture memory} and \emph{constant memory}.
+      
+      \begin{figure}
+        \centering
+        \includegraphics[width=\linewidth]{images/gpu-vs-cpu.eps}
+        \caption{CPU vs GPU architecture\protect\footnotemark}
+      \end{figure}
+      
+      Each streaming multiprocessor contains a single \emph{instruction unit} (equivalent to the CPU's control unit) with instruction cache, \emph{constant cache} (a cache for constant memory), \emph{shared memory} and several \emph{thread processors}. Each thread processor is capable of executing several groups (called \emph{warps}) of \emph{threads}. All threads in a warp execute the same program, which is called a \emph{kernel} \cite{nvidia:gpuArch}.
+      
+      \footnotetext{Copyright \textcopyright~2010, NVIDIA Corporation, published under a \href{https://creativecommons.org/licenses/by/3.0/}{Creative Commons Attribution 3.0 Unported License}; source: \url{https://commons.wikimedia.org/w/index.php?title=File:Cpu-gpu.svg&oldid=156649300}}
+      
+      Streaming multiprocessors are designed for \emph{data parallelism} -- threads should execute the same sequence of instructions over different data. Kernels may contain branches and loops -- in this case both paths of each branch are executed in each thread. Branches should, however, be used carefully -- if the threads diverge (that is, they end up executing different parts of the kernel) the computation becomes very inefficient. Thread scheduling is handled by hardware automatically, which minimizes scheduling overhead. As opposed to CPUs, SMs in GPUs always execute instructions in-order instead of out-of-order. Memory latency is avoided by temporarily switching to another thread while a memory transaction is in progress \cite{nvidia:gpuArch}.
+      
+      \begin{figure}
+        \centering
+        \includegraphics[width=\linewidth]{images/sm.png}
+        \caption{Streaming multiprocessor}
+      \end{figure}
+      
+      \subsection{Memory hierarchy}
+      From ...
       
     \chapter{Implementing PBKDF2 on GPUs}
     \chapter{Comparison of CPU and GPU attack speeds}
@@ -229,15 +258,15 @@
     \iffalse
     \appendix
     \chapter{First appendix}        % Appendices
-    TODO
+      TODO
     \chapter{Another appendix}
-    TODO
+      TODO
     \fi
     
     % Bibliography goes here
     % shut up those bibliography warnings:
-\apptocmd{\sloppy}{\hbadness 10000\relax}{}{}
-
+    \apptocmd{\sloppy}{\hbadness 10000}{}{}
+    
     \bibliographystyle{acm}
     \bibliography{thesis}
     

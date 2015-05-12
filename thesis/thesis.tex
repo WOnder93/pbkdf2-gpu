@@ -33,6 +33,7 @@
 
 \widowpenalty=500
 \clubpenalty=500
+\raggedbottom
 
 \hyphenation{po-si-tive}
 
@@ -93,7 +94,7 @@
       
       Modern GPUs can be programmed using various high-level APIs (such as OpenCL\footnote{\url{https://www.khronos.org/opencl/}}, CUDA\footnote{\url{http://www.nvidia.com/object/cuda_home_new.html}}, DirectCompute or C++ AMP) and can be used not only for graphics processing but also for general purpose computation. Due to their specific architecture GPUs are suitable for parallel processing of massive amounts of data. Tasks that can be split into many small subtasks which can be run in parallel can be processed by a single GPU several times faster than by a single CPU. As was shown by Harrison and Waldron \cite{Harrison}, using GPUs it is possible to accelerate also various algorithms of symmetric cryptography.
     
-      This work also includes analysis of susceptibility of PBKDF2 to attacks using GPUs and the implementation of an illustration program performing a brute-force attack on the password of a LUKS\footnote{LUKS = Linux Unified Key Setup} encrypted partition.
+      This work also includes analysis of susceptibility of PBKDF2 to attacks using GPUs and the implementation of a demonstration program performing a brute-force attack on the password of a LUKS\footnote{LUKS = Linux Unified Key Setup} encrypted partition.
     
       \section{Summary of results}
       TODO
@@ -126,10 +127,10 @@
       
       A well-designed PBKDF also takes into account the difference between the hardware that is used in the legitimate scenario and the hardware that the attacker might have available. A highly motivated and well-funded attacker might have access to massive amounts of computing power, might often be willing to wait even years until the password is found and might possess an expensive specialized hardware which would minimize the time and resources needed to successfully break the password. A typical user, on the other hand, will use a consumer-grade hardware (such as a personal computer or a laptop), so the PBKDF should be designed so that it performs with reasonable efficiency on the user's hardware, but at the same time it is difficult to utilize specialized hardware to gain advantage in an attack \cite{openwall:pwHashing}.
       
+      \label{p:memoryHard}
       In order to protect against attacks using highly parallel architectures, modern PBKDFs use \emph{sequential memory-hard functions}, which are designed in such a way that any time-efficient computation needs to use a certain configurable amount of memory (for a formal definition see \cite[chapter 4]{scrypt}). Requiring a certain non-trivial amount of memory to compute a single instance of the PBKDF increases the size of each compute unit, thus making any increase in parallelism more expensive (as opposed to functions that use only a small constant amount of memory) \cite{scrypt}.
       
       Another desirable property of PBKDFs is the ability to upgrade an existing derived key/hash to another having different (stronger) security parameters (e. g. the iteration count) without knowledge of the original password \cite{openwall:pwHashing}. However, there are no PBKDFs having this property currently available.
-      % TODO: ?auth servers
       
       \paragraph*{}
       The most widely used password-based key derivation functions are currently \emph{PBKDF2} and \emph{bcrypt}.
@@ -140,12 +141,15 @@
       
       In 2009, a new password-based key derivation function \emph{scrypt} was introduced \cite{scrypt}, which uses the aforementioned sequential memory-hard functions.
       
-      \label{phc}
+      \label{p:phc}
       In 2013, an open competition called \emph{Password Hashing Competition} was announced. The competition aims to ``identify new password hashing schemes in order to improve on the state-of-the-art'' \cite{phc}. The competition is organized by a group of cryptography experts, not by a standardization body. It is expected, however, that it will lead to a new standard for password-based key derivation and password hashing.
       
       \section{PBKDF2}\label{s:PBKDF2}
-      PBKDF2 is a generic password-based key derivation function -- its definition depends on the choice of an underlying pseudorandom function (PRF). The specification \cite{rfc2898} does not impose any additional constraints on the PRF, other than that it takes two arbitrarily long octet strings as input and outputs an octet string of a certain fixed length. In appendix B.1, the specification presents the HMAC message authentication code (HMAC; specified in RFC 2104 \cite{rfc2104}) using SHA-1 as the underlying hash function as an example for the PRF. The practical applications of PBKDF2 use HMAC (with various underlying hash algorithms) almost solely as the underlying PRF. The instantiations of PBKDF2 using specific PRFs are often denoted as PBKDF2-\emph{PRF}, where \emph{PRF} is the name of the PRF used (for example PBKDF2 using HMAC-SHA1 would be denoted as PBKDF2-HMAC-SHA1).
+      PBKDF2 is a generic password-based key derivation function -- its definition depends on the choice of an underlying pseudorandom function (PRF). The specification \cite{rfc2898} does not impose any additional constraints on the PRF, other than that it takes two arbitrarily long octet strings as input and outputs an octet string of a certain fixed length. In appendix B.1, the specification presents the HMAC message authentication code (HMAC; specified in RFC 2104 \cite{rfc2104}) using SHA-1 as the underlying hash function as an example for the PRF. The practical applications of PBKDF2 use HMAC (with various underlying hash algorithms) almost solely as the underlying PRF.
       
+      The instantiations of PBKDF2 using specific PRFs are often denoted as PBKDF2-\emph{PRF}, where \emph{PRF} is the name of the PRF used (for example PBKDF2 using HMAC-SHA1 would be denoted as PBKDF2-HMAC-SHA1).
+      
+      \paragraph*{}
       PBKDF2 takes two important security parameters -- \emph{salt} and \emph{iteration count}.
       
       As noted in \cite[section 4.1]{rfc2898}, salt has two main purposes in password-based cryptography:
@@ -212,23 +216,22 @@
       
       The $p$ parameter also has linear scaling effect on time and space complexity, but allows up to $p$ parallel processes/computation units to be used for computation (with the exception of the fast initial and final steps). The value for this parameter recommended by the scrypt specification is 1. However, the author notes that future advancement in technology might lead to higher values being more efficient \cite[chapter 7]{scrypt}.
       
-      The time-memory trade-off problem was addressed in scrypt's successor, \emph{yescrypt}, which is one of the finalists of the Password Hashing Competition (see \ref{phc}).
+      The time-memory trade-off problem was addressed in scrypt's successor, \emph{yescrypt}, which is one of the finalists of the Password Hashing Competition (see page \pageref{p:phc}).
       
       As opposed to PBKDF2, the pseudorandom function and hash function used internally in scrypt are strictly defined in the specification.
       
-    %\chapter{Attacks on key derivation functions}
-    \chapter{Acceleration of algorithms using GPUs}
+    \chapter{The GPU architecture} \label{ch:gpuArch}
       Originally designed for acceleration of computer graphics, GPUs have recently also become a powerful platform for general-purpose parallel processing. The fast-growing computer game industry has motivated a rapid advancement of graphics hardware, which is gradually outperforming general-purpose CPUs by several orders of magnitude.
       
       To be able to optimally use the computational potential of GPUs, the task being computed must have certain properties. The task must be divisible into multiple small tasks that all perform the same computation over different pieces of data. Each of these tasks must only require a very small amount of memory.
       
-      In the following section, we describe the architecture of GPUs in detail and discuss the considerations for implementing algorithms on these devices.
-      
-      \section{GPU architecture}
-      A standard, general-purpose CPU consists of a single and relatively complex \emph{control unit} (CU)\footnote{The CU is the part of the CPU that decodes a program's instructions and controls the operation of the rest of the CPU, the computer's memory and the input/output devices based on these instructions \cite{wiki:CU}.} and one or more \emph{arithmetic logic units} (ALU)\footnote{The ALU ``performs arithmetic and bitwise logical operations on integer binary numbers'' \cite{wiki:ALU}.}. Between the CPU and main memory there are several layers of cache -- a small and fast memory that stores recently accessed contents of the main memory for faster access.
+      \paragraph*{}
+      A standard CPU consists of a single and relatively complex \emph{control unit} (CU)\footnote{The CU is the part of the CPU that decodes a program's instructions and controls the operation of the rest of the CPU, the computer's memory and the input/output devices based on these instructions \cite{wiki:CU}.} and one or more \emph{arithmetic logic units} (ALU)\footnote{The ALU ``performs arithmetic and bitwise logical operations on integer binary numbers'' \cite{wiki:ALU}.}. Between the CPU and main memory there are several layers of cache -- a small and fast memory that stores recently accessed contents of the main memory for faster access.
       
       \paragraph*{}
-      A GPU consists of several main parts -- multiple \emph{streaming multiprocessors}, the \emph{global memory}, the \emph{texture memory} and \emph{constant memory}.
+      \emph{Note:} the GPU architecture described in this chapter mostly follows the Compute Unified Device Architecture\footnote{see \url{http://www.nvidia.com/object/cuda_home_new.html} or \url{https://en.wikipedia.org/wiki/CUDA} for more information} (CUDA). The architecture of GPUs that do not support CUDA might differ.
+      
+      A GPU consists of the \emph{global memory} (also called \emph{device memory}) and multiple \emph{streaming multiprocessors}. Data can be transferred from the host's main memory to/from the global memory via a PCI Express (PCIe) bus or, in the case of an integrated GPU, the host's main memory is shared with the GPU, so there is no need to transfer data between the host and the GPU.
       
       \begin{figure}
         \centering
@@ -236,11 +239,13 @@
         \caption{CPU vs GPU architecture\protect\footnotemark}
       \end{figure}
       
-      Each streaming multiprocessor contains a single \emph{instruction unit} (equivalent to the CPU's control unit) with instruction cache, \emph{constant cache} (a cache for constant memory), \emph{shared memory} and several \emph{thread processors}. Each thread processor is capable of executing several groups (called \emph{warps}) of \emph{threads}. All threads in a warp execute the same program, which is called a \emph{kernel} \cite{nvidia:gpuArch}.
-      
       \footnotetext{Copyright \textcopyright~2010, NVIDIA Corporation, published under a \href{https://creativecommons.org/licenses/by/3.0/}{Creative Commons Attribution 3.0 Unported License}; source: \url{https://commons.wikimedia.org/w/index.php?title=File:Cpu-gpu.svg&oldid=156649300}}
       
-      Streaming multiprocessors are designed for \emph{data parallelism} -- threads should execute the same sequence of instructions over different data. Kernels may contain branches and loops -- in this case both paths of each branch are executed in each thread. Branches should, however, be used carefully -- if the threads diverge (that is, they end up executing different parts of the kernel) the computation becomes very inefficient. Thread scheduling is handled by hardware automatically, which minimizes scheduling overhead. As opposed to CPUs, SMs in GPUs always execute instructions in-order instead of out-of-order. Memory latency is avoided by temporarily switching to another thread while a memory transaction is in progress \cite{nvidia:gpuArch}.
+      Streaming multiprocessors are designed for \emph{data parallelism} -- each thread should ideally execute the same sequence of instructions over different data. The workload given to a GPU consists of a certain number of executions (\emph{threads}) of a single program (\emph{kernel}). Threads are divided into \emph{blocks}, which are distributed among SMs. Blocks are further divided into smaller \emph{warps} of threads -- all threads in a warp always execute the same instruction. SM can switch between currently running warps, for example to hide memory latency while a warp waits for a memory transaction. Warp scheduling is handled by hardware automatically, which minimizes scheduling overhead \cite{nvidia:gpuArch}.
+      
+      Kernels may contain branches and loops -- in this case both paths of each branch are executed in each thread. Branching should, however, be used carefully -- if the threads within a warp diverge (that is, they end up executing different parts of the kernel) the computation becomes inefficient. As opposed to CPUs, SMs in GPUs always execute instructions in-order instead of out-of-order. Memory latency is avoided by temporarily switching to another warp \cite{nvidia:gpuArch}.
+            
+      Each streaming multiprocessor contains a single \emph{instruction unit} (similar to the CPU's control unit) with instruction cache, \emph{constant cache} (a cache for the part of global memory which contains constant data), \emph{shared memory}, several \emph{thread processors} (denoted SP) and several \emph{special function units} (SFU) \cite{nvidia:gpuArch}. SPs execute arithmetic instructions, SFUs are used for special mathematical functions, such as sine, cosine or logarithm \cite{nvidia:gpuArch}.
       
       \begin{figure}
         \centering
@@ -248,20 +253,346 @@
         \caption{Streaming multiprocessor}
       \end{figure}
       
-      \subsection{Memory hierarchy}
-      From ...
+      \section{Memory hierarchy}
+      \begin{figure}
+        \centering
+        \includegraphics[width=\linewidth]{images/gpu-memory.png}
+        \caption{GPU memory hierarchy}
+      \end{figure}
       
-    \chapter{Implementing PBKDF2 on GPUs}
+      \subsection{Global memory}
+      The main memory of a GPU is the \emph{global memory}. Global memory is a dynamic random-access memory (DRAM), which is the type of memory that is also typically used for a computer's main memory. Accessing global memory from a thread has a relatively high latency (as opposed to registers), because it is not cached (except for the part that is reserved for constant data). The size of global memory ranges from hundreds  of megabytes to several gigabytes \cite{wiki:listOfGPUs}.
+      
+      \subsection{Constant memory}
+      Part of global memory is used as the so-called \emph{constant memory}. To the threads running on the GPU the constant memory is read-only. Since constant memory is cached, accessing it from a thread has relatively low latency (unless there is a cache miss, it can be as fast as the registers). Usage of constant memory is optimal when all threads in a warp are reading the same memory location at once \cite[section 5.3.2., Constant memory]{nvidia:cudaProgGuide}. The size of constant memory in CUDA is fixed to 64 KB with 8-10 KB of cache for each streaming multiprocessor \cite[appendix G.1]{nvidia:cudaProgGuide}.
+      
+      \subsection{Texture memory}
+      Another part of global memory is used as \emph{texture memory}. Like constant memory, texture memory is also cached. Texture memory is, as opposed to constant memory, optimized for two-dimensional spacial locality. That is, the data in the memory is interpreted as a two-dimensional array of values and accesses to the memory are optimal when threads in the same warp access memory locations that correspond to positions in the array that are close to each other \cite[section 5.3.2., Texture memory]{nvidia:cudaProgGuide}.
+      
+      \subsection{Local memory}
+      The GPU driver also allocates a block of global memory as the \emph{local memory} for each thread (if necessary). Local memory is used for thread-local data that does not fit into the registers in the streaming multiprocessor \cite[section 5.3.2., Local memory]{nvidia:cudaProgGuide}. Since accesses to the local memory have a high latency, the programmer should keep the per-thread data as small as possible, so that only SM registers are used.
+      
+      \subsection{Shared memory}
+      Each streaming multiprocessor contains an on-chip \emph{shared memory} which is shared between threads in the same block. The shared memory is distributed among blocks that are being executed by the SM. The size of the shared memory is typically about 16 KB. Shared memory has higher throughput and lower latency than global memory \cite[section 5.3.2., Shared memory]{nvidia:cudaProgGuide}.
+      
+      Shared memory is divided into modules of the same size called \emph{banks}. When threads each access a different bank, the data transfer can be performed in parallel. When two or more threads access the same bank, the access has to be serialized \cite[section 5.3.2., Shared memory]{nvidia:cudaProgGuide}.
+      
+      \subsection{Registers}
+      The fastest kind of memory available on a GPU are the registers within SPs. The registers are divided among all threads in a block -- the registers for each block remain allocated until all threads in the block finish execution, which allows for fast warp switching.
+      
+    \chapter{Implementing a brute-force attack on PBKDF2 on GPUs}
+      In this chapter we discuss the feasibility of an efficient brute-force attack on the PBKDF2 key derivation function. We focus on the PBKDF2-HMAC family of functions\footnote{by PBKDF2-HMAC we denote the family of functions that use HMAC-\emph{hash} (for any \emph{hash}) as their underlying PRF} as these are most frequently used in real-world applications (see section \ref{s:PBKDF2}).
+      
+      \section{Notes on implementing PBKDF2-HMAC}
+      Let $H$ be a hash function that uses an internal state of $s$ octets, operates on input blocks of $b$ octets and produces output of $l$ octets ($l \le s$, $l \le b$). We shall assume that the hash function is defined by the following parameters:
+      \begin{itemize}
+        \item $H_I$ -- the initial state (an octet string of length $s$)
+        \item $H_U$ -- the ``update'' function, which takes the previous state (an octet string of length $s$) and an input block (an octet string of length $b$) and returns the new state (an octet string of length $s$)
+        \item $H_F$ -- the ``finalize'' function, which takes the previous state (an octet string of length $s$), the last (possibly incomplete) input block (an octet string of length at most $b$) and the total length of the input string (a non-negative integer) and returns the final hash (an octet string of length $l$)
+      \end{itemize}
+      We further assume that computing the hash function $H$ over an input octet string $D$ of length $n$ proceeds as follows:
+      \begin{algorithmic}[1]
+        \Function{$H$}{$D$, $n$}
+          \State $S \gets H_I$
+          \State $c \gets \lceil n / b \rceil - 1$
+          \For{$i \gets 1$, $c$}
+            \State $S \gets H_U(S, D[ib:(i+1)b-1])$
+          \EndFor
+          \State \Return $H_F(S, D[cb:n-1], n)$
+        \EndFunction
+      \end{algorithmic}
+      
+      Here, $A[i..k]$ denotes an octet string produced by taking the $i$-th through the $k$-th octet of the octet string $A$.
+      
+      It can be shown that any hash function that uses the Merkle-Damgård construction (see \cite[p. 333]{handbook}; this includes all of the commonly used hash functions -- SHA-1, SHA-2, SHA-3, MD4, MD5, RIPEMD, Whirlpool) conforms to this definition.
+      
+      \paragraph*{}
+      Following the above definition and the HMAC specification (\cite{rfc2104}) the pseudocode from section \ref{s:PBKDF2} can be rewritten for PBKDF2-HMAC as follows:
+      \begin{algorithmic}[1]
+        \Function{PBKDF2-HMAC}{$P, S, c, dkLen$}
+          \If{$dkLen \le (2^{32} - 1) \cdot hLen$}
+            \State output ``derived key too long'' and stop
+          \EndIf
+          \State $l \gets \lceil dkLen / hLen\rceil$ \Comment{{\footnotesize $l$ is the number of $hLen$-octet blocks in the derived key, rounding up}}
+          \State $r \gets dkLen - (l - 1) \cdot hLen$ \Comment{{\footnotesize $r$ is the number of octets in the last block}}
+          \State \Comment{{\footnotesize Pre-hash the password if necessary and pad it with zeroes:}}
+          \If{$|P| > b$}
+            \State $K \gets H(P)|\operatorname{repeat}(\text{0x00}, b - l)$
+          \Else
+            \State $K \gets P|\operatorname{repeat}(\text{0x00}, b - |P|)$
+          \EndIf
+          \State \Comment{{\footnotesize Setup ``ipad'' and ``opad'' partial hash states:}}
+          \State $S_{IPAD} \gets H_U(H_I, K \oplus \operatorname{repeat}(\text{0x36}, b))$
+          \State $S_{OPAD} \gets H_U(H_I, K \oplus \operatorname{repeat}(\text{0x5C}, b))$
+          \For{$k \gets 1$, $l$} \label{dkLoop:from}
+            \State \Comment{{\footnotesize The first iteration:}}
+            \State $A \gets S \mid \operatorname{int}(k)$
+            \State $c_A \gets \lfloor |A| / b \rfloor$
+            \State $S_{SALT} \gets S_{IPAD}$
+            \For{$i \gets 1$, $c_A$}
+              \State $S_{SALT} \gets H_U(S_{SALT}, A[ib:(i+1)b-1])$
+            \EndFor
+            \State $T_k \gets H_F(S_{OPAD}, H_F(S_{SALT}, A[c_Ab:|A|-1]))$
+            \State \Comment{{\footnotesize The remaining iterations:}}
+            \For{$i \gets 2$, $c$} \label{mainLoop:from}
+              \State $D \gets H_F(S_{IPAD}, T_k)$
+              \State $D \gets H_F(S_{OPAD}, D)$
+              \State $T_k \gets T_k \oplus D$
+            \EndFor \label{mainLoop:to}
+          \EndFor \label{dkLoop:to}
+          \State \Return $T_1 \mid T_2 \mid ... \mid T_l[0..r - 1]$
+        \EndFunction
+      \end{algorithmic}
+      
+      Here, $|A|$ denotes the length of octet string $A$; $\operatorname{repeat}(x, n)$ denotes an octet string produced by repeating octet $x$ $n$ times; 0x$XY$ denotes an octet in hexadecimal representation.
+      
+      \paragraph*{}
+      When trying to implement PBKDF2 efficiently, the most important part for optimization is the main loop from lines \ref{mainLoop:from}-\ref{mainLoop:to}, as this is the only part time complexity of which depends on the number of iterations. When HMAC is used as the PRF in PBKDF2, this part is very simple -- it iteratively performs two hashing operations over the result of the previous iteration and then combines the result with the result of the previous iteration. Therefore, assuming a reasonably high iteration count, in order to optimize PBKDF2-HMAC it is sufficient to optimize the implementation of the underlying hash function.
+      
+      On parallel computing platforms such as GPUs, it is also important that the computation consumes as little memory as possible. When PBKDF2 is used with HMAC as the PRF, the memory requirements of the core of the algorithm (the main loop from the previous paragraph) do not depend on the security parameters (iteration count, salt length), but only depend on the hash function used. For example, with SHA-1 used as the hash, the core of the algorithm requires approximately 164 bytes (plus few more bytes might be required for temporary variables); with SHA-256 it requires approximately 224 bytes and with SHA-512 approximately 448 bytes.
+      
+      \section{Running PBKDF2 on a GPU} \label{s:PBKDF2onGPU}
+      PBKDF2-HMAC, when used with common hash functions, has several properties that make it possible to implement it (for bulk processing) very efficiently on GPU hardware. This poses a security/usability problem for applications that cannot utilize the GPU for evaluating PBKDF2 (this is true for almost all practical applications, with only a few exceptions -- e. g. busy user authentication servers). The great difference in performance between the hardware available to the user and the hardware available to the attacker means that in order to provide reasonable security, the PBKDF2 iteration count must be set according to the attacker's potential hardware capabilities, which in turn causes an excessive inconvenience to the user, who then has to wait a long time for the password to be processed.
+      
+      \paragraph*{}
+      As with most cryptographic algorithms, an efficient implementation PBKDF-HMAC does not require any data-dependent branching (executing different code on different inputs) which avoids divergence of different GPU threads (see chapter \ref{ch:gpuArch}). This is, however, a desirable security property that helps prevent timing attacks, where an attacker attempts to gain information about a secret parameter by measuring and analyzing the time it takes to perform a certain cryptographic function.
+      
+      Another important property of PBKDF2-HMAC is that it has constant and very low memory requirements (as discussed in the previous section). This allows the GPU implementation to run more threads while keeping most (or all) of the data in the registers, thus avoiding expensive accesses to the global memory. As discussed on page \pageref{p:memoryHard}, new password-based key derivation functions (such as scrypt) address this problem by using so called \emph{sequential memory-hard functions}.
+      
+      An interesting property of PBKDF2-HMAC is also the fact that each hash-output-sized block of the derived key can be computed independently. This allows the GPU implementation to compute each block in a separate thread, which means that when deriving longer keys, fewer PBKDF2 tasks are sufficient to saturate all cores of the GPU. This, however, does not provide a significant advantage for brute-force/dictionary attacks, as the attacker has a lot of tasks to process and can always submit more of them at once.
+      
+    \chapter{The demonstration program}
+      To demonstrate how GPUs can be used to accelerate a brute-force or dictionary attack on a real-world system that uses PBKDF2 for password-based key derivation, we implemented a simple demonstration program in the form of a command-line application that performs an offline attack on the access passwords of a LUKS partition.
+      
+      The source code of the demonstration program can be found in the source code archive included in the thesis repository, under the \texttt{lukscrack-gpu} directory. The source code is also accessible online as a GitHub repository\footnote{\url{https://github.com/WOnder93/pbkdf2-gpu}}.
+      %TODO say there is also documentation (when there will be :)
+      
+      \section{LUKS}
+      LUKS (Linux Unified Key Setup) is a standard for key setup\footnote{key setup = the management of encryption keys used in a cryptosystem} in disk encryption \cite{luks}. It was originally developed for the purpose of standardizing and simplifying the process of key management for disk encryption on the Linux operating system \cite[chapter 6]{Fruhwirth}. Nevertheless, the standard itself is platform independent and can be implemented on any platform.
+      
+      LUKS defines a binary format for storing keys and encrypted data on disk partitions, as well as basic operations on partitions which use this format (partition initialization, adding, changing and revoking passwords, etc.) \cite{luks}.
+      
+      \paragraph*{}
+      A LUKS partition begins with a \emph{partition header}, followed by eight sections of encrypted key data (called \emph{key material}), which is then followed by the encrypted \emph{payload} (the contents of the partition).
+      
+      The payload of a LUKS partition is encrypted by a \emph{master key} (MK), which is randomly generated when initializing the partition and does not change during the lifetime of the partition.
+      
+      The partition header contains eight \emph{key slots}, each of which can be active or disabled. Each active key slot is associated with one of the key material sections. Each key material section contains the master key processed by a transformation called \emph{AFsplit} (explained below) and encrypted with a key derived from the \emph{user password}. Each key slot contains parameters that specify how to obtain the master key from the associated key material and the corresponding user password. This means that the user needs to know the correct password of at least one key slot in order to decrypt the whole partition.
+      
+      A more detailed description of the LUKS partition format can be found in the LUKS On-Disk Format Specification \cite[section 2.4]{luks}.
+      
+      \subsection{AFsplit}
+      The master key is usually only 16 or 32 bytes long \cite[chapter 1]{luks}. Therefore when stored on a hard disk device, it is likely to end up in a single physical disk sector. When a disk sector gets damaged or corrupted, the disk firmware may silently remap it another spare sector and the original sector becomes inaccessible \cite[chapter 1]{luks}. Even though the remapped sector becomes inaccessible to the software and is likely unreadable, an advanced forensic analysis might still be able to recover all or part of the data stored in the sector.
+      
+      Suppose an encrypted master key was stored in a single sector, which was later remapped to another sector. If the key used to encrypt the MK was then revoked, the disk encryption software, not knowing that the remapping occurred, would only erase the new sector, while the data might still be readable from the original one.
+      
+      To counter this problem, LUKS defines a transformation called \emph{AFsplit} (the inverse transformation is called \emph{AFmerge}), which transforms a key (any octet string) into an octet string, size of which is an arbitrary multiple of the key size, such that the master key can only be recovered from the whole string.
+      
+      A brief definition of the AFsplit/AFmerge transformation can be found in \cite[section 2.4]{luks}. A more detailed description and rationale is provided by Fruhwirth in \cite[section 5.2]{Fruhwirth}.
+      
+      \subsection{Verifying LUKS partition passwords}
+      To implement a brute-force attack on a LUKS partition, it is essential to understand the process of verifying whether a password is valid for a given active key slot. In order to verify a key slot password, the following fields of the partition header are needed (field names are as per \cite{luks}):
+      \begin{itemize}
+        \item \emph{cipher-name}, \emph{cipher-mode} -- text identifiers of the cipher (encryption algorithm) that is used to encrypt the key material (as well as to encrypt the payload)
+        \item \emph{hash-spec} -- a text identifier of the hash function used for key derivation, the AFsplit/AFmerge transformation and for computing the master key digest (see below)
+        \item \emph{key-bytes} -- the length in bytes of the key used with the cipher specified by \emph{cipher-name} and \emph{cipher-mode}
+        \item \emph{mk-digest} -- the master key digest, which is computed from the MK using PBKDF2-HMAC with the hash function specified by \emph{hash-spec}
+        \item \emph{mk-digest-salt}, \emph{mk-digest-iter} -- the PBKDF2 salt and iteration count used for computing the MK digest
+      \end{itemize}
+      
+      In addition to this information, the following fields of the key slot are needed:
+      \begin{itemize}
+        \item \emph{iterations}, \emph{salt} -- the PBKDF2 iteration count and salt used for deriving the key material encryption key from the user password
+        \item \emph{key-material-offset} -- the offset in sectors\footnote{a sector in LUKS is 512 bytes long (this fact is omitted in version 1.2.1 of the LUKS On-Disk Format Specification)} of the key material associated with the key slot
+        \item \emph{stripes} -- the factor by which the MK is expanded by the AFsplit transformation
+      \end{itemize}
+      
+      \begin{figure}[t]
+        \centering
+        \includegraphics[width=\linewidth]{images/luks-pwcheck.png}
+        \caption{LUKS partition password verification}
+      \end{figure}
+      
+      Using the information above, the key slot password verification proceeds as follows:
+      \begin{enumerate}
+        \item The key material sectors are read from the partition. The key material starts at sector specified by \emph{key-material-offset} and takes up as many sectors as needed to store \emph{key-bytes} times \emph{stripes} bytes.
+        \item A key of \emph{key-bytes} bytes is derived from the password using PBKDF2-HMAC with the hash function specified by \emph{hash-spec}, \emph{iterations} as the iteration count and \emph{salt} as the salt.
+        \item The derived key from the previous step is used to decrypt the key material sectors. The first \emph{key-bytes} times \emph{stripes} bytes of the decrypted data are taken as the split master key. The trailing bytes (if any) are ignored.
+        \item The master key candidate is obtained from the split master key by applying the AFmerge transformation with the hash function specified by \emph{hash-spec}, with \emph{key-bytes} as the key length and with \emph{stripes} as the expansion factor.
+        \item Finally, a 20-byte digest of the master key candidate is produced by applying PBKDF2-HMAC with the hash function specified by \emph{hash-spec}, \emph{mk-digest-iter} as the iteration count and \emph{mk-digest-salt} as the salt. The computed digest is then compared to \emph{mk-digest} -- if the digests match, the password is valid, otherwise it is not.
+      \end{enumerate}
+      
+      %TODO ?discuss the iteration count
+      
+      \section{Implementation}
+      As shown in the previous section, verifying a LUKS key slot password requires two computations of PBKDF2, between which a different computation needs to be performed (key material decryption and AFmerge).
+      
+      For a typical LUKS partition created by cryptsetup the most computationally difficult is the first PBKDF2 instance (deriving encryption key from the password). The second PBKDF2 instance (master key digest computation) is about 8 times less computationally difficult and the difficulty of the rest of the computation is usually negligible. In our demonstration program both PBKDF2 instances are computed on the GPU, while the rest of the computation is performed on the CPU.
+      
+      \subsection{Optimal utilization of hardware resources}
+      In order to employ all cores of the GPU, our demonstration program processes the candidate passwords in \emph{batches}. The state of processing a password batch is managed by an object which we call the \emph{batch processing context} (BPC). The BPC can be thought of as a state machine with four states (excluding the initial and final state) where the transitions between states represent separate stages of computation. Figure \ref{fig:processingContext} shows a state diagram of the BPC.
+      
+      \begin{figure}[t]
+        \centering
+        \includegraphics[width=\linewidth]{images/bpc.png}
+        \caption{Batch processing context -- a state diagram}
+        \label{fig:processingContext}
+      \end{figure}
+      
+      %TODO describe also in text
+      
+      \paragraph*{}
+      Since most of the computation is performed on the GPU, it is desirable that it is kept fully utilized throughout the attack. Also, in case the GPU used was so powerful that the CPU computation takes longer than the GPU computation, it would be preferable if the CPU was kept fully utilized.
+      
+      \begin{algorithm}
+        \caption{Batch processing context scheduling}
+        \label{alg:bpcSched}
+        \begin{algorithmic}[1]
+          \Procedure{CpuPhase1}{bpc}
+            \State \Call{EndMkDigestComputation}{bpc}
+            \State \Call{ProcessDigests}{bpc}
+            \State \Call{InitPasswords}{bpc}
+            \State \Call{BeginKeyDerivation}{bpc}
+          \EndProcedure
+          \State
+          \Procedure{CpuPhase2}{bpc}
+            \State \Call{EndKeyDerivation}{bpc}
+            \State \Call{DecryptKeyMaterial}{bpc}
+            \State \Call{BeginMkDigestComputation}{bpc}
+          \EndProcedure
+          \State
+          \Procedure{ProcessPasswords}{bpc1, bpc2, bpc3}
+            \State (run a partial version of the body of the loop below to initialize the BPCs to the loop's invariant)
+            \While{(there are passwords to process)}
+              \State \Call{CpuPhase1}{bpc1}
+              \State \Call{CpuPhase2}{bpc3}
+              \State \Call{CpuPhase1}{bpc2}
+              \State \Call{CpuPhase2}{bpc1}
+              \State \Call{CpuPhase1}{bpc3}
+              \State \Call{CpuPhase2}{bpc2}
+            \EndWhile
+            \State (run a partial version of the body of the loop above to finalize the BPCs from the loop's invariant)
+          \EndProcedure
+        \end{algorithmic}
+      \end{algorithm}
+      
+      For this reason, we devised a simple scheduling algorithm which coordinates execution of three concurrent BPCs in a way that ensures that the computing hardware is optimally utilized (as described in the previous paragraph).
+      
+      The algorithm is informally described in the pseudocode of the \Call{ProcessPasswords}{} procedure presented in algorithm \ref{alg:bpcSched}. An explanation of the procedures used in algorithm \ref{alg:bpcSched} follows:
+      \begin{itemize}
+        \item \Call{InitPasswords}{\emph{bpc}} -- initializes \emph{bpc} with a new password batch.
+        \item \Call{BeginKeyDerivation}{\emph{bpc}} -- submits the PBKDF2 task to derive the keys for key material decryption from the passwords to the GPU.
+        \item \Call{EndKeyDerivation}{\emph{bpc}} -- waits for the task submitted by \Call{BeginKeyDerivation}{\emph{bpc}} to end.
+        \item \Call{DecryptKeyMaterial}{\emph{bpc}} -- decrypts the key material using the derived keys, then obtains MK candidates from the decrypted versions of the key material using the AFmerge transformation.
+        \item \Call{BeginMkDigestComputation}{\emph{bpc}} -- submits the PBKDF2 task to compute digests of the MK candidates to the GPU (for the BPC \emph{bpc}).
+        \item \Call{EndMkDigestComputation}{\emph{bpc}} -- waits for the task submitted by \Call{BeginMkDigestComputation}{\emph{bpc}} to end.
+        \item \Call{ProcessDigests}{\emph{bpc}} -- compares the computed MK candidate digests with the MK digest from the partition header. If a matching digest is found, reports that a valid password was found and stops the processing.
+      \end{itemize}
+      
+      The GPU tasks are executed one at a time in the order in which they have been submitted.
+      
+      \begin{figure}[H]
+        \centering
+        \includegraphics[width=\linewidth]{images/scheduling.png}
+        \caption{The scheduling algorithm -- resource utilization}
+        \label{fig:scheduling}
+      \end{figure}
+      
+      Figure \ref{fig:scheduling} shows how our algorithm achieves optimal CPU/GPU utilization in both cases discussed earlier in this section.
+      
+      \subsection{Using multiple CPU threads or GPUs}
+      The demonstration program allows the user to specify multiple GPUs to use for computation of PBKDF2, as well as the number of CPU threads to use for the key material decryption and AFmerge transformation phase.
+      
+      \paragraph*{}
+      When the user specifies multiple GPUs to be used, the program runs processing on each GPU separately. That is, each GPU is controlled from a separate CPU thread, which executes a separate set of interleaved batch processing contexts as described in the previous subsection.
+      
+      \begin{figure}[hb]
+        \centering
+        \includegraphics[width=\linewidth]{images/lukscrack-gpu-architecture.png}
+        \caption{The overall architecture of the demonstration program}
+        \label{fig:lukscrackArch}
+      \end{figure}
+      
+      \paragraph*{}
+      When the user specifies that more than one CPU thread should be used, the program allocates the requested number of threads which share a synchronized queue from which they pull the tasks to execute. All GPU controlling threads have a reference to the queue and push tasks into it. When a GPU controlling thread needs to perform key material decryption and AFmerge transformation over a batch of inputs, the inputs are divided into as many groups of approximately equal size as there are CPU threads allocated. For each group a separate task that processes the inputs in the group is pushed to the queue. The GPU controlling thread then waits for all tasks it has pushed to the queue to complete.
+      
+      Figure \ref{fig:lukscrackArch} shows an illustration of the overall architecture as described in this subsection.
+      
+      \paragraph*{}
+      If the user specifies that only one CPU thread should be used, then no extra threads are allocated and all CPU computation is performed directly in each GPU controlling thread.
+      
     \chapter{Comparison of CPU and GPU attack speeds}
+      In order to compare the potential speed of a brute-force/dictionary attack on the PBKDF2 key derivation function, we wrote a GPU implementation of PBKDF2-HMAC-SHA1 and ran benchmarks on both the GPU implementation and a CPU reference implementation on various devices.
+      
+      The source code of the benchmarking program as well as the raw measurement data can be found in the source code archive included in the thesis repository, under the \texttt{benchmarking-tool} directory. The source code and data is also accessible online as a GitHub repository\footnote{\url{https://github.com/WOnder93/pbkdf2-gpu}}.
+      
+      \section{Implementation and methodology}
+      In the GPU implementation, we used the OpenCL API for submitting work to the GPU.
+      
+      In order to utilize all cores of the GPU and therefore maximize the performance, our implementation processes passwords in large fixed-size batches. The optimal password batch size varies between devices and can be specified by the user.
+      
+      The implementation works as follows:
+      \begin{enumerate}
+        \item A new password batch is initialized on the host CPU (in the benchmarking program the passwords are initialized to fixed-length pseudorandom strings). Each password is pre-hashed and padded with zeroes if necessary as per the HMAC specification \cite{rfc2104}. The resulting fixed-size blocks are transferred to the global memory on the GPU.
+        
+              The initialization and memory transfer are not included in the benchmark, since in a practical attack they can be performed while the GPU is processing another password batch, and thus have no effect on the attack speed.
+        \item Next, the work is submitted to the GPU. One GPU thread is assigned for each derived key block of each password (see section \ref{s:PBKDF2onGPU}).
+        \item The CPU thread waits for the GPU to finish processing the password batch and the difference between the time the work was submitted and the time the waiting finished is taken as the result of the benchmark.
+      \end{enumerate}
+      
+      The CPU implementation uses the API of the OpenSSL ``crypto'' library\footnote{\url{https://www.openssl.org/docs/}}, specifically the PKCS5\_PBKDF2\_HMAC function. The benchmarks were run with the LibreSSL library\footnote{\url{https://github.com/libressl-portable/portable}} due to problems when building the OpenSSL library on the system where the benchmarks were run.
+      
+      Due to the variance in running times, the benchmarks were run several times for each data point and the arithmetic mean was taken as the final value. For GPU benchmarks the number of samples was 10, for CPU benchmarks it was 20 (the variance in running times for the GPU implementation was smaller than for the CPU implementation).
+      
+      \section{Results}
+      The results of the benchmarks show that a brute-force attack on PBKDF2-HMAC-SHA1 can be performed very efficiently on GPU hardware. The GPU implementation significantly outperforms the reference CPU implementation both in terms of attack speed per single device and in terms of power efficiency.
+      
+      Figure \ref{graph:devices:speed} shows a comparison of attack speeds for various devices. The attack speed is measured in PBKDF2 block-iterations per second (PBIPS) -- that is the number of PBKDF2 instances (i. e. the number of passwords processed) times the number of blocks of the derived key computed independently times the iteration count over the time it took to process these passwords. We use this unit because the amount of computation needed to perform one PBKDF2 instance is proportional to the iteration count and to the smallest number of hash-output-sized blocks such that they can fit the derived key.
+      
+      \begin{figure}
+        \centering
+        \includegraphics[width=\linewidth, clip=true, trim=3cm 1cm 2cm 3cm]{images/devices-raw-speed-whole.eps}
+        \caption{PBKDF2-HMAC-SHA1 attack speed per single device}
+        \label{graph:devices:speed}
+      \end{figure}
+      
+      The default parameters used in the benchmark were:
+      
+      \begin{tabular}{l||l|l}
+        \textbf{Device type:} & \textbf{Iterations:} & \textbf{Derived key length (blocks):} \\
+        \hline \hline
+        CPU & 4096  & 16 (1) \\
+        GPU & 16384 & 16 (1)
+      \end{tabular}
+      
+      ~
+      
+      Smaller iteration count was used for CPU benchmarks only so that they finish within a reasonable time. As the graph in figure (TODO) shows, except for extremely small values the iteration count does not influence the attack speed significantly.
+      
+      The highest attack speed we measured on a CPU was 12.276 million PBIBS (on \emph{Intel Xeon E5-4627 v2}), while the highest attack speed on a GPU was 489.437 million PBIPS (on \emph{NVIDIA Tesla K20m}), which means the attack on a GPU was almost 40 times faster than on a (single) CPU.
+      
+      For an attacker, however, an increase in attack speed per device alone is probably not going to make a significant difference. If we disregard the initial cost\footnote{The initial costs can be avoided entirely by buying computing power by the hour via a service such as Amazon EC2 (\url{https://aws.amazon.com/ec2/}).}, the the total cost of the attack can be expressed as the product of the attack speed (in work items per second), power consumption at full speed and the price of electricity divided by the number of work items to compute. Therefore, a more meaningful metric would be the attack speed (on a given device) divided by power consumption (of the device while performing the attack).
+      
+      In figure \ref{graph:devices:power} the devices are compared by attack speed divided by their thermal design power (TDP). The TDP of a device is defined as the maximum amount of heat generated by the device in typical operation \cite{tdp}. TDP is generally used when designing CPU/GPU cooling systems, however since almost all of the power drawn by a CPU/GPU eventually converts to heat, it is an acceptable approximation of the actual power consumption.
+      
+      \begin{figure}
+        \centering
+        \includegraphics[width=\linewidth, clip=true, trim=3cm 1cm 2cm 3cm]{images/devices-power-consumption.eps}
+        \caption{PBKDF2-HMAC-SHA1 attack speed over TDP}
+        \label{graph:devices:power}
+      \end{figure}
+      
+      The highest attack power efficiency we measured on a CPU was 112.385 thousand PBIPJ\footnote{PBIPJ = PBKDF2 block-iterations per joule -- equivalent to PBIPS per watt} (on \emph{Intel Xeon E5-2650}) and the highest attack power efficiency on a GPU was 2\,175.276 PBIPJ (on \emph{NVIDIA Tesla K20m}). This means that the power efficiency of PBKDF2-HMAC-SHA1 processing on a GPU was about 19 times higher than on a CPU.
+      
+      It should be noted that a GPU cannot operate without at least one CPU, and therefore the actual gain from using a GPU for an attack on PBKDF2 might be lower.
+      
+      %TODO ?add a CPU vs GPU timeline (speed, maybe power efficiency)
+      
     \chapter{Conclusion}
-    
-    \iffalse
+      % TODO: discuss other hash functions, GPU impl was not difficult (mention OpenCL?), LUKS implications (mention the calibration)...
     \appendix
-    \chapter{First appendix}        % Appendices
-      TODO
-    \chapter{Another appendix}
-      TODO
-    \fi
+    \chapter{Additional benchmark graphs}        % Appendices
+      %TODO
     
     % Bibliography goes here
     % shut up those bibliography warnings:

@@ -59,7 +59,7 @@
       Next, I would like to thank my family for their support and patience and also to my friends who were falling behind schedule just like me and thus helped me not to panic.
       
       \sloppy
-      Last but not least, access to computing and storage facilities owned by parties and projects contributing to the National Grid Infrastructure MetaCentrum, provided under the programme “Projects of Large Infrastructure for Research, Development, and Innovations” (LM2010005), is also greatly appreciated.
+      Last but not least, access to computing and storage facilities owned by parties and projects contributing to the National Grid Infrastructure MetaCentrum, provided under the programme ``Projects of Large Infrastructure for Research, Development, and Innovations'' (LM2010005), is also greatly appreciated.
     \end{ThesisThanks}
     
     \begin{ThesisAbstract}          % The abstract
@@ -86,7 +86,7 @@
     
       For this reason, a cryptographic primitive called \emph{key derivation function} (KDF, plural KDFs) is used to derive encryption keys from passwords. KDFs are also often used for \emph{password hashing} (transforming the password to a hash in such a way that it is easy to verify a given password against a hash, but infeasible to determine the original password from the hash) or \emph{key diversification} (also \emph{key separation}; deriving multiple keys from a master key so that it is infeasible to determine the master key or any other derived key from one or more derived keys) \cite{wiki:KDF, nist:sp800:108}.
     
-      KDFs usually have various security parameters, such as the number of iterations of an internal algorithm, which control the amount of time or memory required to perform the derivation in order to thwart brute-force attacks. Another common parameter is the cryptographic salt, which is a unique or random piece of data that is used together with the password to derive the key. Its main purpose is to protect against dictionary and rainbow table attacks and it is usually not kept secret \cite{rfc2898}.
+      KDFs usually have various security parameters, such as the number of iterations of an internal algorithm, which control the amount of time or memory required to perform the derivation in order to thwart brute-force attacks. Another common parameter is the cryptographic salt, which is a unique or random piece of data that is used together with the password to derive the key. Its main purpose is to protect against dictionary and rainbow table attacks and it is usually not kept secret \cite[section 4.1]{rfc2898}.
       
       \sloppy
       One possible application of KDFs is key derivation from passwords in disk encryption software. Disk encryption software encrypts the contents of a storage device (such as a hard disk or a USB drive) or its part (a disk volume or \emph{partition}) so that the data stored on the device can only be unlocked by one or more passwords or passphrases. The password/passphrase is entered when the user boots an operating system from the encrypted device or when they mount the encrypted partition to the filesystem.
@@ -169,10 +169,10 @@
       \subsection{Description of the algorithm}
       Let $hLen$ be the length in octets of the output of the pseudorandom function \Call{PRF}{}. PBKDF2 with \Call{PRF}{} as the underlying function takes the following input parameters \cite{rfc2898}:
       \begin{itemize}
-        \item $P$ -- the password (an octet string)
-        \item $S$ -- the salt (an octet string)
-        \item $c$ -- the iteration count (a positive integer)
-        \item $dkLen$ -- the intended length in octets of the derived key (a positive integer, at most $(2^{32} - 1) \cdot hLen$)
+        \item $P$ -- the password (an octet string),
+        \item $S$ -- the salt (an octet string),
+        \item $c$ -- the iteration count (a positive integer),
+        \item $dkLen$ -- the intended length in octets of the derived key (a positive integer, at most $(2^{32} - 1) \cdot hLen$).
       \end{itemize}
       
       The following pseudocode illustrates the process of computation of PBKDF2 with underlying function \Call{PRF}{}, as per RFC 2898 \cite{rfc2898}:
@@ -206,12 +206,12 @@
       \section{Scrypt} \label{s:scrypt}
       The scrypt key derivation function takes the following input parameters \cite[chapter 7]{scrypt}:
       \begin{itemize}
-        \item $P$ -- the password (an octet string)
-        \item $S$ -- the salt (an octet string)
-        \item $N$ -- the CPU/memory cost parameter
-        \item $r$ -- the block size parameter
-        \item $p$ -- the ``parallelization'' parameter
-        \item $dkLen$ -- the intended length in octets of the derived key
+        \item $P$ -- the password (an octet string),
+        \item $S$ -- the salt (an octet string),
+        \item $N$ -- the CPU/memory cost parameter,
+        \item $r$ -- the block size parameter,
+        \item $p$ -- the ``parallelization'' parameter,
+        \item $dkLen$ -- the intended length in octets of the derived key.
       \end{itemize}
       
       The $P$, $S$ and $dkLen$ parameters have the same meaning as in PBKDF2 described in the previous section (\ref{s:PBKDF2}). The remaining parameters can be tuned by the user according to the amount of computing power and memory available.
@@ -292,9 +292,9 @@
       \section{Notes on implementing PBKDF2-HMAC}
       Let $H$ be a hash function that uses an internal state of $s$ octets, operates on input blocks of $b$ octets and produces output of $l$ octets ($l \le s$, $l \le b$). We shall assume that the hash function is defined by the following parameters:
       \begin{itemize}
-        \item $H_I$ -- the initial state (an octet string of length $s$)
-        \item $H_U$ -- the ``update'' function, which takes the previous state (an octet string of length $s$) and an input block (an octet string of length $b$) and returns the new state (an octet string of length $s$)
-        \item $H_F$ -- the ``finalize'' function, which takes the previous state (an octet string of length $s$), the last (possibly incomplete) input block (an octet string of length at most $b$) and the total length of the input string (a non-negative integer) and returns the final hash (an octet string of length $l$)
+        \item $H_I$ -- the initial state (an octet string of length $s$),
+        \item $H_U$ -- the ``update'' function, which takes the previous state (an octet string of length $s$) and an input block (an octet string of length $b$) and returns the new state (an octet string of length $s$),
+        \item $H_F$ -- the ``finalize'' function, which takes the previous state (an octet string of length $s$), the last (possibly incomplete) input block (an octet string of length at most $b$) and the total length of the input string (a non-negative integer) and returns the final hash (an octet string of length $l$).
       \end{itemize}
       We further assume that computing the hash function $H$ over an input octet string $D$ of length $n$ proceeds as follows:
       \begin{algorithmic}[1]
@@ -399,18 +399,18 @@
       \subsection{Verifying LUKS partition passwords}
       To implement a brute-force attack on a LUKS partition, it is essential to understand the process of verifying whether a password is valid for a given active key slot. In order to verify a key slot password, the following fields of the partition header are needed (field names are as per \cite{luks}):
       \begin{itemize}
-        \item \emph{cipher-name}, \emph{cipher-mode} -- text identifiers of the cipher (encryption algorithm) that is used to encrypt the key material (as well as to encrypt the payload)
-        \item \emph{hash-spec} -- a text identifier of the hash function used for key derivation, the AFsplit/AFmerge transformation and for computing the master key digest (see below)
-        \item \emph{key-bytes} -- the length in bytes of the key used with the cipher specified by \emph{cipher-name} and \emph{cipher-mode}
-        \item \emph{mk-digest} -- the master key digest, which is computed from the MK using PBKDF2-HMAC with the hash function specified by \emph{hash-spec}
-        \item \emph{mk-digest-salt}, \emph{mk-digest-iter} -- the PBKDF2 salt and iteration count used for computing the MK digest
+        \item \emph{cipher-name}, \emph{cipher-mode} -- text identifiers of the cipher (encryption algorithm) that is used to encrypt the key material (as well as to encrypt the payload),
+        \item \emph{hash-spec} -- a text identifier of the hash function used for key derivation, the AFsplit/AFmerge transformation and for computing the master key digest (see below),
+        \item \emph{key-bytes} -- the length in bytes of the key used with the cipher specified by \emph{cipher-name} and \emph{cipher-mode},
+        \item \emph{mk-digest} -- the master key digest, which is computed from the MK using PBKDF2-HMAC with the hash function specified by \emph{hash-spec},
+        \item \emph{mk-digest-salt}, \emph{mk-digest-iter} -- the PBKDF2 salt and iteration count used for computing the MK digest.
       \end{itemize}
       
       In addition to this information, the following fields of the key slot are needed:
       \begin{itemize}
-        \item \emph{iterations}, \emph{salt} -- the PBKDF2 iteration count and salt used for deriving the key material encryption key from the user password
-        \item \emph{key-material-offset} -- the offset in sectors\footnote{a sector in LUKS is 512 bytes long (this fact is omitted in version 1.2.1 of the LUKS On-Disk Format Specification)} of the key material associated with the key slot
-        \item \emph{stripes} -- the factor by which the MK is expanded by the AFsplit transformation
+        \item \emph{iterations}, \emph{salt} -- the PBKDF2 iteration count and salt used for deriving the key material encryption key from the user password,
+        \item \emph{key-material-offset} -- the offset in sectors\footnote{a sector in LUKS is 512 bytes long (this fact is omitted in version 1.2.1 of the LUKS On-Disk Format Specification)} of the key material associated with the key slot,
+        \item \emph{stripes} -- the factor by which the MK is expanded by the AFsplit transformation.
       \end{itemize}
       
       \begin{figure}[t]

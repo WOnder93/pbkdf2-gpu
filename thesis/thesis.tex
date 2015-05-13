@@ -63,11 +63,15 @@
     \end{ThesisThanks}
     
     \begin{ThesisAbstract}          % The abstract
-      TODO
+      Key derivation functions are a key element of many cryptographic applications. Password-based key derivation functions are designed specifically to derive cryptographic keys from low-entropy sources (such as passwords or passphrases) and to counter brute-force and dictionary attacks. However, the most widely adopted standard for password-based key derivation, PBKDF2, as implemented in most applications, is highly susceptible to attacks using Graphics Processing Units (GPUs).
+      
+      Due to their highly parallel architecture, GPUs are ideal for performing graphic calculations. Soon, it became apparent that GPUs can be used also used for wide range of other practical applications (including cryptography).
+      
+      In this work, we analyze how the design of PBKDF2 allows efficient attacks using GPUs and discuss possible alternatives that address this problem. Next, we present and analyze results of PBKDF2 benchmarks run on current CPU and GPU hardware. Finally, we present our demonstration program which utilizes the GPU hardware to perform a brute-force or dictionary attack on a LUKS encrypted partition.
     \end{ThesisAbstract}
     
     \begin{ThesisKeyWords}          % The keywords
-      key derivation function, PBKDF2, GPU, OpenCL, CUDA, password hashing, disk encryption, password cracking, LUKS
+      key derivation function, PBKDF2, GPU, OpenCL, CUDA, password hashing, password cracking, disk encryption, LUKS
     \end{ThesisKeyWords}
     
     \tableofcontents                % The table of contents
@@ -94,13 +98,15 @@
       
       Modern GPUs can be programmed using various high-level APIs (such as OpenCL\footnote{\url{https://www.khronos.org/opencl/}}, CUDA\footnote{\url{http://www.nvidia.com/object/cuda_home_new.html}}, DirectCompute or C++ AMP) and can be used not only for graphics processing but also for general purpose computation. Due to their specific architecture GPUs are suitable for parallel processing of massive amounts of data. Tasks that can be split into many small subtasks which can be run in parallel can be processed by a single GPU several times faster than by a single CPU. As was shown by Harrison and Waldron \cite{Harrison}, using GPUs it is possible to accelerate also various algorithms of symmetric cryptography.
     
-      This work also includes analysis of susceptibility of PBKDF2 to attacks using GPUs and the implementation of a demonstration program performing a brute-force attack on the password of a LUKS\footnote{LUKS = Linux Unified Key Setup} encrypted partition.
+      This work also includes analysis of susceptibility of PBKDF2 to attacks using GPUs and presents a demonstration program performing a brute-force attack on the password of a LUKS\footnote{LUKS = Linux Unified Key Setup} encrypted partition.
     
       \section{Summary of results}
-      TODO
+      We analyzed the security of PBKDF2 (specifically the most common PBKDF2-HMAC variants with focus on PBKDF2-HMAC-SHA1) against brute-force and dictionary attacks performed on GPUs. We have shown that the computation of PBKDF2-HMAC-SHA1 can be performed significantly faster and more efficiently on a GPU than on a CPU.
+      
+      We measured a 40-fold difference in speed between the best performing CPU and GPU that we tested. We also found the GPUs to outperform CPUs in terms of power efficiency of the attack. We estimate that the most power efficient GPU (of those that we tested) can perform approximately 20 times more computation than the most power efficient CPU for the same amount of energy consumed.
       
       \section{Chapter contents}
-      TODO
+      This work consists of seven chapters. The first chapter is the introduction. In the second chapter we describe the concept of key derivation functions with focus on password-based key derivation functions. In the third chapter we describe the architecture of GPUs. In the fourth chapter we discuss how a brute-force attack on PBKDF2 can be performed using GPUs. The fifth chapter contains a brief introduction to LUKS followed by the description of implementation of our demonstration program. The sixth chapter presents the results of performance benchmarks on CPU and GPU along with a brief description of implementation and methodology. In the seventh chapter we summarize the thesis.
     
     \chapter{Key derivation functions}
       Key derivation functions are cryptographic primitives that are used to derive encryption keys from a secret value. Depending on the application, the secret value can be another key or a password or passphrase \cite{wiki:KDF}. A KDF that is designed for deriving cryptographic key from another key is called a \emph{key-based key derivation function} (KBKDF); a KDF that is designed to take a password or passphrase as input is called a \emph{password-based key derivation function} (PBKDF).
@@ -135,7 +141,7 @@
       \paragraph*{}
       The most widely used password-based key derivation functions are currently \emph{PBKDF2} and \emph{bcrypt}.
       
-      PBKDF2 was standardized under PKCS\footnote{PKCS = Public-Key Cryptography Standards; a group of standards published by RSA Security, Inc. (see \url{https://www.emc.com/emc-plus/rsa-labs/standards-initiatives/public-key-cryptography-standards.htm})} \#5, Version 2.0 in 1999 (also published as RFC 2898 in 2000 \cite{rfc2898}) and later specified in NIST Special Publication 800-132 \cite{nist:sp800:132} as the only password-based key derivation function approved by the U.S. National Institute of Standards and Technology. PBKDF2 is widely employed in many practical applications, such as Wi-Fi Protected Access (security protocols used to secure wireless networks), disk encryption software (Cryptsetup, TrueCrypt/VeraCrypt\footnote{\url{https://veracrypt.codeplex.com/}}, ...) and password managers (LastPass\footnote{\url{https://lastpass.com/}}, 1Password\footnote{\url{https://agilebits.com/onepassword}}, ...).
+      PBKDF2 was standardized under PKCS\footnote{PKCS = Public-Key Cryptography Standards; a group of standards published by RSA Security, Inc. (see \url{https://www.emc.com/emc-plus/rsa-labs/standards-initiatives/public-key-cryptography-standards.htm})} \#5, Version 2.0 in 1999 (also published as RFC 2898 in 2000 \cite{rfc2898}) and later specified in NIST Special Publication 800-132 \cite{nist:sp800:132} as the only password-based key derivation function approved by the U.S. National Institute of Standards and Technology. PBKDF2 is widely employed in many practical applications, such as Wi-Fi Protected Access (a set of security protocols used to secure wireless networks), disk encryption software (Cryptsetup, TrueCrypt/VeraCrypt\footnote{\url{https://veracrypt.codeplex.com/}}, ...) and password managers (LastPass\footnote{\url{https://lastpass.com/}}, 1Password\footnote{\url{https://agilebits.com/onepassword}}, ...).
       
       Bcrypt was introduced in 1999 \cite{bcrypt} and although it incorporates several improvements over PBKDF2, it is not as widely used.
       
@@ -150,7 +156,7 @@
       The instantiations of PBKDF2 using specific PRFs are often denoted as PBKDF2-\emph{PRF}, where \emph{PRF} is the name of the PRF used (for example PBKDF2 using HMAC-SHA1 would be denoted as PBKDF2-HMAC-SHA1).
       
       \paragraph*{}
-      PBKDF2 takes two important security parameters -- \emph{salt} and \emph{iteration count}.
+      PBKDF2 accepts two important security parameters -- \emph{salt} and \emph{iteration count}.
       
       As noted in \cite[section 4.1]{rfc2898}, salt has two main purposes in password-based cryptography:
       \begin{enumerate}
@@ -197,7 +203,7 @@
       
       The computation of each block is performed by applying $c$ iterations of the PRF to an initial seed consisting of the salt and a binary representation of the index of the block. After each iteration, the output from the PRF is combined with the result of the previous iteration using the bitwise XOR operation, in order to ``reduce concerns about the recursion degenerating into a small set of values'' \cite[section 5.2]{rfc2898}.
       
-      \section{Scrypt}
+      \section{Scrypt} \label{s:scrypt}
       The scrypt key derivation function takes the following input parameters \cite[chapter 7]{scrypt}:
       \begin{itemize}
         \item $P$ -- the password (an octet string)
@@ -544,7 +550,7 @@
       
       Due to the variance in running times, the benchmarks were run several times for each data point and the arithmetic mean was taken as the final value. For GPU benchmarks the number of samples was 10, for CPU benchmarks it was 20 (the variance in running times for the GPU implementation was smaller than for the CPU implementation).
       
-      \section{Results}
+      \section{Results} \label{s:results}
       The results of the benchmarks show that a brute-force attack on PBKDF2-HMAC-SHA1 can be performed very efficiently on GPU hardware. The GPU implementation significantly outperforms the reference CPU implementation both in terms of attack speed per single device and in terms of power efficiency.
       
       Figure \ref{graph:devices:speed} shows a comparison of attack speeds for various devices. The attack speed is measured in PBKDF2 block-iterations per second (PBIPS) -- that is the number of PBKDF2 instances (i. e. the number of passwords processed) times the number of blocks of the derived key computed independently times the iteration count over the time it took to process these passwords. We use this unit because the amount of computation needed to perform one PBKDF2 instance is proportional to the iteration count and to the smallest number of hash-output-sized blocks such that they can fit the derived key.
@@ -589,7 +595,22 @@
       %TODO ?add a CPU vs GPU timeline (speed, maybe power efficiency)
       
     \chapter{Conclusion}
-      % TODO: discuss other hash functions, GPU impl was not difficult (mention OpenCL?), LUKS implications (mention the calibration)...
+      We analyzed the security of PBKDF2 (specifically the most common PBKDF2-HMAC variants with focus on PBKDF2-HMAC-SHA1) against brute-force and dictionary attacks performed on GPUs. We have shown that the computation of PBKDF2-HMAC-SHA1 (which is used by default in the disk encryption software \emph{cryptsetup}\footnote{\url{https://gitlab.com/cryptsetup/cryptsetup/}} for LUKS encrypted partitions) can be performed significantly faster and more efficiently on a GPU than on a CPU.
+      
+      We measured a 40-fold difference in speed between the best performing CPU and GPU that we tested. We also found the GPUs to outperform CPUs in terms of power efficiency of the attack. We estimate (based on thermal design power) that the most power efficient GPU (of those that we tested) can perform approximately 20 times more computation than the most power efficient CPU for the same amount of energy consumed. We refer to section \ref{s:results} for more details about the results of our performance benchmarks.
+      
+      \section{Consequences for applications using PBKDF2}
+      Some applications (e. g. Wi-Fi Protected Access protocols in PSK mode \cite{rfc4764} or TrueCrypt \cite{truecrypt}) use only fixed iteration count for PBKDF2 (usually close to the minimum of 1000 iterations recommended in RFC 2898 \cite[section 4.2]{rfc2898}). These applications are particularly vulnerable against GPU attacks, and since they do not update the iteration count based on the steadily increasing hardware performance, they are likely to become even more insecure in the near future.
+      
+      Other applications (e. g. the LUKS implementation in cryptsetup) try to adapt the iteration count to the current hardware performance by selecting the iteration count based on the time it takes to perform the PBKDF2 computation (usually on the user's hardware). In cryptsetup, when the user sets up an access password for a LUKS encrypted partition, they specify the requested time the computation should take and the iteration count is selected based on this requirement. Although this solution still does not address the problem of upgrading the iteration count regularly after the key setup (the user must do this explicitly) and does not account for potentially more advanced hardware that might be available to the attacker, it is a significant improvement as opposed to a fixed iteration count.
+      
+      To better protect against GPU attacks on passwords, future applications should consider alternative password-based key derivation functions based on sequential memory-hard functions (see sections \ref{s:PBKDFs} and \ref{s:scrypt}). Although these functions have certain drawbacks and are not yet widely adopted, there are active efforts within the cryptographic community to improve this situation, such as the Password Hashing Competition \cite{phc}.
+      
+      Regardless of these concerns, the best way to protect the passwords against brute-force and dictionary attacks remains the choice of long, unpredictable passwords (preferably passphrases).
+      
+      \section{Future work}
+      The PBKDF2 performance benchmarks and comparisons in this work are limited to the PBKDF2-HMAC-SHA1 key derivation function. Since other common hash functions (especially the hash functions from the SHA-2 and SHA-3 families) have higher memory requirements (see section \ref{s:PBKDF2onGPU}), and thus could have less efficient GPU implementations, an evaluation of other key derivation functions from the PBKDF2-HMAC family could prove to be interesting. The software developed as part of this work has been designed to allow extending it with other PBKDF2-HMAC implementations.
+      
     \appendix
     \chapter{Additional benchmark graphs}        % Appendices
       %TODO

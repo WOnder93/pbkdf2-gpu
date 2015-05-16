@@ -77,9 +77,11 @@ static CommandLineParser<Arguments> buildCmdLineParser()
                 state.logOpts = logOpts;
             }), "log", 'g', "logging mode", "none", "none|stderr|stdout|file:LOGFILE"),
 
+        /*
         new ArgumentOption<Arguments>(
             [] (Arguments &state, const std::string &action) { state.action = action; },
             "action", 'a', "the action to perform", "crack", "crack|benchmark"),
+        */
         new ArgumentOption<Arguments>(
             makeArgumentWithOptionsHandler<Arguments>(
                 [] (Arguments &state,
@@ -126,10 +128,9 @@ static CommandLineParser<Arguments> buildCmdLineParser()
 
     return CommandLineParser<Arguments>(
         "A tool for cracking LUKS partition passwords using GPU.\n"
-                "\n"
-                "When run in the 'crack' mode and a valid password is found, "
-                "prints it to stdout and exits with 0. When no valid password "
-                "is found, exits with 1.",
+        "\n"
+        "When a valid password is found, prints it to stdout and "
+        "exits with 0. When no valid password is found, exits with 1.",
         positional, options);
 }
 

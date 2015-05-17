@@ -40,7 +40,7 @@ EssivIVGenerator::Context::Context(
         const CipherAlgorithm &cipherAlg)
     : ivLength(ivLength), hashedKey(std::move(hashedKey))
 {
-    ctx = CipherAlgorithm::EncryptionContex(&cipherAlg, hashedKey.get());
+    ctx = CipherAlgorithm::EncryptionContex(&cipherAlg, this->hashedKey.get());
 }
 
 void EssivIVGenerator::Context::generateIV(

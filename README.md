@@ -1,7 +1,7 @@
 # PBKDF2 bulk computation utilities
 A C++11 library for brute-forcing PBKDF2 using (not only) massive parallel processing on GPU hardware and a tool for brute-forcing LUKS passwords.
 
-This project is part of my bachelor's thesis on the [Faculty of Informatics, Masaryk University](https://www.fi.muni.cz).
+This project is part of my [bachelor's thesis](https://is.muni.cz/th/409879/fi_b/?lang=en) on the [Faculty of Informatics, Masaryk University](https://www.fi.muni.cz).
 
 ## Building
 

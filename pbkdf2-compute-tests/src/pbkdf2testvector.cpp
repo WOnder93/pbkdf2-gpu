@@ -139,6 +139,67 @@ static const std::unordered_map<std::string, std::vector<PBKDF2TestVector>> STD_
                 "\x56\xfa\x6a\xa7\x55\x48\x09\x9d"
                 "\xcc\x37\xd7\xf0\x34\x25\xe0\xc3", 16,
                 4096),
+        },
+    },
+    {
+        "sha256", {
+            PBKDF2TestVector(
+                "cryptsetup - Password exceeds block size test",
+                "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", 65,
+                "pass phrase exceeds block size", 30,
+                "\x22\x34\x4b\xc4\xb6\xe3\x26\x75"
+                "\xa8\x09\x0f\x3e\xa8\x0b\xe0\x1d"
+                "\x5f\x95\x12\x6a\x2c\xdd\xc3\xfa"
+                "\xcc\x4a\x5e\x6d\xca\x04\xec\x58", 32,
+                1200),
+            PBKDF2TestVector(
+                "RFC6070-like - 1",
+                "password", 8,
+                "salt", 4,
+                "\x12\x0f\xb6\xcf\xfc\xf8\xb3\x2c"
+                "\x43\xe7\x22\x52\x56\xc4\xf8\x37"
+                "\xa8\x65\x48\xc9", 20,
+                1),
+            PBKDF2TestVector(
+                "RFC6070-like - 2",
+                "password", 8,
+                "salt", 4,
+                "\xae\x4d\x0c\x95\xaf\x6b\x46\xd3"
+                "\x2d\x0a\xdf\xf9\x28\xf0\x6d\xd0"
+                "\x2a\x30\x3f\x8e", 20,
+                2),
+            PBKDF2TestVector(
+                "RFC6070-like - 3",
+                "password", 8,
+                "salt", 4,
+                "\xc5\xe4\x78\xd5\x92\x88\xc8\x41"
+                "\xaa\x53\x0d\xb6\x84\x5c\x4c\x8d"
+                "\x96\x28\x93\xa0", 20,
+                4096),
+            PBKDF2TestVector(
+                "RFC6070-like - 4",
+                "password", 8,
+                "salt", 4,
+                "\xcf\x81\xc6\x6f\xe8\xcf\xc0\x4d"
+                "\x1f\x31\xec\xb6\x5d\xab\x40\x89"
+                "\xf7\xf1\x79\xe8", 20,
+                16777216),
+            PBKDF2TestVector(
+                "RFC6070-like - 5",
+                "passwordPASSWORDpassword", 24,
+                "saltSALTsaltSALTsaltSALTsaltSALTsalt", 36,
+                "\x34\x8c\x89\xdb\xcb\xd3\x2b\x2f"
+                "\x32\xd8\x14\xb8\x11\x6e\x84\xcf"
+                "\x2b\x17\x34\x7e\xbc\x18\x00\x18\x1c", 25,
+                4096),
+            PBKDF2TestVector(
+                "RFC6070-like - 6",
+                "pass\0word", 9,
+                "sa\0lt", 5,
+                "\x89\xb6\x9d\x05\x16\xf8\x29\x89"
+                "\x3c\x69\x62\x26\x65\x0a\x86\x87", 16,
+                4096),
         }
     }
 };

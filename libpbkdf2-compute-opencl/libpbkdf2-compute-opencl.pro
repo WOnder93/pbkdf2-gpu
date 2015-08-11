@@ -38,7 +38,8 @@ SOURCES += \
     src/globalcontext.cpp
 
 OTHER_FILES += \
-    data/opencl/kernels/pbkdf2_sha1.cl
+    data/opencl/kernels/pbkdf2_sha1.cl \
+    data/opencl/kernels/pbkdf2_sha256.cl
 
 unix {
     target.path = /usr/lib

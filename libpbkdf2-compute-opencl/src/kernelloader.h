@@ -45,9 +45,10 @@ namespace KernelLoader
                             const std::string &buildOptions = std::string());
 
     cl::Program loadPBKDF2Program(const cl::Context &context,
+                                  const std::string &dataFolder,
                                   const std::string &sourcePath,
                                   std::size_t saltLength,
-                                  bool log = false, bool debug = false, bool tests = false);
+                                  bool log = false, bool debug = false);
 }
 
 } // namespace opencl

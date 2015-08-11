@@ -33,8 +33,9 @@ ComputeContext::ComputeContext(const HashFunctionContext *parentContext,
 {
     // load and build the kernel program:
     // TODO: check error:
-    std::string path = KernelLoader::findPBKDF2Program(parentContext->getGlobalContext()->getDataDirectory(), parentContext->getHashSpec());
-    prog = KernelLoader::loadPBKDF2Program(parentContext->getContext(), path, saltLength);
+    std::string dataDir = parentContext->getGlobalContext()->getDataDirectory();
+    std::string path = KernelLoader::findPBKDF2Program(dataDir, parentContext->getHashSpec());
+    prog = KernelLoader::loadPBKDF2Program(parentContext->getContext(), dataDir, path, saltLength);
 
     saltBufferSize = ALIGN(4, saltLength);
     saltBuffer = cl::Buffer(parentContext->getContext(), CL_MEM_READ_ONLY, saltBufferSize);

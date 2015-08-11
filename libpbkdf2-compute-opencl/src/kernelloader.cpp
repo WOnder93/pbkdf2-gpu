@@ -55,20 +55,19 @@ cl::Program KernelLoader::loadProgram(
 
 cl::Program KernelLoader::loadPBKDF2Program(
         const cl::Context &context,
+        const std::string &dataFolder,
         const std::string &sourcePath,
         std::size_t saltLength,
-        bool log, bool debug, bool tests)
+        bool log, bool debug)
 {
     std::stringstream opts;
+    opts << "-I \"" << dataFolder << "/opencl/kernels\"" << " ";
     opts << "-D SALT_LENGTH=" << saltLength << " ";
     if (log) {
         opts << "-D ENABLE_LOGGING" << " ";
     }
     if (debug) {
         opts << "-g -s \"" << sourcePath << "\"" << " ";
-    }
-    if (tests) {
-        opts << "-D TESTS" << " ";
     }
     return loadProgram(context, sourcePath, opts.str());
 }

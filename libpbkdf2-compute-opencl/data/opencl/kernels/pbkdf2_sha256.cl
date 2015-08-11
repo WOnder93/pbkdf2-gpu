@@ -422,7 +422,6 @@ inline void sha256_digest_digest(
     state[5] += prev_F;
     state[6] += prev_G;
     state[7] += prev_H;
-
 }
 
 #ifdef DEBUG_LOG

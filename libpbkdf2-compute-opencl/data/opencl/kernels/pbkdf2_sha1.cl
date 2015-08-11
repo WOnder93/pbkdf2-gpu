@@ -186,13 +186,7 @@ do { \
 #endif /* NVIDIA */
 
 #define SHA1_F1(x,y,z) (x ^ y ^ z)
-
-#ifndef NVIDIA
-#define SHA1_F2(x,y,z) (bitselect(x, y, z) ^ bitselect(x, (uint)0, y))
-#else
-#define SHA1_F2(x,y,z) ((x & y) | (z & (x | y)))
-#endif /* NVIDIA */
-
+#define SHA1_F2(x,y,z) bitselect(y, x, y ^ z)
 #define SHA1_F3(x,y,z) (x ^ y ^ z)
 
 #define SHA1_K0 0x5A827999

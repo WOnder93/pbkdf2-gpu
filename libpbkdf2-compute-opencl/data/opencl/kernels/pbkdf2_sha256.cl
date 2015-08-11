@@ -162,16 +162,12 @@ inline void dump_uix_a(__private output_stream_t *stream, __private uint *array,
 #define ROR(x, n) rotate((uint)(x), 32 - (uint)(n))
 
 #ifndef NVIDIA
-
 #define SHA256_F0(x,y,z) bitselect(z, y, x)
-#define SHA256_F1(x,y,z) (bitselect(x, y, z) ^ bitselect(x, (uint)0, y))
-
 #else
-
 #define SHA256_F0(x,y,z) (z ^ (x & (y ^ z)))
-#define SHA256_F1(x,y,z) ((x & y) | (z & (x | y)))
-
 #endif /* NVIDIA */
+
+#define SHA256_F1(x,y,z) bitselect(y, x, y ^ z)
 
 #define SHA256_STEP(a, b, c, d, e, f, g, h, k, x) \
 do { \

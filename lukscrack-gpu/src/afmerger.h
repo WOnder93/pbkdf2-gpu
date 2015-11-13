@@ -53,7 +53,7 @@ public:
         std::unique_ptr<unsigned char[]> buffer;
 
     public:
-        Context(const AFMerger *parent);
+        explicit Context(const AFMerger *parent);
 
         inline void merge(const void *src, void *dst) const
         {

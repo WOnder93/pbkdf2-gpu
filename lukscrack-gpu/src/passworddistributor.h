@@ -35,7 +35,7 @@ public:
     inline PasswordGenerator *getPasswordGenerator() const { return generator; }
     inline std::mutex &getMutex() { return mutex; }
 
-    inline PasswordDistributor(PasswordGenerator *generator)
+    explicit PasswordDistributor(PasswordGenerator *generator)
         : generator(generator), mutex()
     {
     }

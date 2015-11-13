@@ -35,7 +35,7 @@ private:
         std::size_t ivLength;
 
     public:
-        inline Context(std::size_t ivLength)
+        explicit Context(std::size_t ivLength)
             : ivLength(ivLength)
         {
         }
@@ -44,7 +44,7 @@ private:
     };
 
 public:
-    inline NullIVGenerator(const std::string &) { }
+    explicit NullIVGenerator(const std::string &) { }
 
     std::shared_ptr<const IVGenerator::Context> createContext(
             std::size_t ivLength, const std::string &cipherName,

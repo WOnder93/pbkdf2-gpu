@@ -33,7 +33,7 @@ namespace lukscrack {
 using namespace pbkdf2_gpu::common;
 
 AFMerger::Context::Context(const AFMerger *parent)
-    : parent(parent)
+    : parent(parent), buffer()
 {
     buffer = std::unique_ptr<unsigned char[]>(
                 new unsigned char[ALIGN(parent->digestSize, parent->blockSize)]);

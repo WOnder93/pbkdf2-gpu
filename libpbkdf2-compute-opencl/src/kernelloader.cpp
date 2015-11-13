@@ -42,13 +42,13 @@ cl::Program KernelLoader::loadProgram(
     cl::Program prog(context, sourceText);
     try {
         prog.build(buildOptions.c_str());
-    } catch (const cl::Error &err) {
+    } catch (const cl::Error &) {
         std::cerr << "ERROR: Failed to build program:" << std::endl;
         for (cl::Device &device : context.getInfo<CL_CONTEXT_DEVICES>()) {
             std::cerr << "  Build log from device '" << device.getInfo<CL_DEVICE_NAME>() << "':" << std::endl;
             std::cerr << prog.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
         }
-        throw err;
+        throw;
     }
     return prog;
 }

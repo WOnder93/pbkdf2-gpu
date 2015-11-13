@@ -33,10 +33,10 @@ private:
 public:
     inline const std::string &getMessage() const { return message; }
 
-    inline TestException(const std::string &message) :
+    explicit TestException(const std::string &message) :
         message(message) { }
 
-    virtual const char *what() const noexcept {
+    const char *what() const noexcept {
         return message.c_str();
     }
 };

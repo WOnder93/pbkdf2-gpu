@@ -30,7 +30,7 @@ namespace lukscrack {
 class InvalidLuksHeaderException : public std::runtime_error
 {
 public:
-    inline InvalidLuksHeaderException(const std::string &message)
+    explicit InvalidLuksHeaderException(const std::string &message)
         : std::runtime_error("Invalid LUKS header: " + message)
     {
     }
@@ -48,7 +48,7 @@ public:
 class IncompatibleLuksVersionException : public InvalidLuksHeaderException
 {
 public:
-    inline IncompatibleLuksVersionException(std::uint_least16_t version)
+    explicit IncompatibleLuksVersionException(std::uint_least16_t version)
         : InvalidLuksHeaderException("Incompatible version: " + std::to_string(version) + "!")
     {
     }
@@ -57,7 +57,7 @@ public:
 class StringNotTerminatedException : public InvalidLuksHeaderException
 {
 public:
-    inline StringNotTerminatedException(const std::string &field)
+    explicit StringNotTerminatedException(const std::string &field)
         : InvalidLuksHeaderException(field + ": String not terminated!")
     {
     }
@@ -66,7 +66,7 @@ public:
 class KeyslotDisabledException : public InvalidLuksHeaderException
 {
 public:
-    inline KeyslotDisabledException(int keyslot_num)
+    explicit KeyslotDisabledException(int keyslot_num)
         : InvalidLuksHeaderException("Keyslot #" + std::to_string(keyslot_num) + " is disabled!")
     {
     }
@@ -75,7 +75,7 @@ public:
 class KeyslotCorruptedException : public InvalidLuksHeaderException
 {
 public:
-    inline KeyslotCorruptedException(int keyslot_num)
+    explicit KeyslotCorruptedException(int keyslot_num)
         : InvalidLuksHeaderException("Keyslot #" + std::to_string(keyslot_num) + " is corrupted!")
     {
     }

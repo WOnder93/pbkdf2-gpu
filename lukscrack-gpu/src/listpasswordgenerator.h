@@ -34,7 +34,7 @@ private:
     std::string passwordBuffer;
 
 public:
-    inline ListPasswordGenerator(std::string fileName)
+    explicit ListPasswordGenerator(std::string fileName)
         : streamOwner(), passwordBuffer()
     {
         if (fileName == "-") {

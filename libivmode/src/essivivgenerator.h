@@ -44,9 +44,9 @@ private:
         CipherAlgorithm::EncryptionContex ctx;
 
     public:
-        Context(std::size_t ivLength,
-                std::unique_ptr<unsigned char[]> &&hashedKey,
-                const CipherAlgorithm &cipherAlg);
+        explicit Context(std::size_t ivLength,
+                         std::unique_ptr<unsigned char[]> &&hashedKey,
+                         const CipherAlgorithm &cipherAlg);
 
         void generateIV(std::size_t sector, void *dest) const override;
     };
@@ -54,7 +54,7 @@ private:
     const HashAlgorithm *hashAlgorithm;
 
 public:
-    EssivIVGenerator(const std::string &hashSpec);
+    explicit EssivIVGenerator(const std::string &hashSpec);
 
     std::shared_ptr<const IVGenerator::Context> createContext(
             std::size_t ivLength, const std::string &cipherName,

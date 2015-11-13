@@ -48,7 +48,11 @@ public:
 
     inline double getMeanDeviationPerMean() const { return (double)devMean / mean; }
 
-    inline DataSet() : samples(), sum(0) { }
+    inline DataSet()
+        : samples(), sum(0), mean(0),
+          devSum(0), devMean(0)
+    {
+    }
 
     void addSample(uintmax_t sample)
     {

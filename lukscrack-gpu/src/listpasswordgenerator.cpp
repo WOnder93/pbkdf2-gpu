@@ -29,11 +29,11 @@ bool ListPasswordGenerator::nextPassword(const char *&pwData, std::size_t &pwLen
         char c;
         try {
             stream->get(c);
-        } catch (const std::ios_base::failure &ex) {
+        } catch (const std::ios_base::failure &) {
             if (stream->eof()) {
                 break;
             }
-            throw ex;
+            throw;
         }
         if (c == '\n') {
             break;

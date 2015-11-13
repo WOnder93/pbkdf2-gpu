@@ -43,7 +43,7 @@ private:
 public:
     inline std::size_t getSize() const { return size; }
 
-    ThreadPool(std::size_t size);
+    explicit ThreadPool(std::size_t size);
     ~ThreadPool();
 
     std::vector<std::future<void>> enqueueTasks(

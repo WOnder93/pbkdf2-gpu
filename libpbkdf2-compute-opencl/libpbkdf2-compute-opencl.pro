@@ -43,7 +43,10 @@ OTHER_FILES += \
     data/opencl/kernels/pbkdf2_generic.cl \
     data/opencl/kernels/sha_common.cl \
     data/opencl/kernels/hash_sha1.cl \
-    data/opencl/kernels/hash_sha256.cl
+    data/opencl/kernels/hash_sha256.cl \
+    data/opencl/kernels/hash_ripemd160.cl \
+    data/opencl/kernels/pbkdf2_ripemd160.cl \
+    data/opencl/kernels/hash_word_uint.cl
 
 unix {
     target.path = /usr/lib

@@ -38,12 +38,12 @@
  *
  * MACROS:
  *   HASH_NAME - a string constant containing a human-readable name of the hash function
+ *   HASH_LITTLE_ENDIAN - define this macro IFF the hash words and message length
+ *       are stored in little-endian format (as opposed to big-endian)
+ *   HASH_WORD_SWITCH_ENDIANNESS(w) - a macro that reverses bytes in a word
+ *   HASH_WORD_REPEAT_BYTE(b) - makes a (hash_word_t) by repeating the given byte
  *
  *   HASH_WORD_BYTES - the number of bytes in a word
- *   HASH_WORD_HOST2DEV(word) - a function/macro that transforms a word obtained
- *       from the host memory to a proper value (endianness should be swapped here
- *       if necessary)
- *   HASH_WORD_DEV2HOST(word) - an inverse function to the above
  *
  *   HASH_IBLOCK_WORDS - the number of words per input block
  *   HASH_OBLOCK_WORDS - the number of words per output block/HF state
@@ -68,6 +68,14 @@
 #define HASH_IBLOCK_LENGTH  WORDS_TO_BYTES(HASH_IBLOCK_WORDS)
 #define HASH_OBLOCK_LENGTH  WORDS_TO_BYTES(HASH_OBLOCK_WORDS)
 #define HASH_ML_LENGTH      WORDS_TO_BYTES(HASH_ML_WORDS)
+
+#if defined(__ENDIAN_LITTLE__) != defined(HASH_LITTLE_ENDIAN)
+#define HASH_WORD_FROM_DEV(w) HASH_WORD_SWITCH_ENDIANNESS(w)
+#define HASH_WORD_TO_DEV(w)   HASH_WORD_SWITCH_ENDIANNESS(w)
+#else
+#define HASH_WORD_FROM_DEV(w) w
+#define HASH_WORD_TO_DEV(w)   w
+#endif
 
 /* TODO: make optional: */
 #define DEBUG_LOG
@@ -172,7 +180,7 @@ inline void pbkdf2_init(
         hash_word_t buffer[HASH_IBLOCK_WORDS];
         for (uint i = 0; i < SALT_LENGTH / HASH_IBLOCK_LENGTH; i++) {
             for (uint k = 0; k < HASH_IBLOCK_WORDS; k++) {
-                buffer[k] = HASH_WORD_HOST2DEV(salt[k]);
+                buffer[k] = HASH_WORD_FROM_DEV(salt[k]);
             }
             hash_update_block(HASH_OBLOCK_UNROLL(prev_state), buffer, state);
             salt += HASH_IBLOCK_WORDS;
@@ -188,31 +196,49 @@ inline void pbkdf2_init(
         {
             uint i = 0;
             /* Process the rest of the salt: */
-            /* (except the last (SALT_LENGTH % 4) bytes) */
+            /* (except the last (SALT_LENGTH % HASH_IBLOCK_LENGTH) bytes) */
             for (; i < BYTES_TO_WORDS(SALT_LENGTH % HASH_IBLOCK_LENGTH); i++) {
-                tail[i] = HASH_WORD_HOST2DEV(salt[i]);
+                tail[i] = HASH_WORD_FROM_DEV(salt[i]);
             }
 
             /* Append DK block index: */
-            if ((SALT_LENGTH % 4) == 0) {
-                tail[i] = dk_block_index + 1;
+            uint b = dk_block_index + 1;
+            //...
+            if ((SALT_LENGTH % HASH_WORD_BYTES) == 0) {
+                tail[i] = b;
                 i++;
+#ifdef HASH_LITTLE_ENDIAN
+                tail[i] = 0x00000080;
+#else
                 tail[i] = 0x80000000;
+#endif
                 i++;
             } else {
-                tail[i] = HASH_WORD_HOST2DEV(salt[i]) | ((dk_block_index + 1) >> ((SALT_LENGTH % 4) << 3));
+#ifdef HASH_LITTLE_ENDIAN
+                tail[i] = HASH_WORD_FROM_DEV(salt[i]) | (b << ((SALT_LENGTH % HASH_WORD_BYTES) * 8));
+#else
+                tail[i] = HASH_WORD_FROM_DEV(salt[i]) | (b >> ((SALT_LENGTH % HASH_WORD_BYTES) * 8));
+#endif
                 i++;
-                tail[i] = ((dk_block_index + 1) << (32 - ((SALT_LENGTH % 4) << 3))) | ((uint)0x80000000 >> ((SALT_LENGTH % 4) << 3));
+#ifdef HASH_LITTLE_ENDIAN
+                tail[i] = (b >> (32 - ((SALT_LENGTH % HASH_WORD_BYTES) * 8))) | ((hash_word_t)0x80000000 >> ((SALT_LENGTH % HASH_WORD_BYTES) * 8));
+#else
+                tail[i] = (b << (32 - ((SALT_LENGTH % HASH_WORD_BYTES) * 8))) | ((hash_word_t)0x00000080 << ((SALT_LENGTH % HASH_WORD_BYTES) * 8));
+#endif
                 i++;
             }
 
             /* Pad with zeroes: */
-            for (; i < TAIL_BLOCKS * HASH_IBLOCK_WORDS - 1; i++) {
-                tail[i] = 0x00000000;
+            for (; i < TAIL_BLOCKS * HASH_IBLOCK_WORDS; i++) {
+                tail[i] = (hash_word_t)0;
             }
 
-            /* Put SHA1 message length at the end of the last block: */
+            /* Put message length at the end of the last block: */
+#ifdef HASH_LITTLE_ENDIAN
+            tail[TAIL_BLOCKS * HASH_IBLOCK_WORDS - HASH_ML_WORDS] = (HASH_IBLOCK_LENGTH + SALT_LENGTH + 4) * 8 /*(bits in byte)*/;
+#else
             tail[TAIL_BLOCKS * HASH_IBLOCK_WORDS - 1] = (HASH_IBLOCK_LENGTH + SALT_LENGTH + 4) * 8 /*(bits in byte)*/;
+#endif
         }
 
 #ifdef ENABLE_LOGGING
@@ -318,22 +344,22 @@ void pbkdf2_kernel(
     uint input_block_index = (uint)get_global_id(0);
     uint input_pos = input_block_index;
 
-    uint ipad_state[HASH_OBLOCK_WORDS];
-    uint opad_state[HASH_OBLOCK_WORDS];
+    hash_word_t ipad_state[HASH_OBLOCK_WORDS];
+    hash_word_t opad_state[HASH_OBLOCK_WORDS];
     {
-        uint ipad[HASH_IBLOCK_WORDS];
-        uint opad[HASH_IBLOCK_WORDS];
+        hash_word_t ipad[HASH_IBLOCK_WORDS];
+        hash_word_t opad[HASH_IBLOCK_WORDS];
 
         for (uint row = 0; row < HASH_IBLOCK_WORDS; row++) {
-            uint in = HASH_WORD_HOST2DEV(input[input_pos + row * batchSize]);
+            hash_word_t in = HASH_WORD_FROM_DEV(input[input_pos + row * batchSize]);
 
 #ifdef ENABLE_LOGGING
             dump_uix(&dbg, in);
             dump_l(&dbg, " ");
 #endif /* ENABLE_LOGGING */
 
-            ipad[row] = in ^ 0x36363636;
-            opad[row] = in ^ 0x5C5C5C5C;
+            ipad[row] = in ^ HASH_WORD_REPEAT_BYTE(0x36);
+            opad[row] = in ^ HASH_WORD_REPEAT_BYTE(0x5C);
         }
 #ifdef ENABLE_LOGGING
         dump_l(&dbg, "\n");
@@ -345,17 +371,17 @@ void pbkdf2_kernel(
 
     uint dk_block_index = (uint)get_global_id(1);
 
-    uint buffer[HASH_IBLOCK_WORDS];
+    hash_word_t buffer[HASH_IBLOCK_WORDS];
     pbkdf2_init(&dbg, salt, dk_block_index, ipad_state, buffer);
 
-    uint dk[HASH_OBLOCK_WORDS];
+    hash_word_t dk[HASH_OBLOCK_WORDS];
     pbkdf2_iter(&dbg, ipad_state, opad_state, iterations, dk, buffer);
 
     uint output_block_index = input_block_index * dk_blocks + dk_block_index;
     uint output_pos = output_block_index;
 
     for (uint i = 0; i < HASH_OBLOCK_WORDS; i++) {
-        output[output_pos + i * batchSize * dk_blocks] = HASH_WORD_DEV2HOST(dk[i]);
+        output[output_pos + i * batchSize * dk_blocks] = HASH_WORD_TO_DEV(dk[i]);
     }
 
 #ifdef DEBUG_LOG

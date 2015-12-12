@@ -20,20 +20,9 @@
 #endif
 
 #include "sha_common.cl"
+#include "hash_word_uint.cl"
 
 #define HASH_NAME "SHA-1"
-
-typedef uint hash_word_t;
-
-#define SWITCH_ENDIANNESS(v) (\
-    (((uint)(v) & 0xff) << 24) | \
-    (((uint)(v) <<  8) & 0x00ff0000) | \
-    (((uint)(v) >>  8) & 0x0000ff00) | \
-    (((uint)(v) >> 24) & 0x000000ff))
-
-#define HASH_WORD_BYTES 4
-#define HASH_WORD_HOST2DEV(w) SWITCH_ENDIANNESS(w)
-#define HASH_WORD_DEV2HOST(w) SWITCH_ENDIANNESS(w)
 
 #define HASH_IBLOCK_WORDS 16
 #define HASH_OBLOCK_WORDS  5

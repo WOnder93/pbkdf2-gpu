@@ -26,7 +26,9 @@ HashFunctionContext::HashFunctionContext(
         const std::vector<Device> &devices,
         const std::string &hashSpec)
     : globalContext(globalContext), devices(),
-      hashSpec(hashSpec), hashAlg(&HashAlgorithm::getAlgorithm(hashSpec))
+      hashSpec(hashSpec),
+      hashAlg(&HashAlgorithm::getAlgorithm(hashSpec)),
+      helper(&HashFunctionHelper::getHelper(hashSpec))
 {
     for (const Device &device : devices) {
         this->devices.push_back(device.getCLDevice());

@@ -31,12 +31,15 @@ ComputeContext::ComputeContext(const HashFunctionContext *parentContext,
     : parentContext(parentContext), saltData(salt), saltLength(saltLength),
       dkLength(dkLength), iterationCount(iterationCount)
 {
+    auto hfHelper = parentContext->getHelper();
+
     // load and build the kernel program:
     // TODO: check error:
-    std::string path = KernelLoader::findPBKDF2Program(parentContext->getGlobalContext()->getDataDirectory(), parentContext->getHashSpec());
-    prog = KernelLoader::loadPBKDF2Program(parentContext->getContext(), path, saltLength);
+    prog = KernelLoader::loadPBKDF2Program(
+                parentContext->getContext(), "/tmp", *hfHelper,
+                saltLength, false);
 
-    saltBufferSize = ALIGN(4, saltLength);
+    saltBufferSize = ALIGN(hfHelper->getWordBytes(), saltLength);
     saltBuffer = cl::Buffer(parentContext->getContext(), CL_MEM_READ_ONLY, saltBufferSize);
 }
 

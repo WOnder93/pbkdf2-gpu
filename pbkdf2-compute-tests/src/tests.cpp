@@ -167,7 +167,7 @@ static void runOpenCLTests(std::ostream &out, Logger *logger)
     GlobalContext global("data");
 
     runComputeTests<Types>(out, "OpenCL", "sha1",   &global, logger);
-    runComputeTests<Types>(out, "OpenCL", "sha256", &global, logger);
+    //runComputeTests<Types>(out, "OpenCL", "sha256", &global, logger);
 }
 
 static void runCPUTests(std::ostream &out, Logger *logger)
@@ -178,7 +178,7 @@ static void runCPUTests(std::ostream &out, Logger *logger)
 
     //runComputeTests<Types>(out, "CPU", "ripemd160", &global, logger);
     runComputeTests<Types>(out, "CPU", "sha1",      &global, logger);
-    runComputeTests<Types>(out, "CPU", "sha256",    &global, logger);
+    //runComputeTests<Types>(out, "CPU", "sha256",    &global, logger);
     //runComputeTests<Types>(out, "CPU", "sha512",    &global, logger);
 }
 

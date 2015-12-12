@@ -31,9 +31,16 @@ libpbkdf2_compute_opencl_la_SOURCES = \
     src/computecontext.cpp \
     src/devicecontext.cpp \
     src/processingunit.cpp \
+    src/hashfunctionhelper.cpp \
+    src/kernelgenerator.cpp \
+    src/uinthashfunctionhelper.cpp \
+    src/sha1hashfunctionhelper.cpp \
+    src/openclwriter.cpp \
     src/kernelloader.h \
-    src/alignment.h
-
-dist_data_DATA = data/opencl/kernels/pbkdf2_sha1.cl
+    src/alignment.h \
+    src/kernelgenerator.h \
+    src/uinthashfunctionhelper.h \
+    src/sha1hashfunctionhelper.h \
+    src/openclwriter.h
 
 SUBDIRS = . include

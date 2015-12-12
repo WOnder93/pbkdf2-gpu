@@ -24,6 +24,7 @@
 
 #include "opencl.h"
 #include "globalcontext.h"
+#include "hashfunctionhelper.h"
 
 namespace libpbkdf2 {
 namespace compute {
@@ -41,6 +42,7 @@ private:
 
     std::string hashSpec;
     const HashAlgorithm *hashAlg;
+    const HashFunctionHelper *helper;
 
 public:
     inline const GlobalContext *getGlobalContext() const { return globalContext; }
@@ -50,6 +52,7 @@ public:
 
     inline const std::string &getHashSpec() const { return hashSpec; }
     inline const HashAlgorithm *getHashAlgorithm() const { return hashAlg; }
+    inline const HashFunctionHelper *getHelper() const { return helper; }
 
     /**
      * @brief Empty constructor.

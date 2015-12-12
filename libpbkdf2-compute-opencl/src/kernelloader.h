@@ -20,6 +20,8 @@
 
 #include "opencl.h"
 
+#include "hashfunctionhelper.h"
+
 #include <string>
 
 namespace libpbkdf2 {
@@ -28,26 +30,11 @@ namespace opencl {
 
 namespace KernelLoader
 {
-    inline static std::string findProgram(
-            const std::string &dataFolder, const std::string &kernelName)
-    {
-        return dataFolder + "/opencl/kernels/" + kernelName + ".cl";
-    }
-
-    inline static std::string findPBKDF2Program(
-            const std::string &dataFolder, const std::string &hashSpec)
-    {
-        return findProgram(dataFolder, "pbkdf2_" + hashSpec);
-    }
-
-    cl::Program loadProgram(const cl::Context &context,
-                            const std::string &sourcePath,
-                            const std::string &buildOptions = std::string());
-
-    cl::Program loadPBKDF2Program(const cl::Context &context,
-                                  const std::string &sourcePath,
-                                  std::size_t saltLength,
-                                  bool log = false, bool debug = false, bool tests = false);
+    cl::Program loadPBKDF2Program(
+            const cl::Context &context,
+            const std::string &sourceDirectory,
+            const HashFunctionHelper &hfHelper,
+            std::size_t saltLength, bool debug = false);
 }
 
 } // namespace opencl

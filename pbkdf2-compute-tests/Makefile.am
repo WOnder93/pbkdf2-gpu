@@ -35,11 +35,3 @@ pbkdf2_compute_tests_SOURCES = src/main.cpp \
     src/testsuite.h \
     src/tests.h \
     src/pbkdf2parameters.h
-
-DATA_PATH = $(srcdir)/../libpbkdf2-compute-opencl
-
-all-local:
-	rm -rf data && $(LN_S) $(DATA_PATH)/data data
-
-clean-local:
-	rm -rf data

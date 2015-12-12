@@ -13,12 +13,14 @@ HEADERS += \
     src/pbkdf2testvector.h \
     src/utils.h \
     src/testsuite.h \
-    src/tests.h
+    src/tests.h \
+    src/pbkdf2parameters.h
 
 SOURCES += src/main.cpp \
     src/pbkdf2testvector.cpp \
     src/testsuite.cpp \
-    src/tests.cpp
+    src/tests.cpp \
+    src/pbkdf2parameters.cpp
 
 # libpbkdf2-compute-opencl:
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../libpbkdf2-compute-opencl/release/ -lpbkdf2-compute-opencl

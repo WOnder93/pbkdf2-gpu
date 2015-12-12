@@ -34,7 +34,7 @@ namespace tests {
 using namespace pbkdf2_gpu::common;
 
 template<class Types>
-void runComputeTests(
+static void runComputeTests(
         std::ostream &out, const std::string &platformName, const std::string &hashSpec,
         const typename Types::TGlobalContext *globalCtx, Logger *logger)
 {
@@ -49,19 +49,20 @@ void runComputeTests(
 
     typename Types::THashFunctionContext hfContext(globalCtx, { devices[0] }, hashSpec);
     for (const PBKDF2TestVector &tv : testVectors) {
-        tests.push_back(Test("Test vector '" + tv.getName() + "'", [&] {
+        tests.push_back(Test("Test vector '" + tv.getParams().getName() + "'", [&] {
             typename Types::TComputeContext computeContext(
                         &hfContext,
-                        tv.getSaltData(), tv.getSaltLength(),
-                        tv.getDerivedKeyLength(), tv.getIterationCount());
+                        tv.getParams().getSaltData(), tv.getParams().getSaltLength(),
+                        tv.getParams().getDerivedKeyLength(),
+                        tv.getParams().getIterationCount());
             typename Types::TDeviceContext deviceContext(&computeContext, devices[0]);
             typename Types::TProcessingUnit unit(&deviceContext, 1, logger);
 
             {
                 typename Types::TProcessingUnit::PasswordWriter writer(unit);
                 writer.setPassword(
-                            (const char *)tv.getPasswordData(),
-                            tv.getPasswordLength());
+                            (const char *)tv.getParams().getPasswordData(),
+                            tv.getParams().getPasswordLength());
             }
 
             unit.beginProcessing();
@@ -72,7 +73,7 @@ void runComputeTests(
                 typename Types::TProcessingUnit::DerivedKeyReader reader(unit);
                 match = memcmp(tv.getDerivedKeyData(),
                                reader.getDerivedKey(),
-                               tv.getDerivedKeyLength()) == 0;
+                               tv.getParams().getDerivedKeyLength()) == 0;
             }
             Utils::assert("Output should be equal to the expected output", match);
         }));
@@ -80,6 +81,83 @@ void runComputeTests(
 
     TestSuite suite("PBKDF2-HMAC-" + hashSpec + " " + platformName + " compute library tests (standard test vectors)", tests);
     suite.runTests(out);
+}
+
+static void runCPUvsOpenCLTests(std::ostream &out, const std::string &hashSpec,
+                              const cpu::GlobalContext *globalCpu,
+                              const opencl::GlobalContext *globalCl,
+                              Logger *logger)
+{
+    auto &devicesCpu = globalCpu->getAllDevices();
+    auto &devicesCl = globalCl->getAllDevices();
+    if (devicesCpu.empty()) {
+        out << "No CPU devices, tests cannot be run!" << std::endl;
+        return;
+    }
+    if (devicesCl.empty()) {
+        out << "No OpenCL devices, tests cannot be run!" << std::endl;
+        return;
+    }
+
+    std::vector<Test> tests;
+
+    cpu::HashFunctionContext hfCtxCpu(globalCpu, devicesCpu, hashSpec);
+    opencl::HashFunctionContext hfCtxCl(globalCl, devicesCl, hashSpec);
+    for (const PBKDF2Parameters &tp : PBKDF2Parameters::testParameters) {
+        tests.push_back(Test("Test parameters '" + tp.getName() + "'", [&](){
+            cpu::ComputeContext computeCtxCpu(
+                        &hfCtxCpu, tp.getSaltData(), tp.getSaltLength(),
+                        tp.getDerivedKeyLength(), tp.getIterationCount());
+            opencl::ComputeContext computeCtxCl(
+                        &hfCtxCl, tp.getSaltData(), tp.getSaltLength(),
+                        tp.getDerivedKeyLength(), tp.getIterationCount());
+
+            cpu::DeviceContext deviceCtxCpu(&computeCtxCpu, devicesCpu[0]);
+            opencl::DeviceContext deviceCtxCl(&computeCtxCl, devicesCl[0]);
+
+            cpu::ProcessingUnit unitCpu(&deviceCtxCpu, 1, logger);
+            opencl::ProcessingUnit unitCl(&deviceCtxCl, 1, logger);
+
+            {
+                cpu::ProcessingUnit::PasswordWriter writerCpu(unitCpu);
+                opencl::ProcessingUnit::PasswordWriter writerCl(unitCl);
+
+                writerCpu.setPassword(
+                            (const char *)tp.getPasswordData(),
+                            tp.getPasswordLength());
+                writerCl.setPassword(
+                            (const char *)tp.getPasswordData(),
+                            tp.getPasswordLength());
+            }
+
+            unitCpu.beginProcessing();
+            unitCl.beginProcessing();
+            unitCpu.endProcessing();
+            unitCl.endProcessing();
+
+            bool match = false;
+            {
+                cpu::ProcessingUnit::DerivedKeyReader readerCpu(unitCpu);
+                opencl::ProcessingUnit::DerivedKeyReader readerCl(unitCl);
+
+                match = memcmp(readerCpu.getDerivedKey(),
+                               readerCl.getDerivedKey(),
+                               tp.getDerivedKeyLength()) == 0;
+            }
+            Utils::assert("Output of CPU module should equal the output of OpenCL mode", match);
+        }));
+    }
+
+    TestSuite suite("PBKDF2-HMAC-" + hashSpec + " CPU vs OpenCL comparison", tests);
+    suite.runTests(out);
+}
+
+static void runAllCPUvsOpenCLTests(std::ostream &out, Logger *logger)
+{
+    cpu::GlobalContext globalCpu(nullptr);
+    opencl::GlobalContext globalCl("data");
+
+    runCPUvsOpenCLTests(out, "ripemd160", &globalCpu, &globalCl, logger);
 }
 
 static void runOpenCLTests(std::ostream &out, Logger *logger)
@@ -107,6 +185,9 @@ static void runCPUTests(std::ostream &out, Logger *logger)
 void Tests::runTests(std::ostream &out)
 {
     RootLogger logger(&out);
+
+    SubLogger cpuVsOpenClLogger(&logger, "CPU vs OpenCL: ");
+    runAllCPUvsOpenCLTests(out, &cpuVsOpenClLogger);
 
     SubLogger openclLogger(&logger, "OpenCL: ");
     runOpenCLTests(out, &openclLogger);

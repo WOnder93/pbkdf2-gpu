@@ -22,7 +22,7 @@ bin_PROGRAMS = pbkdf2-compute-tests
 AM_CXXFLAGS += -I$(srcdir)/../libpbkdf2-compute-opencl/include -I$(srcdir)/../libhashspec-hashalgorithm/include -I$(srcdir)/../libpbkdf2-gpu-common/include
 AM_CXXFLAGS += -I$(srcdir)/../libpbkdf2-compute-cpu/include
 
-pbkdf2_compute_tests_LDADD = ../libpbkdf2-compute-opencl/libpbkdf2-compute-opencl.la ../libpbkdf2-compute-cpu/libpbkdf2-compute-cpu.la -l$(OPENCL_LIB)
+pbkdf2_compute_tests_LDADD = ../libpbkdf2-compute-opencl/libpbkdf2-compute-opencl.la ../libpbkdf2-compute-cpu/libpbkdf2-compute-cpu.la -l$(OPENCL_LIB) -lpthread
 pbkdf2_compute_tests_SOURCES = src/main.cpp \
     src/pbkdf2testvector.cpp \
     src/testsuite.cpp \

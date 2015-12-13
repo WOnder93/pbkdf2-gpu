@@ -69,7 +69,9 @@ static void writeUpdateWithDigest(
         writer.endAssignment();
     }
     if (!twoBlocks) {
-        writer.beginAssignment(extra[hfIBlockWords - hfOBlockWords - 1]);
+        std::size_t mlPos = hfIBlockWords - hfOBlockWords -
+                (hfLE ? hfMlWords : 1);
+        writer.beginAssignment(extra[mlPos]);
         writer << "(hash_word_t)"
                << ((hfIBlockWords + hfOBlockWords) * hfWordBytes * 8);
         writer.endAssignment();
@@ -102,7 +104,8 @@ static void writeUpdateWithDigest(
         }
         writer.endAssignment();
     }
-    writer.beginAssignment(extra[hfIBlockWords - 1]);
+    std::size_t mlPos = hfIBlockWords - (hfLE ? hfMlWords : 1);
+    writer.beginAssignment(extra[mlPos]);
     writer << "(hash_word_t)"
            << ((hfIBlockWords + hfOBlockWords) * hfWordBytes * 8);
     writer.endAssignment();
@@ -338,13 +341,14 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
     writer.endAssignment();
     tailIndex++;
 
-    while (tailIndex < tailBlocks * hfIBlockWords - 1) {
+    while (tailIndex < tailBlocks * hfIBlockWords) {
         writer.beginAssignment(tail[tailIndex]);
         writer << "0";
         writer.endAssignment();
         tailIndex++;
     }
-    writer.beginAssignment(tail[tailIndex]);
+    std::size_t mlPos = tailIndex - (hfLE ? hfMlWords : 1);
+    writer.beginAssignment(tail[mlPos]);
     writer << "(hash_word_t)"
            << std::to_string((hfIBlockBytes + saltBytes + 4) * 8);
     writer.endAssignment();

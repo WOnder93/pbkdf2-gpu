@@ -31,6 +31,7 @@ HEADERS += \
     src/uinthashfunctionhelper.h \
     src/sha1hashfunctionhelper.h \
     src/sha256hashfunctionhelper.h \
+    src/ripemd160hashfunctionhelper.h \
     src/openclwriter.h
 
 SOURCES += \
@@ -46,6 +47,7 @@ SOURCES += \
     src/uinthashfunctionhelper.cpp \
     src/sha1hashfunctionhelper.cpp \
     src/sha256hashfunctionhelper.cpp \
+    src/ripemd160hashfunctionhelper.cpp \
     src/openclwriter.cpp
 
 unix {

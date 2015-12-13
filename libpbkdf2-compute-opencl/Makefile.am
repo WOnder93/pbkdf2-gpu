@@ -36,6 +36,7 @@ libpbkdf2_compute_opencl_la_SOURCES = \
     src/uinthashfunctionhelper.cpp \
     src/sha1hashfunctionhelper.cpp \
     src/sha256hashfunctionhelper.cpp \
+    src/ripemd160hashfunctionhelper.cpp \
     src/openclwriter.cpp \
     src/kernelloader.h \
     src/alignment.h \
@@ -44,6 +45,7 @@ libpbkdf2_compute_opencl_la_SOURCES = \
     src/uinthashfunctionhelper.h \
     src/sha1hashfunctionhelper.h \
     src/sha256hashfunctionhelper.h \
+    src/ripemd160hashfunctionhelper.h \
     src/openclwriter.h
 
 SUBDIRS = . include

@@ -17,6 +17,8 @@
 
 #include "hashfunctioncontext.h"
 
+#include "hashfunctionhelper.h"
+
 namespace libpbkdf2 {
 namespace compute {
 namespace opencl {

@@ -24,13 +24,15 @@
 
 #include "opencl.h"
 #include "globalcontext.h"
-#include "hashfunctionhelper.h"
 
 namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
 
 using namespace libhashspec::hashalgorithm;
+
+/* HashFunctionHelper is internal: */
+class HashFunctionHelper;
 
 class HashFunctionContext
 {

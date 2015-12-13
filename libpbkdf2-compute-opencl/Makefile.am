@@ -39,6 +39,7 @@ libpbkdf2_compute_opencl_la_SOURCES = \
     src/kernelloader.h \
     src/alignment.h \
     src/kernelgenerator.h \
+    src/hashfunctionhelper.h \
     src/uinthashfunctionhelper.h \
     src/sha1hashfunctionhelper.h \
     src/openclwriter.h

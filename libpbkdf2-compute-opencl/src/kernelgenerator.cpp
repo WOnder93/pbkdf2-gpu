@@ -1,7 +1,5 @@
 #include "kernelgenerator.h"
 
-#include "openclwriter.h"
-
 namespace libpbkdf2 {
 namespace compute {
 namespace opencl {

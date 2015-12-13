@@ -1,7 +1,5 @@
 #include "hashfunctionhelper.h"
 
-#include "openclwriter.h"
-
 #include "sha1hashfunctionhelper.h"
 
 #include <unordered_map>

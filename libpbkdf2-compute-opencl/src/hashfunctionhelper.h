@@ -1,14 +1,14 @@
 #ifndef LIBPBKDF2_COMPUTE_OPENCL_HASHFUNCTIONHELPER_H
 #define LIBPBKDF2_COMPUTE_OPENCL_HASHFUNCTIONHELPER_H
 
+#include "openclwriter.h"
+
 #include <string>
 #include <vector>
 
 namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
-
-class OpenCLWriter;
 
 class HashFunctionHelper
 {

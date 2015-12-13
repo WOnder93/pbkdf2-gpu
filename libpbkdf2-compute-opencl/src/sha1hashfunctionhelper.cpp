@@ -1,7 +1,5 @@
 #include "sha1hashfunctionhelper.h"
 
-#include "openclwriter.h"
-
 #define IBLOCK_WORDS 16
 #define OBLOCK_WORDS 5
 #define ML_WORDS 2

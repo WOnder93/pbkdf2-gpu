@@ -18,6 +18,7 @@
 #include "processingunit.h"
 
 #include "libpbkdf2-gpu-common/alignment.h"
+#include "hashfunctionhelper.h"
 
 #include <cstring>
 

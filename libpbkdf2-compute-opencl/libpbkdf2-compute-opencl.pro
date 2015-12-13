@@ -25,9 +25,9 @@ HEADERS += \
     include/libpbkdf2-compute-opencl/globalcontext.h \
     include/libpbkdf2-compute-opencl/types.h \
     include/libpbkdf2-compute-opencl/device.h \
-    include/libpbkdf2-compute-opencl/hashfunctionhelper.h \
     src/kernelloader.h \
     src/kernelgenerator.h \
+    src/hashfunctionhelper.h \
     src/uinthashfunctionhelper.h \
     src/sha1hashfunctionhelper.h \
     src/openclwriter.h

@@ -30,15 +30,14 @@ namespace opencl {
 class GlobalContext
 {
 private:
-    std::string dataDirectory;
     std::vector<Device> devices;
 
 public:
     inline const std::vector<Device> &getAllDevices() const { return devices; }
 
-    inline const std::string &getDataDirectory() const { return dataDirectory; }
+    GlobalContext(std::nullptr_t);
 
-    GlobalContext(const std::string &dataDirectory);
+    GlobalContext() { }
 };
 
 } // namespace opencl

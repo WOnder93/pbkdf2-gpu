@@ -155,7 +155,7 @@ static void runCPUvsOpenCLTests(std::ostream &out, const std::string &hashSpec,
 static void runAllCPUvsOpenCLTests(std::ostream &out, Logger *logger)
 {
     cpu::GlobalContext globalCpu(nullptr);
-    opencl::GlobalContext globalCl("data");
+    opencl::GlobalContext globalCl(nullptr);
 
     runCPUvsOpenCLTests(out, "ripemd160", &globalCpu, &globalCl, logger);
 }
@@ -164,7 +164,7 @@ static void runOpenCLTests(std::ostream &out, Logger *logger)
 {
     using namespace libpbkdf2::compute::opencl;
 
-    GlobalContext global("data");
+    GlobalContext global(nullptr);
 
     runComputeTests<Types>(out, "OpenCL", "sha1",   &global, logger);
     //runComputeTests<Types>(out, "OpenCL", "sha256", &global, logger);

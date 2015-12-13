@@ -49,6 +49,8 @@ static const char * const KS[] = {
     "0xCA62C1D6",
 };
 
+const Sha1HashFunctionHelper Sha1HashFunctionHelper::INSTANCE;
+
 Sha1HashFunctionHelper::Sha1HashFunctionHelper()
     : UIntHashFunctionHelper(
           false, IBLOCK_WORDS, OBLOCK_WORDS, ML_WORDS, INIT_STATE)
@@ -79,9 +81,8 @@ void Sha1HashFunctionHelper::writeDefinitions(OpenCLWriter &out) const
 void Sha1HashFunctionHelper::writeUpdate(
         OpenCLWriter &writer,
         const std::vector<std::string> &prevState,
-        const std::vector<std::string> &inputBlock,
         const std::vector<std::string> &state,
-        const std::vector<std::string> &buffer,
+        const std::vector<std::string> &inputBlock,
         bool swap) const
 {
     for (std::size_t i = 0; i < OBLOCK_WORDS; i++) {
@@ -95,10 +96,6 @@ void Sha1HashFunctionHelper::writeUpdate(
     const std::vector<std::string> &aux  = swap ? state : prevState;
 
     for (std::size_t iter = 0; iter < ITERATIONS; iter++) {
-        auto &src = iter / IBLOCK_WORDS == 0
-                ? inputBlock
-                : buffer;
-
         std::size_t state_a = (ITERATIONS - iter) % OBLOCK_WORDS;
         std::size_t quarter = iter / (ITERATIONS / 4);
 
@@ -110,7 +107,7 @@ void Sha1HashFunctionHelper::writeUpdate(
                << ", " << dest[(state_a + 3) % OBLOCK_WORDS]
                << ") + " << KS[quarter] << " + "
                << dest[(state_a + 4) % OBLOCK_WORDS] << " + "
-               << src[iter % IBLOCK_WORDS];
+               << inputBlock[iter % IBLOCK_WORDS];
         writer.endAssignment();
 
         writer.beginAssignment(dest[(state_a + 1) % OBLOCK_WORDS]);
@@ -121,12 +118,12 @@ void Sha1HashFunctionHelper::writeUpdate(
         if (iter % IBLOCK_WORDS == IBLOCK_WORDS - 1) {
             writer.writeEmptyLine();
             for (std::size_t i = 0; i < IBLOCK_WORDS; i++) {
-                writer.beginAssignment(buffer[i]);
+                writer.beginAssignment(inputBlock[i]);
                 writer << "rotate("
-                       << src[(i + 13) % IBLOCK_WORDS] << " ^ "
-                       << src[(i +  8) % IBLOCK_WORDS] << " ^ "
-                       << src[(i +  2) % IBLOCK_WORDS] << " ^ "
-                       << src[(i +  0) % IBLOCK_WORDS]
+                       << inputBlock[(i + 13) % IBLOCK_WORDS] << " ^ "
+                       << inputBlock[(i +  8) % IBLOCK_WORDS] << " ^ "
+                       << inputBlock[(i +  2) % IBLOCK_WORDS] << " ^ "
+                       << inputBlock[(i +  0) % IBLOCK_WORDS]
                        << ", (uint)1)";
                 writer.endAssignment();
             }

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015, Ondrej Mosnacek <omosnacek@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation: either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "sha256hashfunctionhelper.h"
 
 #define IBLOCK_WORDS 16
@@ -5,6 +22,10 @@
 #define ML_WORDS 2
 
 #define ITERATIONS 64
+
+namespace libpbkdf2 {
+namespace compute {
+namespace opencl {
 
 static const char * const INIT_STATE[] = {
     "0x6A09E667",
@@ -36,9 +57,7 @@ static const char * const KS[] = {
     "0x90befffa", "0xa4506ceb", "0xbef9a3f7", "0xc67178f2",
 };
 
-namespace libpbkdf2 {
-namespace compute {
-namespace opencl {
+const Sha256HashFunctionHelper Sha256HashFunctionHelper::INSTANCE;
 
 Sha256HashFunctionHelper::Sha256HashFunctionHelper()
     : UIntHashFunctionHelper(
@@ -65,12 +84,10 @@ void Sha256HashFunctionHelper::writeDefinitions(OpenCLWriter &out) const
 void Sha256HashFunctionHelper::writeUpdate(
         OpenCLWriter &writer,
         const std::vector<std::string> &prevState,
-        const std::vector<std::string> &inputBlock,
         const std::vector<std::string> &state,
-        const std::vector<std::string> &buffer,
+        const std::vector<std::string> &inputBlock,
         bool swap) const
 {
-    // TODO: merge inputBlock and buffer
     for (std::size_t i = 0; i < OBLOCK_WORDS; i++) {
         writer.beginAssignment(state[i]);
         writer << prevState[i];
@@ -82,10 +99,6 @@ void Sha256HashFunctionHelper::writeUpdate(
     const std::vector<std::string> &aux  = swap ? state : prevState;
 
     for (std::size_t iter = 0; iter < ITERATIONS; iter++) {
-        auto &src = iter / IBLOCK_WORDS == 0
-                ? inputBlock
-                : buffer;
-
         std::size_t state_a = (ITERATIONS - iter) % OBLOCK_WORDS;
 
         writer.beginAssignment(dest[(state_a + 7) % OBLOCK_WORDS]);
@@ -111,7 +124,7 @@ void Sha256HashFunctionHelper::writeUpdate(
 
         writer.beginAssignment(dest[(state_a + 7) % OBLOCK_WORDS]);
         writer << dest[(state_a + 7) % OBLOCK_WORDS] << " + "
-               << src[iter % IBLOCK_WORDS];
+               << inputBlock[iter % IBLOCK_WORDS];
         writer.endAssignment();
 
         writer.beginAssignment(dest[(state_a + 3) % OBLOCK_WORDS]);
@@ -139,28 +152,28 @@ void Sha256HashFunctionHelper::writeUpdate(
         if (iter % IBLOCK_WORDS == IBLOCK_WORDS - 1) {
             writer.writeEmptyLine();
             for (std::size_t i = 0; i < IBLOCK_WORDS; i++) {
-                writer.beginAssignment(buffer[i]);
-                writer << src[i] << " + ("
+                writer.beginAssignment(inputBlock[i]);
+                writer << inputBlock[i] << " + ("
                        << "rotate("
-                       << src[(i +  1) % IBLOCK_WORDS]
+                       << inputBlock[(i +  1) % IBLOCK_WORDS]
                        << ", 32 - (uint)7) ^ "
                        << "rotate("
-                       << src[(i +  1) % IBLOCK_WORDS]
+                       << inputBlock[(i +  1) % IBLOCK_WORDS]
                        << ", 32 - (uint)18) ^ "
-                       << "(" << src[(i +  1) % IBLOCK_WORDS]
+                       << "(" << inputBlock[(i +  1) % IBLOCK_WORDS]
                        << " >> 3))";
                 writer.endAssignment();
 
-                writer.beginAssignment(buffer[i]);
-                writer << buffer[i] << " + "
-                       << src[(i +  9) % IBLOCK_WORDS] << " + ("
+                writer.beginAssignment(inputBlock[i]);
+                writer << inputBlock[i] << " + "
+                       << inputBlock[(i +  9) % IBLOCK_WORDS] << " + ("
                        << "rotate("
-                       << src[(i +  14) % IBLOCK_WORDS]
+                       << inputBlock[(i +  14) % IBLOCK_WORDS]
                        << ", 32 - (uint)17) ^ "
                        << "rotate("
-                       << src[(i +  14) % IBLOCK_WORDS]
+                       << inputBlock[(i +  14) % IBLOCK_WORDS]
                        << ", 32 - (uint)19) ^ "
-                       << "(" << src[(i +  14) % IBLOCK_WORDS]
+                       << "(" << inputBlock[(i +  14) % IBLOCK_WORDS]
                        << " >> 10))";
                 writer.endAssignment();
 

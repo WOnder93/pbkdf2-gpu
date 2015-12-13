@@ -83,7 +83,7 @@ static void writeUpdateWithDigest(
     buffer.insert(buffer.end(), extra.begin(),
                   extra.begin() + hfIBlockWords - hfOBlockWords);
 
-    hfHelper.writeUpdate(writer, prevState, buffer, dest, buffer);
+    hfHelper.writeUpdate(writer, prevState, dest, buffer);
 
     if (!twoBlocks) {
         return;
@@ -108,7 +108,7 @@ static void writeUpdateWithDigest(
     writer.endAssignment();
     writer.writeEmptyLine();
 
-    hfHelper.writeUpdate(writer, dest, extra, input, extra, true);
+    hfHelper.writeUpdate(writer, dest, input, extra, true);
 }
 
 void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
@@ -240,8 +240,8 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
         writer.writeEmptyLine();
     }
 
-    hfHelper.writeUpdate(writer, hfHelper.getInitState(), ipad, ipadState, ipad);
-    hfHelper.writeUpdate(writer, hfHelper.getInitState(), opad, opadState, opad);
+    hfHelper.writeUpdate(writer, hfHelper.getInitState(), ipadState, ipad);
+    hfHelper.writeUpdate(writer, hfHelper.getInitState(), opadState, opad);
 
     writer.writeDeclaration("uint", "dk_block_index");
     writer.beginAssignment("dk_block_index");
@@ -275,7 +275,7 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
     }
     writer.writeEmptyLine();
 
-    hfHelper.writeUpdate(writer, state1, buffer, state2, buffer, true);
+    hfHelper.writeUpdate(writer, state1, state2, buffer, true);
     writer.endBlock();
     writer.writeEmptyLine();
 
@@ -354,7 +354,7 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
     for (std::size_t i = 0; i < tailBlocks; i++) {
         std::vector<std::string> block { tailBlock, tailBlock + hfIBlockWords };
 
-        hfHelper.writeUpdate(writer, state1, block, state2, block, true);
+        hfHelper.writeUpdate(writer, state1, state2, block, true);
 
         tailBlock += hfIBlockWords;
     }

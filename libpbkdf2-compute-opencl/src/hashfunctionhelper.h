@@ -67,9 +67,8 @@ public:
     virtual void writeUpdate(
             OpenCLWriter &out,
             const std::vector<std::string> &prevState,
-            const std::vector<std::string> &inputBlock,
             const std::vector<std::string> &state,
-            const std::vector<std::string> &buffer,
+            const std::vector<std::string> &inputBlock,
             bool swap = false) const = 0;
 
     static const HashFunctionHelper &getHelper(const std::string &hashSpec);

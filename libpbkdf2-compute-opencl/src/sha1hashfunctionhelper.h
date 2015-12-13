@@ -26,17 +26,19 @@ namespace opencl {
 
 class Sha1HashFunctionHelper : public UIntHashFunctionHelper
 {
-public:
+private:
     Sha1HashFunctionHelper();
+
+public:
+    static const Sha1HashFunctionHelper INSTANCE;
 
     void writeDefinitions(OpenCLWriter &out) const override;
 
     void writeUpdate(
             OpenCLWriter &writer,
             const std::vector<std::string> &prevState,
-            const std::vector<std::string> &inputBlock,
             const std::vector<std::string> &state,
-            const std::vector<std::string> &buffer,
+            const std::vector<std::string> &inputBlock,
             bool swap = false) const override;
 };
 

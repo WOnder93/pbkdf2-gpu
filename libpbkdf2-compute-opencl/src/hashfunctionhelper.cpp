@@ -44,12 +44,9 @@ HashFunctionHelper::HashFunctionHelper(
 
 const HashFunctionHelper &HashFunctionHelper::getHelper(const std::string &hashSpec)
 {
-    static const Sha1HashFunctionHelper SHA1;
-    static const Sha256HashFunctionHelper SHA256;
-
     static const std::unordered_map<std::string, const HashFunctionHelper &> helpers = {
-        { "sha1", SHA1 },
-        { "sha256", SHA256 },
+        { "sha1", Sha1HashFunctionHelper::INSTANCE },
+        { "sha256", Sha256HashFunctionHelper::INSTANCE },
     };
 
     return helpers.at(hashSpec);

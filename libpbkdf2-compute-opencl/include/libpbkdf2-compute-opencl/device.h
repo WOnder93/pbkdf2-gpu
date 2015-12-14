@@ -40,9 +40,9 @@ public:
      * NOTE: Calling methods other than the destructor on an instance initialized
      * with empty constructor results in undefined behavior.
      */
-    inline Device() { }
+    Device() { }
 
-    inline Device(const cl::Device &device)
+    Device(const cl::Device &device)
         : device(device)
     {
     }

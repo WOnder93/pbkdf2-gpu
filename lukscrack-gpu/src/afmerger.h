@@ -55,13 +55,13 @@ public:
     public:
         explicit Context(const AFMerger *parent);
 
-        inline void merge(const void *src, void *dst) const
+        void merge(const void *src, void *dst) const
         {
             parent->merge(src, dst, buffer.get());
         }
     };
 
-    inline AFMerger() { }
+    AFMerger() { }
 
     AFMerger(std::size_t blockSize, std::size_t blockCount,
              const std::string &hashSpec);

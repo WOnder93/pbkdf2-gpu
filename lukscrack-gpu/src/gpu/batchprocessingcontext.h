@@ -54,9 +54,9 @@ private:
     std::unique_ptr<unsigned char[]> masterKeyBuffers;
 
 public:
-    inline const std::vector<std::string> &getCurrentPasswords() const { return passwords; }
+    const std::vector<std::string> &getCurrentPasswords() const { return passwords; }
 
-    inline BatchProcessingContext() { }
+    BatchProcessingContext() { }
 
     BatchProcessingContext(
             const CrackingContext *parentContext,
@@ -66,13 +66,13 @@ public:
 
     bool initializePasswords(lukscrack::PasswordGenerator &generator);
 
-    inline void beginKeyslotUnit() { keyslotUnit.beginProcessing(); }
-    inline void endKeyslotUnit() { keyslotUnit.endProcessing(); }
+    void beginKeyslotUnit() { keyslotUnit.beginProcessing(); }
+    void endKeyslotUnit() { keyslotUnit.endProcessing(); }
 
     void decryptMasterKey();
 
-    inline void beginMKDigestUnit() { mkDigestUnit.beginProcessing(); }
-    inline void endMKDigestUnit() { mkDigestUnit.endProcessing(); }
+    void beginMKDigestUnit() { mkDigestUnit.beginProcessing(); }
+    void endMKDigestUnit() { mkDigestUnit.endProcessing(); }
 
     /**
      * @brief processResults

@@ -56,7 +56,7 @@ private:
     }
 
 public:
-    inline RootLogger(std::ostream *out)
+    RootLogger(std::ostream *out)
         : out(out), mutex()
     {
     }
@@ -72,31 +72,31 @@ private:
     RootLogger *parent;
 
 public:
-    inline LockedLogger() : parent(nullptr) { }
-    inline LockedLogger(RootLogger *parent)
+    LockedLogger() : parent(nullptr) { }
+    LockedLogger(RootLogger *parent)
         : parent(parent)
     {
         parent->lock();
     }
-    inline LockedLogger(const LockedLogger &other)
+    LockedLogger(const LockedLogger &other)
         : parent(other.parent)
     {
         if (parent != nullptr) {
             parent->lock();
         }
     }
-    inline LockedLogger(LockedLogger &&other)
+    LockedLogger(LockedLogger &&other)
         : parent(other.parent)
     {
         other.parent = nullptr;
     }
-    inline ~LockedLogger()
+    ~LockedLogger()
     {
         if (parent != nullptr) {
             parent->unlock();
         }
     }
-    inline LockedLogger &operator=(const LockedLogger &other)
+    LockedLogger &operator=(const LockedLogger &other)
     {
         if (parent != nullptr) {
             parent->unlock();
@@ -107,7 +107,7 @@ public:
         }
         return *this;
     }
-    inline LockedLogger &operator=(LockedLogger &&other)
+    LockedLogger &operator=(LockedLogger &&other)
     {
         if (parent != nullptr) {
             parent->unlock();
@@ -141,7 +141,7 @@ LockedLogger Logger::operator<<(T& value)
     return open() << value;
 }
 
-inline LockedLogger RootLogger::open()
+LockedLogger RootLogger::open()
 {
     return LockedLogger(this);
 }
@@ -153,14 +153,14 @@ private:
     std::string prefix;
 
 public:
-    inline SubLogger() { }
+    SubLogger() { }
 
-    inline SubLogger(Logger *parent, const std::string &prefix)
+    SubLogger(Logger *parent, const std::string &prefix)
         : parent(parent), prefix(prefix)
     {
     }
 
-    inline LockedLogger open() override
+    LockedLogger open() override
     {
         return *parent << prefix;
     }

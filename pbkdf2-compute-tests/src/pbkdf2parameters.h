@@ -40,20 +40,20 @@ private:
     std::size_t iter;
 
 public:
-    inline const std::string &getName() const { return name; }
+    const std::string &getName() const { return name; }
 
-    inline const void *getPasswordData() const { return password; }
-    inline const void *getSaltData() const { return salt; }
+    const void *getPasswordData() const { return password; }
+    const void *getSaltData() const { return salt; }
 
-    inline std::size_t getPasswordLength() const { return passwordLength; }
-    inline std::size_t getSaltLength() const { return saltLength; }
+    std::size_t getPasswordLength() const { return passwordLength; }
+    std::size_t getSaltLength() const { return saltLength; }
 
-    inline std::size_t getDerivedKeyLength() const { return dkLength; }
+    std::size_t getDerivedKeyLength() const { return dkLength; }
 
-    inline std::size_t getIterationCount() const { return iter; }
+    std::size_t getIterationCount() const { return iter; }
 
-    inline PBKDF2Parameters() { }
-    inline PBKDF2Parameters(
+    PBKDF2Parameters() { }
+    PBKDF2Parameters(
             const std::string &name,
             const void *password, std::size_t passwordLength,
             const void *salt, std::size_t saltLength,

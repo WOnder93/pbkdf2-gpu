@@ -34,9 +34,9 @@ private:
     std::vector<Device> devices;
 
 public:
-    inline const std::vector<Device> &getAllDevices() const { return devices; }
+    const std::vector<Device> &getAllDevices() const { return devices; }
 
-    inline const std::string &getDataDirectory() const { return dataDirectory; }
+    const std::string &getDataDirectory() const { return dataDirectory; }
 
     GlobalContext(const std::string &dataDirectory);
 };

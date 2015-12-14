@@ -40,7 +40,7 @@ private:
     std::string currentPw;
 
 public:
-    inline DummyPasswordGenerator()
+    DummyPasswordGenerator()
         : gen(std::chrono::system_clock::now().time_since_epoch().count())
     {
     }

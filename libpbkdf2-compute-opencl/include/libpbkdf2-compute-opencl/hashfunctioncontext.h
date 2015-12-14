@@ -43,20 +43,20 @@ private:
     const HashAlgorithm *hashAlg;
 
 public:
-    inline const GlobalContext *getGlobalContext() const { return globalContext; }
+    const GlobalContext *getGlobalContext() const { return globalContext; }
 
-    inline const std::vector<cl::Device> &getDevices() const { return devices; }
-    inline const cl::Context &getContext() const { return context; }
+    const std::vector<cl::Device> &getDevices() const { return devices; }
+    const cl::Context &getContext() const { return context; }
 
-    inline const std::string &getHashSpec() const { return hashSpec; }
-    inline const HashAlgorithm *getHashAlgorithm() const { return hashAlg; }
+    const std::string &getHashSpec() const { return hashSpec; }
+    const HashAlgorithm *getHashAlgorithm() const { return hashAlg; }
 
     /**
      * @brief Empty constructor.
      * NOTE: Calling methods other than the destructor on an instance initialized
      * with empty constructor results in undefined behavior.
      */
-    inline HashFunctionContext() { }
+    HashFunctionContext() { }
 
     HashFunctionContext(const HashFunctionContext &) = delete;
     HashFunctionContext &operator=(const HashFunctionContext &) = delete;

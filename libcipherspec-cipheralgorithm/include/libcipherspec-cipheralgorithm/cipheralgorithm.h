@@ -29,7 +29,7 @@ namespace cipheralgorithm {
 class CipherException : public std::runtime_error
 {
 public:
-    inline CipherException(const std::string &message)
+    CipherException(const std::string &message)
         : std::runtime_error(message)
     {
     }
@@ -40,7 +40,7 @@ class CipherAlgorithm
 private:
     const ::EVP_CIPHER *cipher;
 
-    inline CipherAlgorithm(const ::EVP_CIPHER *cipher)
+    CipherAlgorithm(const ::EVP_CIPHER *cipher)
         : cipher(cipher)
     {
     }
@@ -53,7 +53,7 @@ public:
         const void *key;
 
     public:
-        inline EncryptionContex() { }
+        EncryptionContex() { }
 
         EncryptionContex(const CipherAlgorithm *algorithm, const void *key);
 
@@ -67,7 +67,7 @@ public:
         const void *key;
 
     public:
-        inline DecryptionContex() { }
+        DecryptionContex() { }
 
         DecryptionContex(const CipherAlgorithm *algorithm, const void *key);
 

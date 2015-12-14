@@ -65,9 +65,9 @@ private:
     std::unique_ptr<CoreContext[]> cores;
 
 public:
-    inline const std::vector<Device> &getAllDevices() const { return devices; }
+    const std::vector<Device> &getAllDevices() const { return devices; }
 
-    inline CoreContext &getCoreContext(const Device &device) const
+    CoreContext &getCoreContext(const Device &device) const
     {
         return cores[device.getCoreIndex()];
     }
@@ -77,7 +77,7 @@ public:
      * NOTE: Calling methods other than the destructor on an instance initialized
      * with empty constructor results in undefined behavior.
      */
-    inline GlobalContext() { }
+    GlobalContext() { }
 
     GlobalContext(const GlobalContext &) = delete;
     GlobalContext &operator=(const GlobalContext &) = delete;

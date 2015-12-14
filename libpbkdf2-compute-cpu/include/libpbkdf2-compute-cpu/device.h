@@ -30,23 +30,23 @@ private:
     unsigned coreIndex;
 
 public:
-    inline std::string getName() const
+    std::string getName() const
     {
         return "Virtual CPU core #" + std::to_string(coreIndex);
     }
-    inline std::string getInfo() const
+    std::string getInfo() const
     {
         return getName();
     }
 
-    inline unsigned getCoreIndex() const { return coreIndex; }
+    unsigned getCoreIndex() const { return coreIndex; }
 
     /**
      * @brief Empty constructor.
      * NOTE: Calling methods other than the destructor on an instance initialized
      * with empty constructor results in undefined behavior.
      */
-    inline Device() { }
+    Device() { }
 
     Device(unsigned coreIndex) : coreIndex(coreIndex) { }
 };

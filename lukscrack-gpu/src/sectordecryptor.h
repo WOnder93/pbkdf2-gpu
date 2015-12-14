@@ -34,7 +34,7 @@ private:
     std::shared_ptr<const IVGenerator> ivgen;
 
 public:
-    inline SectorDecryptor() { }
+    SectorDecryptor() { }
 
     SectorDecryptor(
             const std::string &cipherName, std::size_t keySize,

@@ -31,7 +31,7 @@ private:
     std::string message;
 
 public:
-    inline const std::string &getMessage() const { return message; }
+    const std::string &getMessage() const { return message; }
 
     explicit TestException(const std::string &message) :
         message(message) { }

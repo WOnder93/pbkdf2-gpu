@@ -44,13 +44,13 @@ private:
     AFMerger afMerger;
 
 public:
-    inline const PasswordData *getPasswordData() const { return passwordData; }
+    const PasswordData *getPasswordData() const { return passwordData; }
 
-    inline const ComputeContext &getKeyslotContext() const { return keyslotContext; }
-    inline const ComputeContext &getMKDigestContext() const { return mkDigestContext; }
+    const ComputeContext &getKeyslotContext() const { return keyslotContext; }
+    const ComputeContext &getMKDigestContext() const { return mkDigestContext; }
 
-    inline const SectorDecryptor &getSectorDecryptor() const { return decryptor; }
-    inline const AFMerger &getAFMerger() const { return afMerger; }
+    const SectorDecryptor &getSectorDecryptor() const { return decryptor; }
+    const AFMerger &getAFMerger() const { return afMerger; }
 
     CrackingContext(
             const GlobalContext *global,

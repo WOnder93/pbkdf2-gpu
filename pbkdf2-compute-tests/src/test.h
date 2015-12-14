@@ -34,12 +34,12 @@ private:
     std::function<void()> body;
 
 public:
-    inline const std::string &getName() const { return name; }
+    const std::string &getName() const { return name; }
 
-    inline Test(const std::string &name, std::function<void()> body) :
+    Test(const std::string &name, std::function<void()> body) :
         name(name), body(body) { }
 
-    inline void run() const {
+    void run() const {
         body();
     }
 };

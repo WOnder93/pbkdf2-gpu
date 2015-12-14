@@ -41,7 +41,7 @@ private:
     void processTasks();
 
 public:
-    inline std::size_t getSize() const { return size; }
+    std::size_t getSize() const { return size; }
 
     explicit ThreadPool(std::size_t size);
     ~ThreadPool();

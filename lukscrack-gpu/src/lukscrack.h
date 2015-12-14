@@ -46,8 +46,8 @@ private:
     void setFoundPassword(const std::string &found);
 
 public:
-    inline bool wasPasswordFound() const { return passwordFound; }
-    inline const std::string &getPassword() const { return password; }
+    bool wasPasswordFound() const { return passwordFound; }
+    const std::string &getPassword() const { return password; }
 
     LuksCrack(const GlobalContext *globalContext,
               const std::vector<Device> &devices,

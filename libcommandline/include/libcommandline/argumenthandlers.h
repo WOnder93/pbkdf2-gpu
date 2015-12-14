@@ -30,7 +30,7 @@ struct NumericParsingTraits<int>
 {
     static const char *typeName;
 
-    inline static int parse(const std::string &arg, std::size_t *endpos)
+    static int parse(const std::string &arg, std::size_t *endpos)
     {
         return std::stoi(arg, endpos);
     }
@@ -41,7 +41,7 @@ struct NumericParsingTraits<long>
 {
     static const char *typeName;
 
-    inline static long parse(const std::string &arg, std::size_t *endpos)
+    static long parse(const std::string &arg, std::size_t *endpos)
     {
         return std::stol(arg, endpos);
     }
@@ -52,7 +52,7 @@ struct NumericParsingTraits<unsigned long>
 {
     static const char *typeName;
 
-    inline static unsigned long parse(const std::string &arg, std::size_t *endpos)
+    static unsigned long parse(const std::string &arg, std::size_t *endpos)
     {
         return std::stoul(arg, endpos);
     }
@@ -63,7 +63,7 @@ struct NumericParsingTraits<long long>
 {
     static const char *typeName;
 
-    inline static long long parse(const std::string &arg, std::size_t *endpos)
+    static long long parse(const std::string &arg, std::size_t *endpos)
     {
         return std::stoll(arg, endpos);
     }
@@ -74,7 +74,7 @@ struct NumericParsingTraits<unsigned long long>
 {
     static const char *typeName;
 
-    inline static unsigned long long parse(const std::string &arg, std::size_t *endpos)
+    static unsigned long long parse(const std::string &arg, std::size_t *endpos)
     {
         return std::stoull(arg, endpos);
     }
@@ -85,7 +85,7 @@ struct NumericParsingTraits<float>
 {
     static const char *typeName;
 
-    inline static float parse(const std::string &arg, std::size_t *endpos)
+    static float parse(const std::string &arg, std::size_t *endpos)
     {
         return std::stof(arg, endpos);
     }
@@ -96,7 +96,7 @@ struct NumericParsingTraits<double>
 {
     static const char *typeName;
 
-    inline static double parse(const std::string &arg, std::size_t *endpos)
+    static double parse(const std::string &arg, std::size_t *endpos)
     {
         return std::stod(arg, endpos);
     }
@@ -107,7 +107,7 @@ struct NumericParsingTraits<long double>
 {
     static const char *typeName;
 
-    inline static long double parse(const std::string &arg, std::size_t *endpos)
+    static long double parse(const std::string &arg, std::size_t *endpos)
     {
         return std::stold(arg, endpos);
     }

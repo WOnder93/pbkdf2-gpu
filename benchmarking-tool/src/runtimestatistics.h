@@ -42,13 +42,13 @@ private:
     uintmax_t devMean;
 
 public:
-    inline const std::vector<uintmax_t> &getSamples() const { return samples; }
-    inline uintmax_t getMean() const { return mean; }
-    inline uintmax_t getMeanDeviation() const { return devMean; }
+    const std::vector<uintmax_t> &getSamples() const { return samples; }
+    uintmax_t getMean() const { return mean; }
+    uintmax_t getMeanDeviation() const { return devMean; }
 
-    inline double getMeanDeviationPerMean() const { return (double)devMean / mean; }
+    double getMeanDeviationPerMean() const { return (double)devMean / mean; }
 
-    inline DataSet()
+    DataSet()
         : samples(), sum(0), mean(0),
           devSum(0), devMean(0)
     {
@@ -85,11 +85,11 @@ private:
     DataSet nsPer1MIters;
 
 public:
-    inline const DataSet &getIterationsPerSecond() const { return itersPerSec; }
-    inline const DataSet &getNanoseconds() const { return ns; }
-    inline const DataSet &getNsPer1MIterations() const { return nsPer1MIters; }
+    const DataSet &getIterationsPerSecond() const { return itersPerSec; }
+    const DataSet &getNanoseconds() const { return ns; }
+    const DataSet &getNsPer1MIterations() const { return nsPer1MIters; }
 
-    inline RunTimeStatistics(std::size_t iterationCount, std::size_t batchSize)
+    RunTimeStatistics(std::size_t iterationCount, std::size_t batchSize)
         : iter(iterationCount * batchSize),
           itersPerSec(), ns(), nsPer1MIters()
     {
@@ -109,22 +109,22 @@ public:
         itersPerSec.close();
     }
 
-    inline static double toMinutes(nanosecs ns)
+    static double toMinutes(nanosecs ns)
     {
         return (double)ns / ((nanosecs)60 * 1000 * 1000 * 1000);
     }
 
-    inline static double toSeconds(nanosecs ns)
+    static double toSeconds(nanosecs ns)
     {
         return (double)ns / ((nanosecs)1000 * 1000 * 1000);
     }
 
-    inline static double toMilliSeconds(nanosecs ns)
+    static double toMilliSeconds(nanosecs ns)
     {
         return (double)ns / ((nanosecs)1000 * 1000);
     }
 
-    inline static double toMicroSeconds(nanosecs ns)
+    static double toMicroSeconds(nanosecs ns)
     {
         return (double)ns / (nanosecs)1000;
     }

@@ -40,7 +40,7 @@ class HashAlgorithm
 private:
     const ::EVP_MD *digest;
 
-    inline HashAlgorithm(const ::EVP_MD *digest)
+    HashAlgorithm(const ::EVP_MD *digest)
         : digest(digest)
     {
     }
@@ -62,7 +62,7 @@ public:
     std::size_t getInputBlockLength() const;
     std::size_t getOutputBlockLength() const;
 
-    inline void computeDigest(const void *data, std::size_t size, void *dest) const
+    void computeDigest(const void *data, std::size_t size, void *dest) const
     {
         Context ctx(*this);
         ctx.update(data, size);

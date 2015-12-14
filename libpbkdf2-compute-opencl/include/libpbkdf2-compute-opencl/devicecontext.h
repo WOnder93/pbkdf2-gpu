@@ -32,15 +32,15 @@ private:
     cl::Device device;
 
 public:
-    inline const ComputeContext *getParentContext() const { return parentContext; }
-    inline const cl::Device &getDevice() const { return device; }
+    const ComputeContext *getParentContext() const { return parentContext; }
+    const cl::Device &getDevice() const { return device; }
 
     /**
      * @brief Empty constructor.
      * NOTE: Calling methods other than the destructor on an instance initialized
      * with empty constructor results in undefined behavior.
      */
-    inline DeviceContext() { }
+    DeviceContext() { }
 
     DeviceContext(const DeviceContext &) = delete;
     DeviceContext &operator=(const DeviceContext &) = delete;

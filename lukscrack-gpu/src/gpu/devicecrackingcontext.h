@@ -43,7 +43,7 @@ private:
     std::atomic_bool stop;
 
 public:
-    inline DeviceCrackingContext() { }
+    DeviceCrackingContext() { }
 
     DeviceCrackingContext(
             const CrackingContext *crackingContext,

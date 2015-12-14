@@ -40,12 +40,12 @@ private:
     std::unordered_map<char, const CommandLineOption<TState> *> mapShort;
     std::unordered_map<std::string, const CommandLineOption<TState> *> mapLong;
 
-    inline static int tryProcessOption(
+    static int tryProcessOption(
             const std::string &progname, const std::string &optname,
             const CommandLineOption<TState> *opt,
             TState &state, const std::string &argument);
 
-    inline static int tryProcessOption(
+    static int tryProcessOption(
             const std::string &progname, const std::string &optname,
             const CommandLineOption<TState> *opt,
             TState &state);
@@ -59,7 +59,7 @@ public:
 
     /* NOTE: the paser takes ownership of the pointers
      * passed in the 'options' vector */
-    inline CommandLineParser(
+    CommandLineParser(
             const std::string &helpText,
             const PositionalArgumentHandler<TState> &posArgHandler,
             const std::vector<const CommandLineOption<TState>*> &options)
@@ -128,7 +128,7 @@ void CommandLineParser<TState>::printHelp(const char * const * argv) const
 }
 
 template<class TState>
-inline int CommandLineParser<TState>::tryProcessOption(
+int CommandLineParser<TState>::tryProcessOption(
         const std::string &progname, const std::string &optname,
         const CommandLineOption<TState> *opt,
         TState &state, const std::string &argument)
@@ -153,7 +153,7 @@ inline int CommandLineParser<TState>::tryProcessOption(
 }
 
 template<class TState>
-inline int CommandLineParser<TState>::tryProcessOption(
+int CommandLineParser<TState>::tryProcessOption(
         const std::string &progname, const std::string &optname,
         const CommandLineOption<TState> *opt,
         TState &state)

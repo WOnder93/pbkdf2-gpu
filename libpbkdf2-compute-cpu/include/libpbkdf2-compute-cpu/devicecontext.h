@@ -31,8 +31,8 @@ private:
     Device device;
 
 public:
-    inline const ComputeContext *getParentContext() const { return parentContext; }
-    inline GlobalContext::CoreContext &getCoreContext() const
+    const ComputeContext *getParentContext() const { return parentContext; }
+    GlobalContext::CoreContext &getCoreContext() const
     {
         return parentContext->getParentContext()->
                 getGlobalContext()->getCoreContext(device);
@@ -43,7 +43,7 @@ public:
      * NOTE: Calling methods other than the destructor on an instance initialized
      * with empty constructor results in undefined behavior.
      */
-    inline DeviceContext() { }
+    DeviceContext() { }
 
     DeviceContext(const DeviceContext &) = delete;
     DeviceContext &operator=(const DeviceContext &) = delete;
@@ -51,7 +51,7 @@ public:
     DeviceContext(DeviceContext &&) = default;
     DeviceContext &operator=(DeviceContext &&) = default;
 
-    inline DeviceContext(const ComputeContext *parentContext, const Device &device)
+    DeviceContext(const ComputeContext *parentContext, const Device &device)
         : parentContext(parentContext), device(device) { }
 };
 

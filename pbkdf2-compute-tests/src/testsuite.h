@@ -35,12 +35,12 @@ private:
     std::vector<Test> tests;
 
 public:
-    inline const std::string &getName() const { return name; }
+    const std::string &getName() const { return name; }
 
-    inline TestSuite(const std::string &name, const std::vector<Test> &tests) :
+    TestSuite(const std::string &name, const std::vector<Test> &tests) :
         name(name), tests(tests) { }
 
-    inline std::size_t runTests() const {
+    std::size_t runTests() const {
         return runTests(std::cerr);
     }
     std::size_t runTests(std::ostream &out) const;

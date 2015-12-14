@@ -33,9 +33,9 @@ private:
     std::string message;
 
 public:
-    inline const std::string &getMessage() const { return message; }
+    const std::string &getMessage() const { return message; }
 
-    inline ArgumentFormatException(const std::string &message)
+    ArgumentFormatException(const std::string &message)
         : std::runtime_error(message), message(message)
     {
     }
@@ -57,12 +57,12 @@ private:
     std::string metavar;
 
 public:
-    inline const std::string &getLongName() const { return longName; }
-    inline char getShortName() const { return shortName; }
-    inline const std::string &getHelpText() const { return helpText; }
-    inline bool doesTakeArgument() const { return takesArgument; }
+    const std::string &getLongName() const { return longName; }
+    char getShortName() const { return shortName; }
+    const std::string &getHelpText() const { return helpText; }
+    bool doesTakeArgument() const { return takesArgument; }
 
-    inline CommandLineOption(
+    CommandLineOption(
             const std::string &longName, char shortName = '\0',
             const std::string &helpText = std::string(),
             bool takesArgument = false, const std::string &metavar = std::string())
@@ -100,7 +100,7 @@ private:
     std::function<Callback> callback;
 
 public:
-    inline FlagOption(
+    FlagOption(
             std::function<Callback> callback,
             const std::string &longName, char shortName = '\0',
             const std::string &helpText = std::string())
@@ -136,7 +136,7 @@ private:
     }
 
 public:
-    inline ArgumentOption(
+    ArgumentOption(
             std::function<Callback> callback,
             const std::string &longName, char shortName = '\0',
             const std::string &helpText = std::string(),
@@ -167,10 +167,10 @@ private:
     std::function<Callback> callback;
 
 public:
-    inline const std::string &getName() const { return name; }
-    inline const std::string &getHelpText() const { return helpText; }
+    const std::string &getName() const { return name; }
+    const std::string &getHelpText() const { return helpText; }
 
-    inline PositionalArgumentHandler(
+    PositionalArgumentHandler(
             std::function<Callback> callback,
             const std::string &name = std::string(),
             const std::string &helpText = std::string())

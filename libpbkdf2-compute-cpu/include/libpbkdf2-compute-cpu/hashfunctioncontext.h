@@ -36,15 +36,15 @@ private:
     const ::EVP_MD *digest;
 
 public:
-    inline const GlobalContext *getGlobalContext() const { return globalContext; }
-    inline const ::EVP_MD *getDigest() const { return digest; }
+    const GlobalContext *getGlobalContext() const { return globalContext; }
+    const ::EVP_MD *getDigest() const { return digest; }
 
     /**
      * @brief Empty constructor.
      * NOTE: Calling methods other than the destructor on an instance initialized
      * with empty constructor results in undefined behavior.
      */
-    inline HashFunctionContext() { }
+    HashFunctionContext() { }
 
     HashFunctionContext(const HashFunctionContext &) = delete;
     HashFunctionContext &operator=(const HashFunctionContext &) = delete;

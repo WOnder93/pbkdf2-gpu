@@ -29,18 +29,21 @@ namespace tests {
 
 namespace Utils
 {
-    inline void fail(std::string reason) {
+    inline static void fail(std::string reason)
+    {
         throw TestException(reason);
     }
 
-    inline void assert(std::string assertion, bool condition) {
+    inline static void assert(std::string assertion, bool condition)
+    {
         if (!condition) {
             throw TestException("Assertion failed: " + assertion);
         }
     }
 
     template<class T>
-    inline void assertEquals(T actual, T expected) {
+    inline static void assertEquals(T actual, T expected)
+    {
         std::ostringstream buf;
         buf << "'" << actual << "' should equal '" << expected << "'";
         assert(buf.str(), actual == expected);

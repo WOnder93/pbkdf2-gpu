@@ -39,7 +39,7 @@ public:
 class InvalidLuksMagicException : public InvalidLuksHeaderException
 {
 public:
-    inline InvalidLuksMagicException()
+    InvalidLuksMagicException()
         : InvalidLuksHeaderException("Invalid magic!")
     {
     }
@@ -84,7 +84,7 @@ public:
 class NoActiveKeyslotException : public InvalidLuksHeaderException
 {
 public:
-    inline NoActiveKeyslotException()
+    NoActiveKeyslotException()
         : InvalidLuksHeaderException("No active keyslot found!")
     {
     }
@@ -118,24 +118,24 @@ private:
     std::unique_ptr<unsigned char[]> keyMaterial;
 
 public:
-    inline const std::string &getCipherName() const { return cipherName; }
-    inline const std::string &getCipherMode() const { return cipherMode; }
-    inline const std::string &getHashSpec() const { return hashSpec; }
+    const std::string &getCipherName() const { return cipherName; }
+    const std::string &getCipherMode() const { return cipherMode; }
+    const std::string &getHashSpec() const { return hashSpec; }
 
-    inline std::size_t getKeySize() const { return keySize; }
+    std::size_t getKeySize() const { return keySize; }
 
-    inline const unsigned char *getMasterKeyDigest() const { return masterKeyDigest; }
-    inline const unsigned char *getMasterKeyDigestSalt() const { return masterKeyDigestSalt; }
-    inline std::size_t getMasterKeyDigestIter() const { return masterKeyDigestIter; }
+    const unsigned char *getMasterKeyDigest() const { return masterKeyDigest; }
+    const unsigned char *getMasterKeyDigestSalt() const { return masterKeyDigestSalt; }
+    std::size_t getMasterKeyDigestIter() const { return masterKeyDigestIter; }
 
-    inline const unsigned char *getKeyslotSalt() const { return keyslotSalt; }
-    inline std::size_t getKeyslotIter() const { return keyslotIter; }
-    inline std::size_t getKeyslotStripes() const { return keyslotStripes; }
+    const unsigned char *getKeyslotSalt() const { return keyslotSalt; }
+    std::size_t getKeyslotIter() const { return keyslotIter; }
+    std::size_t getKeyslotStripes() const { return keyslotStripes; }
 
-    inline std::size_t getKeyMaterialSectors() const { return keyMaterialSectors; }
-    inline const unsigned char *getKeyMaterial() const { return keyMaterial.get(); }
+    std::size_t getKeyMaterialSectors() const { return keyMaterialSectors; }
+    const unsigned char *getKeyMaterial() const { return keyMaterial.get(); }
 
-    inline PasswordData() = default;
+    PasswordData() = default;
 
     void readFromLuksHeader(std::istream &stream, std::size_t keyslot);
 };

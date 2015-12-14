@@ -36,12 +36,12 @@ private:
     const void *dk;
 
 public:
-    inline const PBKDF2Parameters &getParams() const { return params; }
+    const PBKDF2Parameters &getParams() const { return params; }
 
-    inline const void *getDerivedKeyData() const { return dk; }
+    const void *getDerivedKeyData() const { return dk; }
 
-    inline PBKDF2TestVector() { }
-    inline PBKDF2TestVector(
+    PBKDF2TestVector() { }
+    PBKDF2TestVector(
             const PBKDF2Parameters &params,
             const void *dk) :
         params(params), dk(dk) { }

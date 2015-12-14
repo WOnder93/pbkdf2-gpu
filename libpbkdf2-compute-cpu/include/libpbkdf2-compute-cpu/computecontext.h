@@ -35,19 +35,19 @@ private:
     std::size_t iterationCount;
 
 public:
-    inline const HashFunctionContext *getParentContext() const { return parentContext; }
+    const HashFunctionContext *getParentContext() const { return parentContext; }
 
-    inline const void *getSaltData() const { return saltData; }
-    inline std::size_t getSaltLength() const { return saltLength; }
-    inline std::size_t getDerivedKeyLength() const { return dkLength; }
-    inline std::size_t getIterationCount() const { return iterationCount; }
+    const void *getSaltData() const { return saltData; }
+    std::size_t getSaltLength() const { return saltLength; }
+    std::size_t getDerivedKeyLength() const { return dkLength; }
+    std::size_t getIterationCount() const { return iterationCount; }
 
     /**
      * @brief Empty constructor.
      * NOTE: Calling methods other than the destructor on an instance initialized
      * with empty constructor results in undefined behavior.
      */
-    inline ComputeContext() { }
+    ComputeContext() { }
 
     ComputeContext(const ComputeContext &) = delete;
     ComputeContext &operator=(const ComputeContext &) = delete;
@@ -55,7 +55,7 @@ public:
     ComputeContext(ComputeContext &&) = default;
     ComputeContext &operator=(ComputeContext &&) = default;
 
-    inline ComputeContext(const HashFunctionContext *parentContext,
+    ComputeContext(const HashFunctionContext *parentContext,
                    const void *salt, std::size_t saltLength,
                    std::size_t dkLength, std::size_t iterationCount)
         : parentContext(parentContext), saltData(salt), saltLength(saltLength),

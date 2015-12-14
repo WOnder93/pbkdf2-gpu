@@ -32,8 +32,8 @@ private:
     std::mutex mutex;
 
 public:
-    inline PasswordGenerator *getPasswordGenerator() const { return generator; }
-    inline std::mutex &getMutex() { return mutex; }
+    PasswordGenerator *getPasswordGenerator() const { return generator; }
+    std::mutex &getMutex() { return mutex; }
 
     explicit PasswordDistributor(PasswordGenerator *generator)
         : generator(generator), mutex()

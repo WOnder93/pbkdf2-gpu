@@ -104,14 +104,14 @@ public:
         const void *getDerivedKey() const;
     };
 
-    inline std::size_t getBatchSize() const { return batchSize; }
+    std::size_t getBatchSize() const { return batchSize; }
 
     /**
      * @brief Empty constructor.
      * NOTE: Calling methods other than the destructor on an instance initialized
      * with empty constructor results in undefined behavior.
      */
-    inline ProcessingUnit() { }
+    ProcessingUnit() { }
 
     ProcessingUnit(const ProcessingUnit &) = delete;
     ProcessingUnit &operator=(const ProcessingUnit &) = delete;

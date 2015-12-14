@@ -135,7 +135,7 @@ public:
     inline std::size_t getKeyMaterialSectors() const { return keyMaterialSectors; }
     inline const unsigned char *getKeyMaterial() const { return keyMaterial.get(); }
 
-    inline PasswordData() : keyMaterial() { }
+    inline PasswordData() = default;
 
     void readFromLuksHeader(std::istream &stream, std::size_t keyslot);
 };

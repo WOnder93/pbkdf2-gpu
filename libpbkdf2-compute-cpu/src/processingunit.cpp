@@ -31,11 +31,9 @@ ProcessingUnit::ProcessingUnit(
 
     passwordBuffer.resize(batchSize);
 
-    unsigned char *dkBuferPtr = new unsigned char[computeContext->getDerivedKeyLength() * batchSize];
-    if (dkBuferPtr == nullptr) {
-        throw std::bad_alloc();
-    }
-    dkBuffer = std::unique_ptr<unsigned char[]>(dkBuferPtr);
+    std::size_t dkLength = computeContext->getDerivedKeyLength();
+    dkBuffer = std::unique_ptr<unsigned char[]>(
+                new unsigned char[dkLength * batchSize]);
 }
 
 ProcessingUnit::PasswordWriter::PasswordWriter(

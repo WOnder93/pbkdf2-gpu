@@ -27,11 +27,3 @@ benchmarking_tool_LDADD = ../libpbkdf2-compute-opencl/libpbkdf2-compute-opencl.l
 benchmarking_tool_SOURCES = src/main.cpp \
     src/runtimestatistics.h \
     src/benchmark.h
-
-DATA_PATH = $(srcdir)/../libpbkdf2-compute-opencl
-
-all-local:
-	rm -rf data && $(LN_S) $(DATA_PATH)/data data
-
-clean-local:
-	rm -rf data

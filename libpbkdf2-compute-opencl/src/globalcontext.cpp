@@ -23,8 +23,8 @@ namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
 
-GlobalContext::GlobalContext(const std::string &dataDirectory)
-    : dataDirectory(dataDirectory)
+GlobalContext::GlobalContext(std::nullptr_t)
+    : devices()
 {
     std::vector<cl::Platform> platforms;
     cl::Platform::get(&platforms);

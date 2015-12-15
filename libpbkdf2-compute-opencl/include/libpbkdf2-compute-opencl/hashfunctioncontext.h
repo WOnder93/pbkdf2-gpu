@@ -31,6 +31,9 @@ namespace opencl {
 
 using namespace libhashspec::hashalgorithm;
 
+/* HashFunctionHelper is internal: */
+class HashFunctionHelper;
+
 class HashFunctionContext
 {
 private:
@@ -41,6 +44,7 @@ private:
 
     std::string hashSpec;
     const HashAlgorithm *hashAlg;
+    const HashFunctionHelper *helper;
 
 public:
     const GlobalContext *getGlobalContext() const { return globalContext; }
@@ -50,6 +54,7 @@ public:
 
     const std::string &getHashSpec() const { return hashSpec; }
     const HashAlgorithm *getHashAlgorithm() const { return hashAlg; }
+    const HashFunctionHelper *getHelper() const { return helper; }
 
     /**
      * @brief Empty constructor.

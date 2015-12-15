@@ -15,33 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBPBKDF2_COMPUTE_OPENCL_GLOBALCONTEXT_H
-#define LIBPBKDF2_COMPUTE_OPENCL_GLOBALCONTEXT_H
+#ifndef LIBPBKDF2_COMPUTE_OPENCL_SHA256HASHFUNCTIONHELPER_H
+#define LIBPBKDF2_COMPUTE_OPENCL_SHA256HASHFUNCTIONHELPER_H
 
-#include "device.h"
-
-#include <string>
-#include <vector>
+#include "sha2hashfunctionhelper.h"
 
 namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
 
-class GlobalContext
+class Sha256HashFunctionHelper : public Sha2HashFunctionHelper
 {
 private:
-    std::vector<Device> devices;
+    Sha256HashFunctionHelper();
 
 public:
-    const std::vector<Device> &getAllDevices() const { return devices; }
-
-    GlobalContext(std::nullptr_t);
-
-    GlobalContext() { }
+    static const Sha256HashFunctionHelper INSTANCE;
 };
 
 } // namespace opencl
 } // namespace compute
 } // namespace libpbkdf2
 
-#endif // LIBPBKDF2_COMPUTE_OPENCL_GLOBALCONTEXT_H
+#endif // LIBPBKDF2_COMPUTE_OPENCL_SHA256HASHFUNCTIONHELPER_H

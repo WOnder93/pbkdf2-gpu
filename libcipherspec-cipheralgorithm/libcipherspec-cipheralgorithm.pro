@@ -4,12 +4,10 @@
 #
 #-------------------------------------------------
 
-QT       -= core gui
-
 TARGET = cipherspec-cipheralgorithm
 TEMPLATE = lib
+CONFIG -= qt
 CONFIG += staticlib
-
 CONFIG += c++11
 CONFIG += create_prl
 

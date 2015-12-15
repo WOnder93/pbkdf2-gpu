@@ -7,7 +7,7 @@ CONFIG += link_prl
 
 INCLUDEPATH += src
 
-LIBS += -l:libOpenCL.so.1
+LIBS += -l:libOpenCL.so.1 -lpthread
 
 SOURCES += src/main.cpp \
     src/lukscrack.cpp \

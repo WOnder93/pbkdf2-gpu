@@ -4,10 +4,9 @@
 #
 #-------------------------------------------------
 
-QT       -= core gui
-
 TARGET = pbkdf2-gpu-common
 TEMPLATE = lib
+CONFIG -= qt
 CONFIG += staticlib
 CONFIG += c++11
 CONFIG += create_prl

@@ -44,7 +44,6 @@ struct Arguments
     std::string pwgenOpts = "-";
 
     std::set<std::size_t> deviceIndices = { 0 };
-    std::string openclDataDir = "data";
     std::size_t batchSize = 2048;
     std::size_t threads = 1;
 
@@ -98,10 +97,6 @@ static CommandLineParser<Arguments> buildCmdLineParser()
             }), "device", 'd', "use device with index INDEX", "0", "INDEX"),
 
         new ArgumentOption<Arguments>(
-            [] (Arguments &state, const std::string &folder) { state.openclDataDir = folder; },
-            "opencl-data-dir", '\0', "the data directory for the 'opencl' mode", "data", "DIR"),
-
-        new ArgumentOption<Arguments>(
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
                 state.batchSize = (std::size_t)num;
             }), "batch-size", 'b', "the number of tasks per batch", "2048", "N"),
@@ -149,7 +144,7 @@ int main(int, const char * const *argv)
         return 0;
     }
 
-    GlobalContext global(args.openclDataDir);
+    GlobalContext global(nullptr);
     if (args.listDevices) {
         std::size_t i = 0;
         for (auto &device : global.getAllDevices()) {

@@ -36,9 +36,6 @@ AC_CHECK_LIB([OpenCL], [clSetMemObjectDestructorCallback], [OPENCL_LIB=OpenCL], 
 
 AC_SUBST([OPENCL_LIB])
 
-dnl # 'ln -s' (or equivalent) needed for copying the data folder:
-AC_PROG_LN_S
-
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 

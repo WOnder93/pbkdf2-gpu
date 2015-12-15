@@ -18,6 +18,7 @@
 #include "devicecontext.h"
 
 #include <cstring>
+#include <cstdint>
 
 namespace libpbkdf2 {
 namespace compute {
@@ -34,8 +35,10 @@ DeviceContext::DeviceContext(const ComputeContext *parentContext, const Device &
                 parentContext->getSaltBuffer(), true, CL_MAP_WRITE,
                 0, parentContext->getSaltBufferSize());
 
-    std::memcpy(hostSaltBuffer, parentContext->getSaltData(), parentContext->getSaltLength());
-    std::memset((char *)hostSaltBuffer + parentContext->getSaltLength(), 0, parentContext->getSaltBufferSize() - parentContext->getSaltLength());
+    std::size_t saltLength = parentContext->getSaltLength();
+    std::memcpy(hostSaltBuffer, parentContext->getSaltData(), saltLength);
+    std::memset((std::uint8_t *)hostSaltBuffer + saltLength,
+                0, parentContext->getSaltBufferSize() - saltLength);
 
     queue.enqueueUnmapMemObject(parentContext->getSaltBuffer(), hostSaltBuffer);
     queue.finish();

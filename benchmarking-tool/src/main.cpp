@@ -45,8 +45,6 @@ struct Arguments
     std::size_t dkLength = 20;
     std::size_t batchSize = 2048;
     std::size_t sampleCount = 10;
-
-    std::string openclDataDir = "data";
 };
 
 typedef unsigned long long u_type;
@@ -98,10 +96,6 @@ static CommandLineParser<Arguments> buildCmdLineParser()
             makeNumericHandler<Arguments, u_type>([] (Arguments &state, u_type num) {
                 state.sampleCount = (std::size_t)num;
             }), "samples", 's', "the number of batches to run and measure", "10", "N"),
-
-        new ArgumentOption<Arguments>(
-            [] (Arguments &state, const std::string &folder) { state.openclDataDir = folder; },
-            "opencl-data-dir", '\0', "the data directory for the 'opencl' mode", "data", "DIR"),
 
         new FlagOption<Arguments>(
             [] (Arguments &state) { state.showHelp = true; },
@@ -217,7 +211,7 @@ int main(int, const char * const *argv)
     }
 
     if (args.mode == "opencl") {
-        opencl::GlobalContext global(args.openclDataDir);
+        opencl::GlobalContext global(nullptr);
 
         return doStuff<opencl::Types>(argv[0], &global, args);
     } else if (args.mode == "cpu") {

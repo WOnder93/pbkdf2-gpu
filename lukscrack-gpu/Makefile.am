@@ -54,11 +54,3 @@ lukscrack_gpu_SOURCES = src/main.cpp \
     src/gpu/batchprocessingcontext.h \
     src/gpu/crackingcontext.h \
     src/gpu/devicecrackingcontext.h
-
-DATA_PATH = $(srcdir)/../libpbkdf2-compute-opencl
-
-all-local:
-	rm -rf data && $(LN_S) $(DATA_PATH)/data data
-
-clean-local:
-	rm -rf data

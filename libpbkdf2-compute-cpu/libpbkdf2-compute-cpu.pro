@@ -4,15 +4,14 @@
 #
 #-------------------------------------------------
 
-QT       -= core gui
-
 TARGET = pbkdf2-compute-cpu
 TEMPLATE = lib
+CONFIG -= qt
 CONFIG += staticlib
 CONFIG += c++11
 CONFIG += create_prl
 
-LIBS += -lcrypto
+LIBS += -lcrypto -lpthread
 
 INCLUDEPATH += include/libpbkdf2-compute-cpu src
 

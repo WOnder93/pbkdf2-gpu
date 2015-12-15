@@ -4,10 +4,9 @@
 #
 #-------------------------------------------------
 
-QT       -= core gui
-
 TARGET = pbkdf2-compute-opencl
 TEMPLATE = lib
+CONFIG -= qt
 CONFIG += staticlib
 CONFIG += c++11
 CONFIG += create_prl
@@ -25,8 +24,16 @@ HEADERS += \
     include/libpbkdf2-compute-opencl/processingunit.h \
     include/libpbkdf2-compute-opencl/globalcontext.h \
     include/libpbkdf2-compute-opencl/types.h \
+    include/libpbkdf2-compute-opencl/device.h \
     src/kernelloader.h \
-    include/libpbkdf2-compute-opencl/device.h
+    src/kernelgenerator.h \
+    src/hashfunctionhelper.h \
+    src/sha1hashfunctionhelper.h \
+    src/sha2hashfunctionhelper.h \
+    src/sha256hashfunctionhelper.h \
+    src/sha512hashfunctionhelper.h \
+    src/ripemd160hashfunctionhelper.h \
+    src/openclwriter.h
 
 SOURCES += \
     src/computecontext.cpp \
@@ -35,11 +42,15 @@ SOURCES += \
     src/hashfunctioncontext.cpp \
     src/processingunit.cpp \
     src/device.cpp \
-    src/globalcontext.cpp
-
-OTHER_FILES += \
-    data/opencl/kernels/pbkdf2_sha1.cl \
-    data/opencl/kernels/pbkdf2_sha256.cl
+    src/globalcontext.cpp \
+    src/hashfunctionhelper.cpp \
+    src/kernelgenerator.cpp \
+    src/sha1hashfunctionhelper.cpp \
+    src/sha2hashfunctionhelper.cpp \
+    src/sha256hashfunctionhelper.cpp \
+    src/sha512hashfunctionhelper.cpp \
+    src/ripemd160hashfunctionhelper.cpp \
+    src/openclwriter.cpp
 
 unix {
     target.path = /usr/lib

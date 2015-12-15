@@ -18,19 +18,15 @@ $ mkdir build && cd build
 $ ../configure --disable-shared && make
 ```
 
-NOTE: When running the executables always run them in their containing directory so they can find the OpenCL kernel source files (in case of benchmarking-tool and lukscrack-gpu you can also specify the --opencl-data-dir command-line option).
-
 ### Using qmake
 
-The project also ships with qmake project files so you can build it using [qmake](http://doc.qt.io/qt-4.8/qmake-manual.html) or open it in the [QtCreator IDE](http://wiki.qt.io/Category:Tools::QtCreator) (just load the `pbkdf2-gpu.pro` file). Note that when running programs that use the `libpbkdf2-compute-opencl` library from QtCreator, you must set the current directory to `(project root)/pbkdf2-gpu/libpbkdf2-compute-opencl` so they can find the OpenCL kernel source files.
+The project also ships with qmake project files so you can build it using [qmake](http://doc.qt.io/qt-4.8/qmake-manual.html) or open it in the [QtCreator IDE](http://wiki.qt.io/Category:Tools::QtCreator) (just load the `pbkdf2-gpu.pro` file).
 
 Building from terminal using qmake:
 
 ```bash
 $ mkdir build-qmake && cd build-qmake
 $ qmake ../pbkdf2-gpu.pro && make
-$ # I'm not sure how to do this portably in the .pro files:
-$ for i in pbkdf2-compute-tests benchmarking-tool lukscrack-gpu; do (cd $i && ln -s ../../libpbkdf2-compute-opencl/data data); done
 ```
 
 ## Subprojects

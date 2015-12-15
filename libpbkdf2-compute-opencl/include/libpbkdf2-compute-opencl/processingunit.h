@@ -25,6 +25,7 @@
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <cstdint>
 
 namespace libpbkdf2 {
 namespace compute {
@@ -54,13 +55,13 @@ private:
 
     cl::Kernel kernel;
 
-    std::size_t inputSize;
-    std::size_t outputSize;
+    std::size_t inputLength;
+    std::size_t outputLength;
 
     std::size_t outputBlocks;
 
-    std::unique_ptr<cl_uint[]> inputDataBuffer;
-    std::unique_ptr<cl_uint[]> outputDataBuffer;
+    std::unique_ptr<std::uint8_t[]> inputDataBuffer;
+    std::unique_ptr<std::uint8_t[]> outputDataBuffer;
 
     cl::Event event;
 
@@ -68,12 +69,13 @@ public:
     class PasswordWriter
     {
     private:
-        cl_uint *dest;
+        std::uint8_t *dest;
 
+        std::size_t hwl;
         std::size_t count;
-        std::size_t inputSize;
+        std::size_t inputLength;
         const HashAlgorithm *hashAlg;
-        std::unique_ptr<cl_uint[]> buffer;
+        std::unique_ptr<std::uint8_t[]> buffer;
 
     public:
         PasswordWriter(ProcessingUnit &parent, std::size_t index = 0);
@@ -87,13 +89,14 @@ public:
     class DerivedKeyReader
     {
     private:
-        const cl_uint *src;
+        const std::uint8_t *src;
 
+        std::size_t hwl;
         std::size_t count;
-        std::size_t outputSize;
+        std::size_t outputLength;
         std::size_t outputBlockCount;
-        std::size_t outputBlockSize;
-        std::unique_ptr<cl_uint[]> buffer;
+        std::size_t outputBlockLength;
+        std::unique_ptr<std::uint8_t[]> buffer;
 
     public:
         DerivedKeyReader(ProcessingUnit &parent, std::size_t index = 0);

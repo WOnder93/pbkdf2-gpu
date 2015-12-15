@@ -4,10 +4,9 @@
 #
 #-------------------------------------------------
 
-QT       -= core gui
-
 TARGET = ivmode
 TEMPLATE = lib
+CONFIG -= qt
 CONFIG += staticlib
 CONFIG += c++11
 CONFIG += create_prl

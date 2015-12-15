@@ -17,6 +17,8 @@
 
 #include "hashfunctioncontext.h"
 
+#include "hashfunctionhelper.h"
+
 namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
@@ -26,7 +28,9 @@ HashFunctionContext::HashFunctionContext(
         const std::vector<Device> &devices,
         const std::string &hashSpec)
     : globalContext(globalContext), devices(),
-      hashSpec(hashSpec), hashAlg(&HashAlgorithm::getAlgorithm(hashSpec))
+      hashSpec(hashSpec),
+      hashAlg(&HashAlgorithm::getAlgorithm(hashSpec)),
+      helper(&HashFunctionHelper::getHelper(hashSpec))
 {
     for (const Device &device : devices) {
         this->devices.push_back(device.getCLDevice());

@@ -15,33 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBPBKDF2_COMPUTE_OPENCL_GLOBALCONTEXT_H
-#define LIBPBKDF2_COMPUTE_OPENCL_GLOBALCONTEXT_H
+#ifndef LIBPBKDF2_COMPUTE_OPENCL_KERNELGENERATOR_H
+#define LIBPBKDF2_COMPUTE_OPENCL_KERNELGENERATOR_H
 
-#include "device.h"
+#include "hashfunctionhelper.h"
 
-#include <string>
-#include <vector>
+#include <ostream>
 
 namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
 
-class GlobalContext
+class KernelGenerator
 {
-private:
-    std::vector<Device> devices;
-
 public:
-    const std::vector<Device> &getAllDevices() const { return devices; }
-
-    GlobalContext(std::nullptr_t);
-
-    GlobalContext() { }
+    static void generateKernel(std::ostream &out, std::size_t saltLength,
+                               const HashFunctionHelper &hfHelper);
 };
 
 } // namespace opencl
 } // namespace compute
 } // namespace libpbkdf2
 
-#endif // LIBPBKDF2_COMPUTE_OPENCL_GLOBALCONTEXT_H
+#endif // LIBPBKDF2_COMPUTE_OPENCL_KERNELGENERATOR_H

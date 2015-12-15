@@ -32,7 +32,7 @@ private:
     std::string indent;
 
 public:
-    OpenCLWriter(std::ostream &out);
+    explicit OpenCLWriter(std::ostream &out);
 
     void writeEmptyLine();
 

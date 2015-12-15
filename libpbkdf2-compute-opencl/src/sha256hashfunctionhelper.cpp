@@ -17,12 +17,6 @@
 
 #include "sha256hashfunctionhelper.h"
 
-#define IBLOCK_WORDS 16
-#define OBLOCK_WORDS 8
-#define ML_WORDS 2
-
-#define ITERATIONS 64
-
 namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
@@ -57,136 +51,18 @@ static const char * const KS[] = {
     "0x90befffa", "0xa4506ceb", "0xbef9a3f7", "0xc67178f2",
 };
 
+static const Shifts SHIFTS {
+    2, 13, 22,
+    6, 11, 25,
+    7, 18,  3,
+   17, 19, 10
+};
+
 const Sha256HashFunctionHelper Sha256HashFunctionHelper::INSTANCE;
 
 Sha256HashFunctionHelper::Sha256HashFunctionHelper()
-    : UIntHashFunctionHelper(
-          false, IBLOCK_WORDS, OBLOCK_WORDS, ML_WORDS, INIT_STATE)
+    : Sha2HashFunctionHelper("uint", 4, INIT_STATE, 64, KS, SHIFTS)
 {
-}
-
-void Sha256HashFunctionHelper::writeDefinitions(OpenCLWriter &out) const
-{
-    out << "#ifdef cl_nv_pragma_unroll" << std::endl;
-    out << "#define NVIDIA" << std::endl;
-    out << "#endif /* cl_nv_pragma_unroll */" << std::endl;
-    out << std::endl;
-    out << "#ifndef NVIDIA" << std::endl;
-    out << "#define SHA_F0(x,y,z) bitselect(z, y, x)" << std::endl;
-    out << "#else" << std::endl;
-    out << "#define SHA_F0(x,y,z) (z ^ (x & (y ^ z)))" << std::endl;
-    out << "#endif /* NVIDIA */" << std::endl;
-    out << std::endl;
-    out << "#define SHA_F1(x,y,z) bitselect(y, x, y ^ z)" << std::endl;
-    out << std::endl;
-}
-
-void Sha256HashFunctionHelper::writeUpdate(
-        OpenCLWriter &writer,
-        const std::vector<std::string> &prevState,
-        const std::vector<std::string> &state,
-        const std::vector<std::string> &inputBlock,
-        bool swap) const
-{
-    for (std::size_t i = 0; i < OBLOCK_WORDS; i++) {
-        writer.beginAssignment(state[i]);
-        writer << prevState[i];
-        writer.endAssignment();
-    }
-    writer.writeEmptyLine();
-
-    const std::vector<std::string> &dest = swap ? prevState : state;
-    const std::vector<std::string> &aux  = swap ? state : prevState;
-
-    for (std::size_t iter = 0; iter < ITERATIONS; iter++) {
-        std::size_t state_a = (ITERATIONS - iter) % OBLOCK_WORDS;
-
-        writer.beginAssignment(dest[(state_a + 7) % OBLOCK_WORDS]);
-        writer << dest[(state_a + 7) % OBLOCK_WORDS] << " + ("
-               << "rotate(" << dest[(state_a + 4) % OBLOCK_WORDS]
-               << ", 32 - (uint)6) ^ "
-               << "rotate(" << dest[(state_a + 4) % OBLOCK_WORDS]
-               << ", 32 - (uint)11) ^ "
-               << "rotate(" << dest[(state_a + 4) % OBLOCK_WORDS]
-               << ", 32 - (uint)25))";
-        writer.endAssignment();
-
-        writer.beginAssignment(dest[(state_a + 7) % OBLOCK_WORDS]);
-        writer << dest[(state_a + 7) % OBLOCK_WORDS] << " + "
-               << "SHA_F0(" << dest[(state_a + 4) % OBLOCK_WORDS]
-               << ", " << dest[(state_a + 5) % OBLOCK_WORDS]
-               << ", " << dest[(state_a + 6) % OBLOCK_WORDS] << ")";
-        writer.endAssignment();
-
-        writer.beginAssignment(dest[(state_a + 7) % OBLOCK_WORDS]);
-        writer << dest[(state_a + 7) % OBLOCK_WORDS] << " + " << KS[iter];
-        writer.endAssignment();
-
-        writer.beginAssignment(dest[(state_a + 7) % OBLOCK_WORDS]);
-        writer << dest[(state_a + 7) % OBLOCK_WORDS] << " + "
-               << inputBlock[iter % IBLOCK_WORDS];
-        writer.endAssignment();
-
-        writer.beginAssignment(dest[(state_a + 3) % OBLOCK_WORDS]);
-        writer << dest[(state_a + 3) % OBLOCK_WORDS] << " + "
-               << dest[(state_a + 7) % OBLOCK_WORDS];
-        writer.endAssignment();
-
-        writer.beginAssignment(dest[(state_a + 7) % OBLOCK_WORDS]);
-        writer << dest[(state_a + 7) % OBLOCK_WORDS] << " + ("
-               << "rotate(" << dest[(state_a + 0) % OBLOCK_WORDS]
-               << ", 32 - (uint)2) ^ "
-               << "rotate(" << dest[(state_a + 0) % OBLOCK_WORDS]
-               << ", 32 - (uint)13) ^ "
-               << "rotate(" << dest[(state_a + 0) % OBLOCK_WORDS]
-               << ", 32 - (uint)22))";
-        writer.endAssignment();
-
-        writer.beginAssignment(dest[(state_a + 7) % OBLOCK_WORDS]);
-        writer << dest[(state_a + 7) % OBLOCK_WORDS] << " + "
-               << "SHA_F1(" << dest[(state_a + 0) % OBLOCK_WORDS]
-               << ", " << dest[(state_a + 1) % OBLOCK_WORDS]
-               << ", " << dest[(state_a + 2) % OBLOCK_WORDS] << ")";
-        writer.endAssignment();
-
-        if (iter % IBLOCK_WORDS == IBLOCK_WORDS - 1) {
-            writer.writeEmptyLine();
-            for (std::size_t i = 0; i < IBLOCK_WORDS; i++) {
-                writer.beginAssignment(inputBlock[i]);
-                writer << inputBlock[i] << " + ("
-                       << "rotate("
-                       << inputBlock[(i +  1) % IBLOCK_WORDS]
-                       << ", 32 - (uint)7) ^ "
-                       << "rotate("
-                       << inputBlock[(i +  1) % IBLOCK_WORDS]
-                       << ", 32 - (uint)18) ^ "
-                       << "(" << inputBlock[(i +  1) % IBLOCK_WORDS]
-                       << " >> 3))";
-                writer.endAssignment();
-
-                writer.beginAssignment(inputBlock[i]);
-                writer << inputBlock[i] << " + "
-                       << inputBlock[(i +  9) % IBLOCK_WORDS] << " + ("
-                       << "rotate("
-                       << inputBlock[(i +  14) % IBLOCK_WORDS]
-                       << ", 32 - (uint)17) ^ "
-                       << "rotate("
-                       << inputBlock[(i +  14) % IBLOCK_WORDS]
-                       << ", 32 - (uint)19) ^ "
-                       << "(" << inputBlock[(i +  14) % IBLOCK_WORDS]
-                       << " >> 10))";
-                writer.endAssignment();
-
-            }
-        }
-        writer.writeEmptyLine();
-    }
-
-    for (std::size_t i = 0; i < OBLOCK_WORDS; i++) {
-        writer.beginAssignment(dest[i]);
-        writer << dest[i] << " + " << aux[i];
-        writer.endAssignment();
-    }
 }
 
 } // namespace opencl

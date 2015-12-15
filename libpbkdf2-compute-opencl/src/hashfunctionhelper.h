@@ -32,7 +32,7 @@ class HashFunctionHelper
 private:
     bool littleEndian;
 
-    std::string wordClType;
+    const char *wordClType;
     std::size_t wordBytes;
 
     std::size_t iblockWords;
@@ -52,7 +52,7 @@ protected:
 public:
     bool isLittleEndian() const { return littleEndian; }
 
-    const std::string &getWordClType() const { return wordClType; }
+    const char *getWordClType() const { return wordClType; }
     std::size_t getWordBytes() const { return wordBytes; }
 
     std::size_t getInputBlockWords() const { return iblockWords; }

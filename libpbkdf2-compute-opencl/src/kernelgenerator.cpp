@@ -128,8 +128,19 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
     OpenCLWriter writer { out };
     hfHelper.writeDefinitions(writer);
 
-    writer << "#ifndef __OPENCL_VERSION__" << std::endl;
     writer << "/* C compatibility For dumb IDEs: */" << std::endl;
+    writer << "#ifndef __OPENCL_VERSION__" << std::endl;
+    writer << "#ifndef __cplusplus" << std::endl;
+    writer << "typedef int bool;" << std::endl;
+    writer << "#endif" << std::endl;
+    writer << "typedef unsigned char uchar;" << std::endl;
+    writer << "typedef unsigned short ushort;" << std::endl;
+    writer << "typedef unsigned int uint;" << std::endl;
+    writer << "typedef unsigned long ulong;" << std::endl;
+    writer << "typedef unsigned long size_t;" << std::endl;
+    writer << "typedef long ptrdiff_t;" << std::endl;
+    writer << "typedef size_t uintptr_t;" << std::endl;
+    writer << "typedef ptrdiff_t intptr_t;" << std::endl;
     writer << "#ifndef __kernel" << std::endl;
     writer << "#define __kernel" << std::endl;
     writer << "#endif" << std::endl;
@@ -153,13 +164,13 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
 
         int offset = hfWordBytes - 1 - 2 * (int)i;
         if (offset > 0) {
-            writer << "((w & (0xFF << " << i * 8 << ")) << "
+            writer << "(((w) & ((hash_word_t)0xFF << " << i * 8 << ")) << "
                    << offset * 8 << ")";
         } else if (offset < 0) {
-            writer << "((w & (0xFF << " << i * 8 << ")) >> "
+            writer << "(((w) & ((hash_word_t)0xFF << " << i * 8 << ")) >> "
                    << -offset * 8 << ")";
         } else {
-            writer << "(w & (0xFF << " << i * 8 << "))";
+            writer << "((w) & ((hash_word_t)0xFF << " << i * 8 << "))";
         }
     }
     writer << ")" << std::endl;
@@ -191,16 +202,16 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
     writer << "    const __global hash_word_t *input," << std::endl;
     writer << "    __global hash_word_t *output," << std::endl;
     writer << "    __constant hash_word_t *salt," << std::endl;
-    writer << "    uint dk_blocks," << std::endl;
-    writer << "    uint iterations," << std::endl;
-    writer << "    uint batchSize," << std::endl;
+    writer << "    ulong dk_blocks," << std::endl;
+    writer << "    ulong iterations," << std::endl;
+    writer << "    ulong batchSize," << std::endl;
     writer << "    __global char *debug_buffer)" << std::endl;
     writer.beginBlock();
 
-    writer.writeDeclaration("uint", "input_block_index");
-    writer.writeDeclaration("uint", "input_pos");
+    writer.writeDeclaration("size_t", "input_block_index");
+    writer.writeDeclaration("size_t", "input_pos");
     writer.beginAssignment("input_block_index");
-    writer << "(uint)get_global_id(0)";
+    writer << "get_global_id(0)";
     writer.endAssignment();
     writer.beginAssignment("input_pos");
     writer << "input_block_index";
@@ -223,18 +234,18 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
     for (std::size_t i = 0; i < hfIBlockWords; i++) {
         writer.beginAssignment("in");
         writer << "HASH_WORD_FROM_DEV(input[input_pos + "
-               << i << " * batchSize])";
+               << i << " * (size_t)batchSize])";
         writer.endAssignment();
 
         writer.beginAssignment(ipad[i]);
-        writer << "in ^ 0x";
+        writer << "in ^ (hash_word_t)0x";
         for (std::size_t k = 0; k < hfWordBytes; k++) {
             writer << "36";
         }
         writer.endAssignment();
 
         writer.beginAssignment(opad[i]);
-        writer << "in ^ 0x";
+        writer << "in ^ (hash_word_t)0x";
         for (std::size_t k = 0; k < hfWordBytes; k++) {
             writer << "5C";
         }
@@ -246,9 +257,9 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
     hfHelper.writeUpdate(writer, hfHelper.getInitState(), ipadState, ipad);
     hfHelper.writeUpdate(writer, hfHelper.getInitState(), opadState, opad);
 
-    writer.writeDeclaration("uint", "dk_block_index");
+    writer.writeDeclaration("size_t", "dk_block_index");
     writer.beginAssignment("dk_block_index");
-    writer << "(uint)get_global_id(1)";
+    writer << "get_global_id(1)";
     writer.endAssignment();
     writer.writeEmptyLine();
 
@@ -256,8 +267,6 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
                                hfOBlockWords);
     auto state2 = declareArray(writer, "hash_word_t", "state2_",
                                hfOBlockWords);
-    auto buffer = declareArray(writer, "hash_word_t", "buffer_",
-                               hfIBlockWords);
     for (std::size_t i = 0; i < hfOBlockWords; i++) {
         writer.beginAssignment(state1[i]);
         writer << ipadState[i];
@@ -270,6 +279,9 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
     std::size_t saltRemainderWords = saltRemainderBytes / hfWordBytes;
 
     writer.beginLoop("i", "0", std::to_string(saltBlocks));
+    auto buffer = declareArray(writer, "hash_word_t", "buffer_",
+                               hfIBlockWords);
+
     for (std::size_t i = 0; i < hfIBlockWords; i++) {
         writer.beginAssignment(buffer[i]);
         writer << "HASH_WORD_FROM_DEV(salt[i * " << hfIBlockWords
@@ -284,7 +296,7 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
 
     writer.writeDeclaration("uint", "block_num");
     writer.beginAssignment("block_num");
-    writer << "dk_block_index + 1";
+    writer << "(uint)dk_block_index + 1";
     writer.endAssignment();
     writer.writeEmptyLine();
 
@@ -336,7 +348,7 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
     }
 
     writer.beginAssignment(tail[tailIndex]);
-    writer << tail[tailIndex] << " | (0x80 << (8 * "
+    writer << tail[tailIndex] << " | ((hash_word_t)0x80 << (8 * "
            << (hfLE ? b : (hfWordBytes - b - 1)) << "))";
     writer.endAssignment();
     tailIndex++;
@@ -397,10 +409,10 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
     writer.endBlock();
     writer.writeEmptyLine();
 
-    writer.writeDeclaration("uint", "output_block_index");
-    writer.writeDeclaration("uint", "output_pos");
+    writer.writeDeclaration("size_t", "output_block_index");
+    writer.writeDeclaration("size_t", "output_pos");
     writer.beginAssignment("output_block_index");
-    writer << "input_block_index * dk_blocks + dk_block_index";
+    writer << "input_block_index * (size_t)dk_blocks + dk_block_index";
     writer.endAssignment();
     writer.beginAssignment("output_pos");
     writer << "output_block_index";
@@ -409,7 +421,7 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
 
     for (std::size_t i = 0; i < hfOBlockWords; i++) {
         writer.beginArrayAssignment("output");
-        writer << "output_pos + " << i << " * batchSize * dk_blocks";
+        writer << "output_pos + " << i << " * (size_t)batchSize * (size_t)dk_blocks";
         writer.endArrayAssignment();
         writer << "HASH_WORD_TO_DEV(" << dk[i] << ")";
         writer.endAssignment();

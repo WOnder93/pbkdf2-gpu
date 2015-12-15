@@ -20,6 +20,7 @@
 #include "sha1hashfunctionhelper.h"
 #include "sha256hashfunctionhelper.h"
 #include "ripemd160hashfunctionhelper.h"
+#include "sha512hashfunctionhelper.h"
 
 #include <unordered_map>
 
@@ -48,6 +49,7 @@ const HashFunctionHelper &HashFunctionHelper::getHelper(const std::string &hashS
     static const std::unordered_map<std::string, const HashFunctionHelper &> helpers = {
         { "sha1", Sha1HashFunctionHelper::INSTANCE },
         { "sha256", Sha256HashFunctionHelper::INSTANCE },
+        { "sha512", Sha512HashFunctionHelper::INSTANCE },
         { "ripemd160", RipeMd160HashFunctionHelper::INSTANCE },
     };
 

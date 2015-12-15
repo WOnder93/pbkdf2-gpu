@@ -18,28 +18,19 @@
 #ifndef LIBPBKDF2_COMPUTE_OPENCL_SHA256HASHFUNCTIONHELPER_H
 #define LIBPBKDF2_COMPUTE_OPENCL_SHA256HASHFUNCTIONHELPER_H
 
-#include "uinthashfunctionhelper.h"
+#include "sha2hashfunctionhelper.h"
 
 namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
 
-class Sha256HashFunctionHelper : public UIntHashFunctionHelper
+class Sha256HashFunctionHelper : public Sha2HashFunctionHelper
 {
 private:
     Sha256HashFunctionHelper();
 
 public:
     static const Sha256HashFunctionHelper INSTANCE;
-
-    void writeDefinitions(OpenCLWriter &out) const override;
-
-    void writeUpdate(
-            OpenCLWriter &writer,
-            const std::vector<std::string> &prevState,
-            const std::vector<std::string> &state,
-            const std::vector<std::string> &inputBlock,
-            bool swap = false) const override;
 };
 
 } // namespace opencl

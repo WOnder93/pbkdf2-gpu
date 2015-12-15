@@ -18,13 +18,13 @@
 #ifndef LIBPBKDF2_COMPUTE_OPENCL_SHA1HASHFUNCTIONHELPER_H
 #define LIBPBKDF2_COMPUTE_OPENCL_SHA1HASHFUNCTIONHELPER_H
 
-#include "uinthashfunctionhelper.h"
+#include "hashfunctionhelper.h"
 
 namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
 
-class Sha1HashFunctionHelper : public UIntHashFunctionHelper
+class Sha1HashFunctionHelper : public HashFunctionHelper
 {
 private:
     Sha1HashFunctionHelper();

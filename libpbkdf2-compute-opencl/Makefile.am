@@ -33,18 +33,20 @@ libpbkdf2_compute_opencl_la_SOURCES = \
     src/processingunit.cpp \
     src/hashfunctionhelper.cpp \
     src/kernelgenerator.cpp \
-    src/uinthashfunctionhelper.cpp \
     src/sha1hashfunctionhelper.cpp \
+    src/sha2hashfunctionhelper.cpp \
     src/sha256hashfunctionhelper.cpp \
+    src/sha512hashfunctionhelper.cpp \
     src/ripemd160hashfunctionhelper.cpp \
     src/openclwriter.cpp \
     src/kernelloader.h \
     src/alignment.h \
     src/kernelgenerator.h \
     src/hashfunctionhelper.h \
-    src/uinthashfunctionhelper.h \
     src/sha1hashfunctionhelper.h \
+    src/sha2hashfunctionhelper.h \
     src/sha256hashfunctionhelper.h \
+    src/sha512hashfunctionhelper.h \
     src/ripemd160hashfunctionhelper.h \
     src/openclwriter.h
 

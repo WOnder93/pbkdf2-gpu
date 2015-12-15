@@ -18,13 +18,13 @@
 #ifndef LIBPBKDF2_COMPUTE_OPENCL_RIPEMD160HASHFUNCTIONHELPER_H
 #define LIBPBKDF2_COMPUTE_OPENCL_RIPEMD160HASHFUNCTIONHELPER_H
 
-#include "uinthashfunctionhelper.h"
+#include "hashfunctionhelper.h"
 
 namespace libpbkdf2 {
 namespace compute {
 namespace opencl {
 
-class RipeMd160HashFunctionHelper : public UIntHashFunctionHelper
+class RipeMd160HashFunctionHelper : public HashFunctionHelper
 {
 private:
     RipeMd160HashFunctionHelper();

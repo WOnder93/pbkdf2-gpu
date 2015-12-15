@@ -385,8 +385,8 @@ static const char * const SHIFTS[] = {
 const RipeMd160HashFunctionHelper RipeMd160HashFunctionHelper::INSTANCE;
 
 RipeMd160HashFunctionHelper::RipeMd160HashFunctionHelper()
-    : UIntHashFunctionHelper(
-          true, IBLOCK_WORDS, OBLOCK_WORDS, ML_WORDS, INIT_STATE)
+    : HashFunctionHelper(
+          true, "uint", 4, IBLOCK_WORDS, OBLOCK_WORDS, ML_WORDS, INIT_STATE)
 {
 }
 

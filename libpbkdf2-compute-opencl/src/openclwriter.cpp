@@ -88,7 +88,7 @@ void OpenCLWriter::beginElse()
 
 void OpenCLWriter::beginLoop(const std::string &loopVar, const std::string &from, const std::string &to)
 {
-    out << indent << "for (uint " << loopVar << " = " << from
+    out << indent << "for (size_t " << loopVar << " = " << from
         << "; " << loopVar << " < " << to << "; " << loopVar << "++) {"
         << std::endl;
     indent.append("    ");

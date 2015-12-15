@@ -71,9 +71,9 @@ ProcessingUnit::ProcessingUnit(
     kernel.setArg<cl::Buffer>(0, inputBuffer);
     kernel.setArg<cl::Buffer>(1, outputBuffer);
     kernel.setArg<cl::Buffer>(2, computeContext->getSaltBuffer());
-    kernel.setArg<cl_uint>   (3, outputBlocks);
-    kernel.setArg<cl_uint>   (4, computeContext->getIterationCount());
-    kernel.setArg<cl_uint>   (5, batchSize);
+    kernel.setArg<cl_ulong>  (3, (cl_ulong)outputBlocks);
+    kernel.setArg<cl_ulong>  (4, (cl_ulong)computeContext->getIterationCount());
+    kernel.setArg<cl_ulong>  (5, (cl_ulong)batchSize);
     kernel.setArg<cl::Buffer>(6, debugBuffer);
 }
 

@@ -52,8 +52,8 @@ static const char * const KS[] = {
 const Sha1HashFunctionHelper Sha1HashFunctionHelper::INSTANCE;
 
 Sha1HashFunctionHelper::Sha1HashFunctionHelper()
-    : UIntHashFunctionHelper(
-          false, IBLOCK_WORDS, OBLOCK_WORDS, ML_WORDS, INIT_STATE)
+    : HashFunctionHelper(
+          false, "uint", 4, IBLOCK_WORDS, OBLOCK_WORDS, ML_WORDS, INIT_STATE)
 {
 }
 

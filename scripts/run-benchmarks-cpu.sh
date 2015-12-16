@@ -39,7 +39,9 @@ fi
 # $ENV is empty by default
 
 echo "Running CPU benchmarks..."
-for task in batch-size dk-length iterations salt-len; do
-    echo "Running benchmark '$task'..."
-    bash run-benchmark.sh "$DEST_DIR" "$task" cpu "$ID" "$BIN_DIR" "$ENV"
+for hash in sha1 sha256; do
+    for task in batch-size dk-length iterations salt-len; do
+        echo "Running benchmark '$task'..."
+        bash run-benchmark.sh "$DEST_DIR" "$hash" "$task" cpu "$ID" "$BIN_DIR" "$ENV"
+    done
 done

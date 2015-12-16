@@ -1,9 +1,15 @@
 #!/bin/bash
 
-TASK=$1
-MODE=$2
-MACHINE=$3
-DURATION=$4
+HASH=$1
+TASK=$2
+MODE=$3
+MACHINE=$4
+DURATION=$5
+
+if [ -z "$HASH" ]; then
+    echo "ERROR: Hash algorithm not specified!" 1>&2
+    exit 1
+fi
 
 if [ -z "$TASK" ]; then
     echo "ERROR: Task not specified!" 1>&2
@@ -40,7 +46,7 @@ TASK_FILE=`mktemp`
 
 cat >$TASK_FILE <<EOF
 #!/bin/bash
-#PBS -N benchmark-$TASK-$MODE-$MACHINE
+#PBS -N benchmark-$HASH-$TASK-$MODE-$MACHINE
 #PBS -l walltime=$DURATION
 #PBS -l nodes=1:ppn=1:cl_$MACHINE
 $EXTRA_ARGS
@@ -53,7 +59,7 @@ module add cuda-6.5
 
 cd /storage/brno2/home/omos/pbkdf2-gpu/scripts
 
-bash run-benchmark.sh $DEST_DIR $TASK $MODE $MACHINE ../build "LD_PRELOAD=/afs/ics.muni.cz/software/cuda/6.0/cuda/lib64/libOpenCL.so"
+bash run-benchmark.sh "$DEST_DIR" "$HASH" "$TASK" "$MODE" "$MACHINE" ../build "LD_PRELOAD=/afs/ics.muni.cz/software/cuda/6.5/cuda/lib64/libOpenCL.so"
 EOF
 
 qsub $TASK_FILE

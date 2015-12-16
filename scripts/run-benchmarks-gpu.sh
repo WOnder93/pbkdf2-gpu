@@ -39,7 +39,9 @@ fi
 # $ENV is empty by default
 
 echo "Running GPU benchmarks..."
-for task in dl-bs salt-len iterations; do
-    echo "Running benchmark '$task'..."
-    bash run-benchmark.sh "$DEST_DIR" "$task" gpu "$ID" "$BIN_DIR" "$ENV"
+for hash in sha1 sha256; do
+    for task in dl-bs salt-len iterations; do
+        echo "Running benchmark '$task'..."
+        bash run-benchmark.sh "$DEST_DIR" "$hash" "$task" gpu "$ID" "$BIN_DIR" "$ENV"
+    done
 done

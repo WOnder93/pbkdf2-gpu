@@ -17,11 +17,12 @@
 # ---------------------------------------------------------------------
 
 DEST_DIR=$1
-TASK=$2
-MODE=$3
-ID=$4
-BINDIR=$5
-ENV=$6
+HASH=$2
+TASK=$3
+MODE=$4
+ID=$5
+BINDIR=$6
+ENV=$7
 
 run_bt() {
     (cd "$BINDIR/benchmarking-tool" && env $ENV ./benchmarking-tool $*)
@@ -68,8 +69,8 @@ else
     exit 1
 fi
 
-DATA_FILE="$DEST_DIR/benchmark-$TASK-$MODE-$ID.csv"
-LOG_FILE="$DEST_DIR/benchmark-$TASK-$MODE-$ID.log"
+DATA_FILE="$DEST_DIR/benchmark-$HASH-$TASK-$MODE-$ID.csv"
+LOG_FILE="$DEST_DIR/benchmark-$HASH-$TASK-$MODE-$ID.log"
 
 print_dev_info() {
     echo "DEFAULT_ITERATIONS=$DEFAULT_ITERATIONS"
@@ -82,12 +83,13 @@ print_dev_info() {
 }
 
 run_benchmark() {
-    SAMPLES=$1
-    SALT=$2
-    ITER=$3
-    DK_LENGTH=$4
-    BATCH_SIZE=$5
-    run_bt --mode=$BT_MODE --output-mode=raw --samples $SAMPLES --salt "$SALT" -i "$ITER" -k "$DK_LENGTH" -b "$BATCH_SIZE"
+    HASH=$1
+    SAMPLES=$2
+    SALT=$3
+    ITER=$4
+    DK_LENGTH=$5
+    BATCH_SIZE=$6
+    run_bt --mode=$BT_MODE --hash-spec="$HASH" --output-mode=raw --samples $SAMPLES --salt "$SALT" -i "$ITER" -k "$DK_LENGTH" -b "$BATCH_SIZE"
 }
 
 rm -f "$DATA_FILE"
@@ -97,7 +99,7 @@ print_dev_info >> $LOG_FILE
 
 case "$TASK" in
     simple)
-        for sample in `run_benchmark $SAMPLES "$DEFAULT_SALT" $DEFAULT_ITERATIONS $DEFAULT_DK_LENGTH $DEFAULT_BATCH_SIZE`; do
+        for sample in `run_benchmark $HASH $SAMPLES "$DEFAULT_SALT" $DEFAULT_ITERATIONS $DEFAULT_DK_LENGTH $DEFAULT_BATCH_SIZE`; do
             echo -n "," >> $DATA_FILE
             echo -n "$sample" >> $DATA_FILE
         done
@@ -108,7 +110,7 @@ case "$TASK" in
             for (( it = $ITER_FROM; it <= $ITER_TO; it *= 2 )); do
                 for (( bs = $BS_FROM; bs <= $BS_TO; bs *= 2 )); do
                     echo -n "$dl,$it,$bs" >> $DATA_FILE
-                    for sample in `run_benchmark $SAMPLES "$DEFAULT_SALT" $it $dl $bs`; do
+                    for sample in `run_benchmark $HASH $SAMPLES "$DEFAULT_SALT" $it $dl $bs`; do
                         echo -n "," >> $DATA_FILE
                         echo -n "$sample" >> $DATA_FILE
                     done
@@ -121,7 +123,7 @@ case "$TASK" in
         for (( dl = $DL_FROM; dl <= $DL_TO; dl *= 2 )); do
             for (( bs = $BS_FROM; bs <= $BS_TO; bs *= 2 )); do
                 echo -n "$dl,$bs" >> $DATA_FILE
-                for sample in `run_benchmark $SAMPLES "$DEFAULT_SALT" $DEFAULT_ITERATIONS $dl $bs`; do
+                for sample in `run_benchmark $HASH $SAMPLES "$DEFAULT_SALT" $DEFAULT_ITERATIONS $dl $bs`; do
                     echo -n "," >> $DATA_FILE
                     echo -n "$sample" >> $DATA_FILE
                 done
@@ -133,7 +135,7 @@ case "$TASK" in
         for (( sl = $SL_FROM; sl <= $SL_TO; sl *= 2 )); do
             echo -n "$sl" >> $DATA_FILE
             SALT=`head -c $sl /dev/zero | tr '\0' 'x'`
-            for sample in `run_benchmark $SAMPLES "$SALT" $DEFAULT_ITERATIONS $DEFAULT_DK_LENGTH $DEFAULT_BATCH_SIZE`; do
+            for sample in `run_benchmark $HASH $SAMPLES "$SALT" $DEFAULT_ITERATIONS $DEFAULT_DK_LENGTH $DEFAULT_BATCH_SIZE`; do
                 echo -n "," >> $DATA_FILE
                 echo -n "$sample" >> $DATA_FILE
             done
@@ -143,7 +145,7 @@ case "$TASK" in
     iterations)
         for (( it = $ITER_FROM; it <= $ITER_TO; it *= 2 )); do
             echo -n "$it" >> $DATA_FILE
-            for sample in `run_benchmark $SAMPLES "$DEFAULT_SALT" $it $DEFAULT_DK_LENGTH $DEFAULT_BATCH_SIZE`; do
+            for sample in `run_benchmark $HASH $SAMPLES "$DEFAULT_SALT" $it $DEFAULT_DK_LENGTH $DEFAULT_BATCH_SIZE`; do
                 echo -n "," >> $DATA_FILE
                 echo -n "$sample" >> $DATA_FILE
             done
@@ -153,7 +155,7 @@ case "$TASK" in
     dk-length)
         for (( dl = $DL_FROM; dl <= $DL_TO; dl *= 2 )); do
             echo -n "$dl" >> $DATA_FILE
-            for sample in `run_benchmark $SAMPLES "$DEFAULT_SALT" $DEFAULT_ITERATIONS $dl $DEFAULT_BATCH_SIZE`; do
+            for sample in `run_benchmark $HASH $SAMPLES "$DEFAULT_SALT" $DEFAULT_ITERATIONS $dl $DEFAULT_BATCH_SIZE`; do
                 echo -n "," >> $DATA_FILE
                 echo -n "$sample" >> $DATA_FILE
             done
@@ -163,7 +165,7 @@ case "$TASK" in
     batch-size)
         for (( bs = $BS_FROM; bs <= $BS_TO; bs *= 2 )); do
             echo -n "$bs" >> $DATA_FILE
-            for sample in `run_benchmark $SAMPLES "$DEFAULT_SALT" $DEFAULT_ITERATIONS $DEFAULT_DK_LENGTH $bs`; do
+            for sample in `run_benchmark $HASH $SAMPLES "$DEFAULT_SALT" $DEFAULT_ITERATIONS $DEFAULT_DK_LENGTH $bs`; do
                 echo -n "," >> $DATA_FILE
                 echo -n "$sample" >> $DATA_FILE
             done

@@ -1,10 +1,28 @@
 #!/bin/bash
 
-cd `dirname $0` || exit 1
+SCRIPTS_DIR="$(dirname $0)"
 
-for machine in manegrot; do
-    for task in batch-size iterations dk-length salt-len; do
-        echo -n "Starting task '$task' on '$machine'... "
-        bash "start-task-benchmark.sh" "$task" "cpu" "$machine"
+MACHINES="$1"
+HASHES="$2"
+TASKS="$3"
+
+if [ "$MACHINES" = "all" ]; then
+    MACHINES="hermes losgar konos minos manegrot mandos luna"
+fi
+
+if [ "$HASHES" = "all" ]; then
+    HASHES="ripemd160 sha1 sha256 sha512"
+fi
+
+if [ "$TASKS" = "all" ]; then
+    TASKS="batch-size iterations dk-length salt-len"
+fi
+
+for machine in $MACHINES; do
+    for hash in $HASHES; do
+        for task in $TASKS; do
+            echo -n "Starting task '$task' on '$machine' for hash '$hash'... "
+            bash "$SCRIPTS_DIR/start-task-benchmark.sh" "$hash" "$task" "cpu" "$machine"
+        done
     done
 done

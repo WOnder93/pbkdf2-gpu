@@ -7,8 +7,8 @@ This project is part of my [bachelor's thesis](https://is.muni.cz/th/409879/fi_b
 
 ### Prerequisites
 
- * The [OpenSSL](https://www.openssl.org/)/[LibreSSL](http://www.libressl.org/) `crypto` library.
- * An [OpenCL](https://www.khronos.org/opencl/) implementation (you should have `libOpenCL.so.1` somewhere in your library search path).
+ * The [OpenSSL](https://www.openssl.org/)/[LibreSSL](http://www.libressl.org/) `crypto` library. Note: LibreSSL is significantly faster for PBKDF2 computation on the CPU.
+ * An [OpenCL](https://www.khronos.org/opencl/) implementation (you should have `libOpenCL.so` or `libOpenCL.so.1` somewhere in your library search path).
 
 ### Using GNU autotools
 
@@ -40,6 +40,28 @@ $ qmake ../pbkdf2-gpu.pro && make
  * **pbkdf2-compute-tests** &ndash; A utility that runs tests (currently only checks computation of RFC test vectors) on the libpbkdf2-compute-\* libraries.
  * **benchmarking-tool** &ndash; A command-line tool for benchmarking the performance of the libpbkdf2-compute-\* libraries.
  * **lukscrack-gpu** &ndash; A command-line tool for cracking passwords of LUKS disk partitions.
+
+## Supported algorithms
+### Hash functions
+All hash functions specified in the [LUKS On-Disk Format Specification](https://gitlab.com/cryptsetup/cryptsetup/wikis/LUKS-standard/on-disk-format.pdf) are supported:
+ * SHA-1 (`sha1`)
+ * SHA-256 (`sha256`)
+ * SHA-512 (`sha512`)
+ * RIPEMD-160 (`ripemd160`)
+
+### Cipher algorithms and modes
+ * AES-128 (`aes`) -- ECB, CBC, XTS
+ * AES-192 (`aes`) -- ECB, CBC, XTS
+ * AES-256 (`aes`) -- ECB, CBC, XTS
+ * CAST-128 (`cast5`) -- ECB, CBC
+TwoFish (`twofish`), Serpent (`serpent`) and CAST-256 (`cast6`) are not supported.
+
+### IV generators
+ * (none) - if IV mode is not specified (only for ECB mode)
+ * `null`
+ * `plain`
+ * `plain64`
+ * `essiv:<hash>` where `<hash>` is one of the hash functions listed above.
 
 ## The common interface of libpbkdf2-compute-\* libraries
 

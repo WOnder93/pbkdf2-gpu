@@ -54,6 +54,7 @@ All hash functions specified in the [LUKS On-Disk Format Specification](https://
  * AES-192 (`aes`) -- ECB, CBC, XTS
  * AES-256 (`aes`) -- ECB, CBC, XTS
  * CAST-128 (`cast5`) -- ECB, CBC
+
 TwoFish (`twofish`), Serpent (`serpent`) and CAST-256 (`cast6`) are not supported.
 
 ### IV generators

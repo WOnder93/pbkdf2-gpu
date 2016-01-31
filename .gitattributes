@@ -1,2 +1,3 @@
 *.h linguist-language=C++
 data/* linguist-documentation
+thesis/* linguist-documentation

@@ -8,7 +8,7 @@ This project is part of my [bachelor's thesis](https://is.muni.cz/th/409879/fi_b
 ### Prerequisites
 
  * The [OpenSSL](https://www.openssl.org/)/[LibreSSL](http://www.libressl.org/) `crypto` library. Note: LibreSSL is significantly faster for PBKDF2 computation on the CPU.
- * An [OpenCL](https://www.khronos.org/opencl/) implementation (you should have `libOpenCL.so` or `libOpenCL.so.1` somewhere in your library search path).
+ * An [OpenCL](https://www.khronos.org/opencl/) library version 1.1 or higher (you should have `libOpenCL.so` or `libOpenCL.so.1` somewhere in your library search path).
 
 ### Using GNU autotools
 

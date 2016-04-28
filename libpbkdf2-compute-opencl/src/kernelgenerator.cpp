@@ -376,10 +376,12 @@ void KernelGenerator::generateKernel(std::ostream &out, std::size_t saltBytes,
     }
     writer.writeEmptyLine();
 
+    bool twoBlocks = hfIBlockWords - hfOBlockWords <= hfMlWords;
     auto dk = declareArray(writer, "hash_word_t", "dk_",
                                     hfOBlockWords);
-    auto extraBuffer = declareArray(writer, "hash_word_t", "extra_",
-                                    hfIBlockWords - hfOBlockWords);
+    auto extraBuffer = declareArray(
+                writer, "hash_word_t", "extra_",
+                (twoBlocks ? 2 : 1) * hfIBlockWords - hfOBlockWords);
 
     writeUpdateWithDigest(writer, hfHelper, opadState, state1,
                           extraBuffer, state2);

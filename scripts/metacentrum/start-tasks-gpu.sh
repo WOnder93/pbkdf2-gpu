@@ -11,7 +11,7 @@ if [ "$MACHINES" = "all" ]; then
 fi
 
 if [ "$HASHES" = "all" ]; then
-    HASHES="ripemd160 sha1 sha256 sha512"
+    HASHES="ripemd160 sha1 sha256 sha512 whirlpool"
 fi
 
 if [ "$TASKS" = "all" ]; then

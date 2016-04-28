@@ -65,6 +65,7 @@ const HashAlgorithm &HashAlgorithm::getAlgorithm(const std::string &hashSpec)
         { "sha1",      HashAlgorithm(DigestLookup::getDigest("sha1")) },
         { "sha256",    HashAlgorithm(DigestLookup::getDigest("sha256")) },
         { "sha512",    HashAlgorithm(DigestLookup::getDigest("sha512")) },
+        { "whirlpool", HashAlgorithm(DigestLookup::getDigest("whirlpool")) },
     };
 
     return algorithms.at(hashSpec);

@@ -21,6 +21,7 @@
 #include "sha256hashfunctionhelper.h"
 #include "ripemd160hashfunctionhelper.h"
 #include "sha512hashfunctionhelper.h"
+#include "whirlpoolhashfunctionhelper.h"
 
 #include <unordered_map>
 
@@ -51,6 +52,7 @@ const HashFunctionHelper &HashFunctionHelper::getHelper(const std::string &hashS
         { "sha256", Sha256HashFunctionHelper::INSTANCE },
         { "sha512", Sha512HashFunctionHelper::INSTANCE },
         { "ripemd160", RipeMd160HashFunctionHelper::INSTANCE },
+        { "whirlpool", WhirlpoolHashFunctionHelper::INSTANCE },
     };
 
     return helpers.at(hashSpec);

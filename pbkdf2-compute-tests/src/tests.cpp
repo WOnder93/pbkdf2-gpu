@@ -157,6 +157,7 @@ static void runAllCPUvsOpenCLTests(std::ostream &out, Logger *logger)
     cpu::GlobalContext globalCpu(nullptr);
     opencl::GlobalContext globalCl(nullptr);
 
+    runCPUvsOpenCLTests(out, "whirlpool", &globalCpu, &globalCl, logger);
     runCPUvsOpenCLTests(out, "sha512", &globalCpu, &globalCl, logger);
     runCPUvsOpenCLTests(out, "ripemd160", &globalCpu, &globalCl, logger);
 }

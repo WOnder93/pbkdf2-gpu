@@ -31,6 +31,10 @@ if [ "$MODE" = cpu ]; then
 elif [ "$MODE" = gpu ]; then
     EXTRA_ARGS="#PBS -l gpu=1
 #PBS -q gpu"
+elif [ "$MODE" = 'gpu-cerit' ]; then
+    EXTRA_ARGS="#PBS -l gpu=1
+#PBS -q default@wagap.cerit-sc.cz"
+    MODE='gpu'
 else
     echo "ERROR: Invalid mode!" 1>&2
     exit 1
@@ -51,7 +55,7 @@ cat >$TASK_FILE <<EOF
 #PBS -l nodes=1:ppn=1:cl_$MACHINE
 $EXTRA_ARGS
 
-module use /auto/brno2/home/omos/packages/run.64/modules/modulefiles
+module use /storage/brno2/home/omos/packages/run.64/modules/modulefiles
 
 module add gcc-4.8.4
 module add libressl-2.2.0

@@ -607,6 +607,12 @@ void WhirlpoolHashFunctionHelper::writeDefinitions(OpenCLWriter &out) const
     out << "    0x28a0285d88507528UL, 0x5c6d5cda31b8865cUL, 0xf8c7f8933fed6bf8UL, 0x86228644a411c286UL," << std::endl;
     out << "};" << std::endl;
     out << std::endl;
+
+    out << "__constant ulong ROUND_CONSTANTS[] = {" << std::endl;
+    for (std::size_t i = 0; i < ITERATIONS; i++) {
+        out << "    " << ROUND_CONSTANTS[i][0] << "," << std::endl;
+    }
+    out << "};" << std::endl;
 }
 
 static void writeCore(
@@ -671,10 +677,10 @@ void WhirlpoolHashFunctionHelper::writeUpdate(
     }
     writer.writeEmptyLine();
 
-    for (std::size_t i = 0; i < ITERATIONS; i++) {
-        writeCore(writer, key, aux, ROUND_CONSTANTS[i]);
-        writeCore(writer, dest, aux, key);
-    }
+    writer.beginLoop("r", "0", std::to_string(ITERATIONS));
+    writeCore(writer, key, aux, { "ROUND_CONSTANTS[r]", "0UL", "0UL", "0UL", "0UL", "0UL", "0UL", "0UL" });
+    writeCore(writer, dest, aux, key);
+    writer.endBlock();
 
     for (std::size_t i = 0; i < BLOCK_WORDS; i++) {
         writer.beginAssignment(dest[i]);

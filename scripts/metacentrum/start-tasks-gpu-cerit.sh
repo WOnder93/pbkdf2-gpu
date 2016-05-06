@@ -22,7 +22,7 @@ for machine in $MACHINES; do
     for hash in $HASHES; do
         for task in $TASKS; do
             echo -n "Starting task '$task' on '$machine' for hash '$hash'... "
-            bash "$SCRIPTS_DIR/start-task-benchmark.sh" "$hash" "$task" "gpu" "$machine"
+            bash "$SCRIPTS_DIR/start-task-benchmark.sh" "$hash" "$task" "gpu-cerit" "$machine"
         done
     done
 done

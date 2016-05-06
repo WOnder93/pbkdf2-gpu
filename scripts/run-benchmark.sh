@@ -34,6 +34,7 @@ if [ "$MODE" = cpu ]; then
     DEFAULT_ITERATIONS=4096
     DEFAULT_DK_LENGTH=16
     DEFAULT_BATCH_SIZE=256
+    DEFAULT_SALT=$(printf "%032x" 0)
 
     DL_FROM=20
     DL_TO=$((20 * 32))
@@ -52,6 +53,7 @@ elif [ "$MODE" = gpu ]; then
     DEFAULT_ITERATIONS=16384
     DEFAULT_DK_LENGTH=16
     DEFAULT_BATCH_SIZE=65536
+    DEFAULT_SALT=$(printf "%032x" 0)
 
     DL_FROM=20
     DL_TO=$((20 * 32))

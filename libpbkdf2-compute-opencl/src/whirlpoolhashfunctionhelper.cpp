@@ -609,27 +609,54 @@ void WhirlpoolHashFunctionHelper::writeDefinitions(OpenCLWriter &out) const
     out << std::endl;
 }
 
+static void writeSwap(OpenCLWriter &out,
+                      const std::string &x, const std::string &y,
+                      unsigned int byte)
+{
+    out.beginAssignment(x);
+    out << x << " ^ (" << y << " & (0xFFUL << " << (8 * byte) << "))";
+    out.endAssignment();
+    out.beginAssignment(y);
+    out << y << " ^ (" << x << " & (0xFFUL << " << (8 * byte) << "))";
+    out.endAssignment();
+    out.beginAssignment(x);
+    out << x << " ^ (" << y << " & (0xFFUL << " << (8 * byte) << "))";
+    out.endAssignment();
+}
+
 static void writeCore(
         OpenCLWriter &out,
         const std::vector<std::string> &state,
-        const std::vector<std::string> &aux,
         const std::vector<std::string> &key)
 {
-    for (size_t i = 0; i < BLOCK_WORDS; i++) {
-        out.beginAssignment(aux[i]);
-        out << key[i];
-        for (size_t k = 0; k < 8; k++) {
-            out << " ^ WHIRLPOOL_C" << (7 - k)
-                << "[(" << state[(i + (k + 1)) % 8]
-                << " >> " << k * 8 << ") & 0xFF]";
+    for (std::size_t i = 0; i < BLOCK_WORDS; i++) {
+        std::size_t ii = BLOCK_WORDS - i - 1;
+        for (std::size_t k = 0; k < ii; k++) {
+            writeSwap(out, state[ii], state[k], (ii + k) % BLOCK_WORDS);
         }
-        out.endAssignment();
+        out.writeEmptyLine();
     }
-    out.writeEmptyLine();
 
-    for (size_t i = 0; i < BLOCK_WORDS; i++) {
+    for (std::size_t i = 0; i < BLOCK_WORDS / 2; i++) {
         out.beginAssignment(state[i]);
-        out << aux[i];
+        out << state[i] << " ^ " << state[BLOCK_WORDS - 1 - i];
+        out.endAssignment();
+        out.beginAssignment(state[BLOCK_WORDS - 1 - i]);
+        out << state[BLOCK_WORDS - 1 - i] << " ^ " << state[i];
+        out.endAssignment();
+        out.beginAssignment(state[i]);
+        out << state[i] << " ^ " << state[BLOCK_WORDS - 1 - i];
+        out.endAssignment();
+        out.writeEmptyLine();
+    }
+
+    for (std::size_t i = 0; i < BLOCK_WORDS; i++) {
+        out.beginAssignment(state[i]);
+        out << key[i];
+        for (std::size_t k = 0; k < 8; k++) {
+            out << " ^ WHIRLPOOL_C" << (7 - k)
+                << "[(" << state[i] << " >> " << k * 8 << ") & 0xFF]";
+        }
         out.endAssignment();
     }
     out.writeEmptyLine();
@@ -645,7 +672,6 @@ void WhirlpoolHashFunctionHelper::writeUpdate(
     writer.beginBlock();
 
     auto key = declareArray(writer, "ulong", "key", BLOCK_WORDS);
-    auto aux = declareArray(writer, "ulong", "aux", BLOCK_WORDS);
 
     for (std::size_t i = 0; i < BLOCK_WORDS; i++) {
         writer.beginAssignment(state[i]);
@@ -672,8 +698,8 @@ void WhirlpoolHashFunctionHelper::writeUpdate(
     writer.writeEmptyLine();
 
     for (std::size_t i = 0; i < ITERATIONS; i++) {
-        writeCore(writer, key, aux, ROUND_CONSTANTS[i]);
-        writeCore(writer, dest, aux, key);
+        writeCore(writer, key, ROUND_CONSTANTS[i]);
+        writeCore(writer, dest, key);
     }
 
     for (std::size_t i = 0; i < BLOCK_WORDS; i++) {

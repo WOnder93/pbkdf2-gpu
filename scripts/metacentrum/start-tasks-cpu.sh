@@ -7,7 +7,7 @@ HASHES="$2"
 TASKS="$3"
 
 if [ "$MACHINES" = "all" ]; then
-    MACHINES="hermes losgar konos minos manegrot mandos luna"
+    MACHINES="losgar konos minos manegrot mandos luna"
 fi
 
 if [ "$HASHES" = "all" ]; then
